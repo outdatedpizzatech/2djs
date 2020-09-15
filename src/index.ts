@@ -1,60 +1,19 @@
 import { Player } from "./player";
 import { Camera } from "./camera";
-
-enum Direction {
-  NONE,
-  UP,
-  RIGHT,
-  DOWN,
-  LEFT,
-}
+import { Direction } from "./common";
 
 function index() {
   let inputDirections: Set<Direction> = new Set<Direction>();
-  let tweenDirection: Direction = Direction.NONE;
   var gridInterval = 50;
   const camera = new Camera();
 
   function handlePlayerMovement(player: Player) {
-    var speed = 5;
-
-    if (!tweenDirection && inputDirections.size > 0) {
-      tweenDirection = Array.from(inputDirections.entries())[0][0];
+    if (inputDirections.size > 0) {
+      const direction = Array.from(inputDirections.entries())[0][0];
+      player.moveBy(direction);
     }
 
-    if (tweenDirection) {
-      if (tweenDirection == Direction.UP) {
-        player.renderY -= speed;
-
-        if (player.renderY % gridInterval === 0) {
-          tweenDirection = Direction.NONE;
-        }
-      }
-
-      if (tweenDirection == Direction.RIGHT) {
-        player.renderX += speed;
-
-        if (player.renderX % gridInterval === 0) {
-          tweenDirection = Direction.NONE;
-        }
-      }
-
-      if (tweenDirection == Direction.DOWN) {
-        player.renderY += speed;
-
-        if (player.renderY % gridInterval === 0) {
-          tweenDirection = Direction.NONE;
-        }
-      }
-
-      if (tweenDirection == Direction.LEFT) {
-        player.renderX -= speed;
-
-        if (player.renderX % gridInterval === 0) {
-          tweenDirection = Direction.NONE;
-        }
-      }
-    }
+    player.refreshMovement();
   }
 
   function handleRendering(player: Player, treasure: Player) {

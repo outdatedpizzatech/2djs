@@ -1,5 +1,7 @@
-import { GRID_INTERVAL } from "./common";
+import { Direction, GRID_INTERVAL } from "./common";
 import { Camera } from "./camera";
+
+const movementSpeed = 5;
 
 interface PlayerAttributes {
   color: string;
@@ -8,10 +10,12 @@ interface PlayerAttributes {
 }
 
 export class Player {
-  private canvas: HTMLCanvasElement;
-  private color: string;
   public renderX: number;
   public renderY: number;
+
+  private canvas: HTMLCanvasElement;
+  private color: string;
+  private tweenDirection: Direction = Direction.NONE;
 
   constructor(attributes: PlayerAttributes) {
     const canvas = document.createElement("canvas");
@@ -40,5 +44,49 @@ export class Player {
       GRID_INTERVAL,
       GRID_INTERVAL
     );
+  }
+
+  moveBy(movementDirection: Direction) {
+    if (!this.tweenDirection) {
+      this.tweenDirection = movementDirection;
+    }
+  }
+
+  refreshMovement() {
+    if (!this.tweenDirection) {
+      return;
+    }
+
+    if (this.tweenDirection == Direction.UP) {
+      this.renderY -= movementSpeed;
+
+      if (this.renderY % GRID_INTERVAL === 0) {
+        this.tweenDirection = Direction.NONE;
+      }
+    }
+
+    if (this.tweenDirection == Direction.RIGHT) {
+      this.renderX += movementSpeed;
+
+      if (this.renderX % GRID_INTERVAL === 0) {
+        this.tweenDirection = Direction.NONE;
+      }
+    }
+
+    if (this.tweenDirection == Direction.DOWN) {
+      this.renderY += movementSpeed;
+
+      if (this.renderY % GRID_INTERVAL === 0) {
+        this.tweenDirection = Direction.NONE;
+      }
+    }
+
+    if (this.tweenDirection == Direction.LEFT) {
+      this.renderX -= movementSpeed;
+
+      if (this.renderX % GRID_INTERVAL === 0) {
+        this.tweenDirection = Direction.NONE;
+      }
+    }
   }
 }
