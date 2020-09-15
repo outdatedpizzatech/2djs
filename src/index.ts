@@ -1,10 +1,14 @@
 import { Player } from "./player";
 import { Camera } from "./camera";
-import { Direction } from "./common";
+import {
+  CAMERA_HEIGHT,
+  CAMERA_WIDTH,
+  Direction,
+  GRID_INTERVAL,
+} from "./common";
 
 function index() {
   let inputDirections: Set<Direction> = new Set<Direction>();
-  var gridInterval = 50;
   const camera = new Camera();
 
   function handlePlayerMovement(player: Player) {
@@ -25,26 +29,26 @@ function index() {
   var body = document.getElementsByTagName("body")[0];
   body.style.backgroundColor = "black";
   var gameArea = document.createElement("div");
-  gameArea.style.width = "800px";
-  gameArea.style.height = "600px";
+  gameArea.style.width = `${CAMERA_WIDTH}px`;
+  gameArea.style.height = `${CAMERA_HEIGHT}px`;
   gameArea.style.marginLeft = "auto";
   gameArea.style.marginRight = "auto";
   body.appendChild(gameArea);
   var canvas = document.createElement("canvas");
-  canvas.width = 800;
-  canvas.height = 600;
+  canvas.width = CAMERA_WIDTH;
+  canvas.height = CAMERA_HEIGHT;
   canvas.style.zIndex = "1";
   canvas.style.position = "absolute";
   gameArea.appendChild(canvas);
   var ctx = canvas.getContext("2d");
   ctx.fillStyle = "green";
-  for (var x = 0; x < gridInterval; x++) {
-    for (var y = 0; y < gridInterval; y++) {
+  for (var x = 0; x < 1000; x++) {
+    for (var y = 0; y < 1000; y++) {
       ctx.fillRect(
-        x * gridInterval,
-        y * gridInterval,
-        gridInterval,
-        gridInterval
+        x * GRID_INTERVAL,
+        y * GRID_INTERVAL,
+        GRID_INTERVAL,
+        GRID_INTERVAL
       );
     }
   }
@@ -59,8 +63,8 @@ function index() {
 
   const treasure = new Player({
     color: "blue",
-    x: 200,
-    y: 100,
+    x: 192,
+    y: 64,
     icon: "heart",
   });
   gameArea.appendChild(treasure.view());
