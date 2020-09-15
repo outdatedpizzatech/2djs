@@ -53,13 +53,15 @@ function index() {
     color: "red",
     x: 0,
     y: 0,
+    icon: "star",
   });
   gameArea.appendChild(player.view());
 
   const treasure = new Player({
     color: "blue",
-    x: 400,
-    y: 300,
+    x: 200,
+    y: 100,
+    icon: "heart",
   });
   gameArea.appendChild(treasure.view());
 
