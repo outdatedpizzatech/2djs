@@ -65,46 +65,14 @@ export class Player {
       GRID_INTERVAL
     );
 
-    var img = new Image(); // Create new img element
+    var img = new Image();
     img.src = SpriteSheet;
 
     ctx.save();
 
-    let frameIndex = 0;
+    this._handleAnimation();
 
-    if (this.tweenDirection == Direction.DOWN) {
-      this.currentAnimation = walkingDownAnimation;
-    } else if (this.tweenDirection == Direction.UP) {
-      this.currentAnimation = walkingUpAnimation;
-    } else if (this.tweenDirection == Direction.RIGHT) {
-      this.currentAnimation = walkingRightAnimation;
-    } else if (this.tweenDirection == Direction.LEFT) {
-      this.currentAnimation = walkingLeftAnimation;
-    } else {
-      this.currentAnimation = null;
-    }
-
-    if (this.currentAnimation) {
-      this.animationIndex++;
-      if (this.currentAnimation.length <= this.animationIndex) {
-        this.animationIndex = 0;
-      }
-    } else {
-      this.animationIndex = -1;
-      if (this.facingDirection == Direction.DOWN) {
-        frameIndex = 0;
-      } else if (this.facingDirection == Direction.UP) {
-        frameIndex = 2;
-      } else if (this.facingDirection == Direction.LEFT) {
-        frameIndex = 4;
-      } else if (this.facingDirection == Direction.RIGHT) {
-        frameIndex = 6;
-      }
-    }
-
-    if (this.animationIndex >= 0) {
-      frameIndex = this.currentAnimation[this.animationIndex];
-    }
+    const frameIndex = this._getSpriteFrame();
 
     ctx.beginPath();
     ctx.rect(this.renderX + x, this.renderY + y, GRID_INTERVAL, GRID_INTERVAL);
@@ -160,5 +128,46 @@ export class Player {
         this.tweenDirection = Direction.NONE;
       }
     }
+  }
+
+  private _handleAnimation() {
+    if (this.tweenDirection == Direction.DOWN) {
+      this.currentAnimation = walkingDownAnimation;
+    } else if (this.tweenDirection == Direction.UP) {
+      this.currentAnimation = walkingUpAnimation;
+    } else if (this.tweenDirection == Direction.RIGHT) {
+      this.currentAnimation = walkingRightAnimation;
+    } else if (this.tweenDirection == Direction.LEFT) {
+      this.currentAnimation = walkingLeftAnimation;
+    } else {
+      this.currentAnimation = null;
+    }
+
+    if (this.currentAnimation) {
+      this.animationIndex++;
+      if (this.currentAnimation.length <= this.animationIndex) {
+        this.animationIndex = 0;
+      }
+    } else {
+      this.animationIndex = -1;
+    }
+  }
+
+  private _getSpriteFrame(): number {
+    if (this.currentAnimation) {
+      return this.currentAnimation[this.animationIndex];
+    }
+
+    if (this.facingDirection == Direction.DOWN) {
+      return 0;
+    } else if (this.facingDirection == Direction.UP) {
+      return 2;
+    } else if (this.facingDirection == Direction.LEFT) {
+      return 4;
+    } else if (this.facingDirection == Direction.RIGHT) {
+      return 6;
+    }
+
+    return 0;
   }
 }
