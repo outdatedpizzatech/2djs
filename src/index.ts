@@ -21,7 +21,7 @@ function index() {
   }
 
   function handleRendering(player: Player, treasure: Player) {
-    camera.setPosition(player.renderX, player.renderY);
+    camera.setPosition(player.positionX(), player.positionY());
     player.render(camera);
     treasure.render(camera);
   }
