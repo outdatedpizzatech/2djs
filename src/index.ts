@@ -3,7 +3,7 @@ import { Camera } from "./camera";
 import {
   CAMERA_HEIGHT,
   CAMERA_WIDTH,
-  Direction,
+  Direction, FRAMERATE,
   GRID_INTERVAL,
 } from "./common";
 
@@ -108,7 +108,7 @@ function index() {
   setInterval(() => {
     handlePlayerMovement(player);
     handleRendering(player, treasure);
-  }, 16);
+  }, 1000 / FRAMERATE);
 }
 
 index();

@@ -8,17 +8,23 @@ import {
 import SpriteSheet from "./player_spritesheet.png";
 import { Player } from "./player";
 
-const walkingDownAnimation = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1];
-const walkingUpAnimation = [2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3];
-const walkingLeftAnimation = [4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5];
-const walkingRightAnimation = [6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7];
+const dilate = (timeline: number[], count: number) => {
+  return timeline.reduce((accumulator, currentValue) => {
+    const stretched = new Array(count).fill(currentValue);
+    return accumulator.concat(stretched);
+  }, []);
+};
+
+const dilationBaseline = 6;
+const walkingDownAnimation = [0, 1];
+const walkingUpAnimation = [2, 3];
+const walkingLeftAnimation = [4, 5];
+const walkingRightAnimation = [6, 7];
 
 export class PlayerRenderer {
   private readonly _canvas: HTMLCanvasElement;
   private readonly _player: Player;
   private readonly _color: string;
-
-  private _currentAnimation: number[] = null;
   private _animationIndex: number;
 
   constructor(player: Player, color: string) {
@@ -52,14 +58,17 @@ export class PlayerRenderer {
       GRID_INTERVAL
     );
 
-    var img = new Image();
-    img.src = SpriteSheet;
-
     ctx.save();
 
-    this._handleAnimation();
-
-    const frameIndex = this._getSpriteFrame();
+    const currentAnimation = this._decideCurrentAnimation();
+    this._animationIndex = this._advanceAnimation(
+      currentAnimation,
+      this._animationIndex
+    );
+    const frameIndex = this._getSpriteFrame(
+      currentAnimation,
+      this._animationIndex
+    );
 
     ctx.beginPath();
     ctx.rect(
@@ -70,6 +79,9 @@ export class PlayerRenderer {
     );
     ctx.clip();
 
+    var img = new Image();
+    img.src = SpriteSheet;
+
     ctx.drawImage(
       img,
       this._player.positionX() + x - frameIndex * GRID_INTERVAL,
@@ -77,41 +89,64 @@ export class PlayerRenderer {
     );
   }
 
-  private _handleAnimation() {
-    if (this._player.movementDirection() == Direction.DOWN) {
-      this._currentAnimation = walkingDownAnimation;
-    } else if (this._player.movementDirection() == Direction.UP) {
-      this._currentAnimation = walkingUpAnimation;
-    } else if (this._player.movementDirection() == Direction.RIGHT) {
-      this._currentAnimation = walkingRightAnimation;
-    } else if (this._player.movementDirection() == Direction.LEFT) {
-      this._currentAnimation = walkingLeftAnimation;
-    } else {
-      this._currentAnimation = null;
+  private _decideCurrentAnimation(): number[] {
+    const movementDirection = this._player.movementDirection();
+
+    if (movementDirection == Direction.NONE) {
+      return null;
     }
 
-    if (this._currentAnimation) {
-      this._animationIndex++;
-      if (this._currentAnimation.length <= this._animationIndex) {
-        this._animationIndex = 0;
+    let animation: number[];
+
+    if (movementDirection == Direction.DOWN) {
+      animation = walkingDownAnimation;
+    } else if (movementDirection == Direction.UP) {
+      animation = walkingUpAnimation;
+    } else if (movementDirection == Direction.RIGHT) {
+      animation = walkingRightAnimation;
+    } else if (movementDirection == Direction.LEFT) {
+      animation = walkingLeftAnimation;
+    } else {
+      animation = walkingDownAnimation;
+    }
+
+    return dilate(animation, dilationBaseline / this._player.movementSpeed());
+  }
+
+  private _advanceAnimation(
+    currentAnimation: number[],
+    animationIndex: number
+  ): number {
+    if (currentAnimation) {
+      const nextAnimationIndex = animationIndex + 1;
+
+      if (currentAnimation.length <= nextAnimationIndex) {
+        return 0;
+      } else {
+        return nextAnimationIndex;
       }
     } else {
-      this._animationIndex = -1;
+      return -1;
     }
   }
 
-  private _getSpriteFrame(): number {
-    if (this._currentAnimation) {
-      return this._currentAnimation[this._animationIndex];
+  private _getSpriteFrame(
+    currentAnimation: number[],
+    animationIndex: number
+  ): number {
+    if (currentAnimation) {
+      return currentAnimation[animationIndex];
     }
 
-    if (this._player.facingDirection() == Direction.DOWN) {
+    const facingDirection = this._player.facingDirection();
+
+    if (facingDirection == Direction.DOWN) {
       return 0;
-    } else if (this._player.facingDirection() == Direction.UP) {
+    } else if (facingDirection == Direction.UP) {
       return 2;
-    } else if (this._player.facingDirection() == Direction.LEFT) {
+    } else if (facingDirection == Direction.LEFT) {
       return 4;
-    } else if (this._player.facingDirection() == Direction.RIGHT) {
+    } else if (facingDirection == Direction.RIGHT) {
       return 6;
     }
 

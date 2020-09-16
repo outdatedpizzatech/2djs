@@ -2,8 +2,6 @@ import { Direction, GRID_INTERVAL } from "./common";
 import { PlayerRenderer } from "./player_renderer";
 import { Camera } from "./camera";
 
-const movementSpeed = 1;
-
 interface PlayerAttributes {
   color: string;
   x: number;
@@ -17,11 +15,16 @@ export class Player {
   private _renderer: PlayerRenderer;
   private _movementDirection: Direction = Direction.NONE;
   private _facingDirection: Direction = Direction.DOWN;
+  private _movementSpeed: number = 1;
 
   constructor(attributes: PlayerAttributes) {
     this._positionX = attributes.x;
     this._positionY = attributes.y;
     this._renderer = new PlayerRenderer(this, attributes.color);
+  }
+
+  movementSpeed(): number {
+    return this._movementSpeed;
   }
 
   positionX(): number {
@@ -61,7 +64,7 @@ export class Player {
     }
 
     if (this._movementDirection == Direction.UP) {
-      this._positionY -= movementSpeed;
+      this._positionY -= this._movementSpeed;
 
       if (this._positionY % GRID_INTERVAL === 0) {
         this._movementDirection = Direction.NONE;
@@ -69,7 +72,7 @@ export class Player {
     }
 
     if (this._movementDirection == Direction.RIGHT) {
-      this._positionX += movementSpeed;
+      this._positionX += this._movementSpeed;
 
       if (this._positionX % GRID_INTERVAL === 0) {
         this._movementDirection = Direction.NONE;
@@ -77,7 +80,7 @@ export class Player {
     }
 
     if (this._movementDirection == Direction.DOWN) {
-      this._positionY += movementSpeed;
+      this._positionY += this._movementSpeed;
 
       if (this._positionY % GRID_INTERVAL === 0) {
         this._movementDirection = Direction.NONE;
@@ -85,7 +88,7 @@ export class Player {
     }
 
     if (this._movementDirection == Direction.LEFT) {
-      this._positionX -= movementSpeed;
+      this._positionX -= this._movementSpeed;
 
       if (this._positionX % GRID_INTERVAL === 0) {
         this._movementDirection = Direction.NONE;
