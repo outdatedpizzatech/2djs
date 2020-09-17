@@ -7,19 +7,42 @@ import {
   FRAMERATE,
   GRID_INTERVAL,
 } from "./common";
-import { fromEvent, interval, Observable, range } from "rxjs";
-import { filter } from "rxjs/operators";
+import { fromEvent, interval, merge } from "rxjs";
+import { scan, withLatestFrom } from "rxjs/operators";
 
 function index() {
-  let inputDirections: Set<Direction> = new Set<Direction>();
+  const frame$ = interval(1000 / FRAMERATE);
+  const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
+  const keyup$ = fromEvent<KeyboardEvent>(document, "keyup");
+  const keyActions$ = merge(keydown$, keyup$);
+  const keyMap$ = keyActions$.pipe(
+    scan<KeyboardEvent, { [key: string]: boolean }>((acc, val) => {
+      acc[val.code] = val.type == "keydown";
+      return acc;
+    }, {})
+  );
+
+  const keysMapPerFrame$ = frame$.pipe(withLatestFrom(keyMap$));
+
   const camera = new Camera();
 
-  function handlePlayerMovement(player: Player) {
-    if (inputDirections.size > 0) {
-      const direction = Array.from(inputDirections.entries())[0][0];
-      player.moveBy(direction);
+  function handlePlayerMovement(
+    player: Player,
+    keymap: { [key: string]: boolean }
+  ) {
+    let direction = Direction.NONE;
+
+    if (keymap["ArrowUp"]) {
+      direction = Direction.UP;
+    } else if (keymap["ArrowRight"]) {
+      direction = Direction.RIGHT;
+    } else if (keymap["ArrowDown"]) {
+      direction = Direction.DOWN;
+    } else if (keymap["ArrowLeft"]) {
+      direction = Direction.LEFT;
     }
 
+    player.moveBy(direction);
     player.refreshMovement();
   }
 
@@ -72,45 +95,13 @@ function index() {
   });
   gameArea.appendChild(treasure.view());
 
-  const keydown$ = fromEvent(document, "keydown");
-  const keyup$ = fromEvent(document, "keyup");
+  keysMapPerFrame$.subscribe(([_frame, keyMap]) => {
+    handlePlayerMovement(player, keyMap);
+  });
 
-  keydown$
-    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowUp"))
-    .subscribe(() => inputDirections.add(Direction.UP));
-
-  keydown$
-    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowRight"))
-    .subscribe(() => inputDirections.add(Direction.RIGHT));
-
-  keydown$
-    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowDown"))
-    .subscribe(() => inputDirections.add(Direction.DOWN));
-
-  keydown$
-    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowLeft"))
-    .subscribe(() => inputDirections.add(Direction.LEFT));
-
-  keyup$
-    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowUp"))
-    .subscribe(() => inputDirections.delete(Direction.UP));
-
-  keyup$
-    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowRight"))
-    .subscribe(() => inputDirections.delete(Direction.RIGHT));
-
-  keyup$
-    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowDown"))
-    .subscribe(() => inputDirections.delete(Direction.DOWN));
-
-  keyup$
-    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowLeft"))
-    .subscribe(() => inputDirections.delete(Direction.LEFT));
-
-  const frame$ = interval(1000 / FRAMERATE);
+  keyMap$.subscribe((keyMap) => console.log(keyMap));
 
   frame$.subscribe(() => {
-    handlePlayerMovement(player);
     handleRendering(player, treasure);
   });
 }
