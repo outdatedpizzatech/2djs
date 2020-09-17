@@ -42,7 +42,9 @@ function index() {
       direction = Direction.LEFT;
     }
 
-    player.moveBy(direction);
+    if (direction != Direction.NONE) {
+      player.moveBy(direction);
+    }
     player.refreshMovement();
   }
 
