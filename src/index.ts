@@ -3,9 +3,12 @@ import { Camera } from "./camera";
 import {
   CAMERA_HEIGHT,
   CAMERA_WIDTH,
-  Direction, FRAMERATE,
+  Direction,
+  FRAMERATE,
   GRID_INTERVAL,
 } from "./common";
+import { fromEvent, interval, Observable, range } from "rxjs";
+import { filter } from "rxjs/operators";
 
 function index() {
   let inputDirections: Set<Direction> = new Set<Direction>();
@@ -69,46 +72,47 @@ function index() {
   });
   gameArea.appendChild(treasure.view());
 
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "ArrowUp") {
-      inputDirections.add(Direction.UP);
-    }
+  const keydown$ = fromEvent(document, "keydown");
+  const keyup$ = fromEvent(document, "keyup");
 
-    if (e.code === "ArrowRight") {
-      inputDirections.add(Direction.RIGHT);
-    }
+  keydown$
+    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowUp"))
+    .subscribe(() => inputDirections.add(Direction.UP));
 
-    if (e.code === "ArrowDown") {
-      inputDirections.add(Direction.DOWN);
-    }
+  keydown$
+    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowRight"))
+    .subscribe(() => inputDirections.add(Direction.RIGHT));
 
-    if (e.code === "ArrowLeft") {
-      inputDirections.add(Direction.LEFT);
-    }
-  });
+  keydown$
+    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowDown"))
+    .subscribe(() => inputDirections.add(Direction.DOWN));
 
-  document.addEventListener("keyup", (e) => {
-    if (e.code === "ArrowUp") {
-      inputDirections.delete(Direction.UP);
-    }
+  keydown$
+    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowLeft"))
+    .subscribe(() => inputDirections.add(Direction.LEFT));
 
-    if (e.code === "ArrowRight") {
-      inputDirections.delete(Direction.RIGHT);
-    }
+  keyup$
+    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowUp"))
+    .subscribe(() => inputDirections.delete(Direction.UP));
 
-    if (e.code === "ArrowDown") {
-      inputDirections.delete(Direction.DOWN);
-    }
+  keyup$
+    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowRight"))
+    .subscribe(() => inputDirections.delete(Direction.RIGHT));
 
-    if (e.code === "ArrowLeft") {
-      inputDirections.delete(Direction.LEFT);
-    }
-  });
+  keyup$
+    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowDown"))
+    .subscribe(() => inputDirections.delete(Direction.DOWN));
 
-  setInterval(() => {
+  keyup$
+    .pipe(filter<KeyboardEvent>((x) => x.code == "ArrowLeft"))
+    .subscribe(() => inputDirections.delete(Direction.LEFT));
+
+  const frame$ = interval(1000 / FRAMERATE);
+
+  frame$.subscribe(() => {
     handlePlayerMovement(player);
     handleRendering(player, treasure);
-  }, 1000 / FRAMERATE);
+  });
 }
 
 index();
