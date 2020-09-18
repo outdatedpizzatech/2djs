@@ -2,12 +2,10 @@ import {
   CAMERA_HEIGHT,
   CAMERA_WIDTH,
   Direction,
-  FRAMERATE,
   GRID_INTERVAL,
 } from "./common";
-import { BehaviorSubject, fromEvent, interval, merge } from "rxjs";
 import { filter, map, scan, withLatestFrom } from "rxjs/operators";
-import { Camera, cameraFactory } from "./camera";
+import { cameraFactory } from "./camera";
 import {
   decideCurrentAnimation,
   nextAnimationFrame,
@@ -15,16 +13,9 @@ import {
   playerFactory,
   renderPlayer,
 } from "./player";
-
-interface KeyMap {
-  [key: string]: boolean;
-}
-
-interface GameState {
-  player: Player;
-  otherPlayer: Player;
-  camera: Camera;
-}
+import { directionForFrame$, frame$ } from "./signals";
+import { GameState } from "./game_state";
+import { BehaviorSubject, Subject } from "rxjs";
 
 function index() {
   const player: Player = playerFactory({
@@ -44,31 +35,13 @@ function index() {
     y: 0,
   });
 
-  const gameState: GameState = {
+  const initialGameState: GameState = {
     player,
     camera,
     otherPlayer,
   };
 
-  const frame$ = interval(1000 / FRAMERATE);
-  const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
-  const keyup$ = fromEvent<KeyboardEvent>(document, "keyup");
-  const keyActions$ = merge(keydown$, keyup$);
-  const keyMap$ = keyActions$.pipe(
-    scan<KeyboardEvent, KeyMap>((acc, val) => {
-      acc[val.code] = val.type == "keydown";
-      return acc;
-    }, {})
-  );
-
-  const keysMapPerFrame$ = frame$.pipe(withLatestFrom(keyMap$));
-
-  const directionForFrame$ = keysMapPerFrame$.pipe(
-    map(([_, keymap]) => getDirectionFromKeyMap(keymap)),
-    filter((direction) => direction != Direction.NONE)
-  );
-
-  const gameState$ = new BehaviorSubject(gameState);
+  const gameState$ = new BehaviorSubject(initialGameState);
 
   directionForFrame$
     .pipe(
@@ -93,11 +66,10 @@ function index() {
 
     // animate player
     const currentAnimation = decideCurrentAnimation(gameState.player);
-    const animationIndex = nextAnimationFrame(
+    gameState.player.animationIndex = nextAnimationFrame(
       currentAnimation,
       gameState.player.animationIndex
     );
-    gameState.player.animationIndex = animationIndex;
 
     gameState$.next(gameState);
   });
@@ -142,22 +114,6 @@ function index() {
 
       gameState$.next(gameState);
     });
-
-  function getDirectionFromKeyMap(keymap: KeyMap): Direction {
-    let direction = Direction.NONE;
-
-    if (keymap["ArrowUp"]) {
-      direction = Direction.UP;
-    } else if (keymap["ArrowRight"]) {
-      direction = Direction.RIGHT;
-    } else if (keymap["ArrowDown"]) {
-      direction = Direction.DOWN;
-    } else if (keymap["ArrowLeft"]) {
-      direction = Direction.LEFT;
-    }
-
-    return direction;
-  }
 
   var body = document.getElementsByTagName("body")[0];
   body.style.backgroundColor = "black";
