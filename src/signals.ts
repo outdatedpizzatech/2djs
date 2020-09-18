@@ -2,6 +2,7 @@ import { fromEvent, interval, merge, Subject } from "rxjs";
 import { Direction, FRAMERATE } from "./common";
 import { filter, map, scan, withLatestFrom } from "rxjs/operators";
 import { getDirectionFromKeyMap, KeyMap } from "./input";
+import {GameState} from "./game_state";
 
 export const frame$ = interval(1000 / FRAMERATE);
 export const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
@@ -19,3 +20,5 @@ export const directionForFrame$ = keysMapPerFrame$.pipe(
   map(([_, keymap]) => getDirectionFromKeyMap(keymap)),
   filter((direction) => direction != Direction.NONE)
 );
+
+export const gameState$: Subject<GameState> = new Subject();

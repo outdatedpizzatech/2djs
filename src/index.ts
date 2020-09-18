@@ -13,9 +13,8 @@ import {
   playerFactory,
   renderPlayer,
 } from "./player";
-import { directionForFrame$, frame$ } from "./signals";
+import { directionForFrame$, frame$, gameState$ } from "./signals";
 import { GameState } from "./game_state";
-import { BehaviorSubject, Subject } from "rxjs";
 
 function index() {
   const player: Player = playerFactory({
@@ -40,8 +39,6 @@ function index() {
     camera,
     otherPlayer,
   };
-
-  const gameState$ = new BehaviorSubject(initialGameState);
 
   directionForFrame$
     .pipe(
@@ -145,6 +142,8 @@ function index() {
   gameArea.appendChild(player.canvas);
 
   gameArea.appendChild(otherPlayer.canvas);
+
+  gameState$.next(initialGameState);
 }
 
 index();
