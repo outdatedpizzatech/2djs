@@ -13,8 +13,20 @@ import {
   playerFactory,
   renderPlayer,
 } from "./player";
-import { directionForFrame$, frame$, gameState$ } from "./signals";
+import {
+  directionForFrame$,
+  frame$,
+  frameWithGameState$,
+  gameState$,
+} from "./signals";
 import { GameState } from "./game_state";
+import {
+  updatePlayerAnimation,
+  updatePlayerDirection,
+  updatePlayerMovement,
+} from "./reducers/player";
+import { updateCameraPosition } from "./reducers/camera";
+import { renderGameSpace } from "./game_renderer";
 
 function index() {
   const player: Player = playerFactory({
@@ -46,104 +58,34 @@ function index() {
       filter(([_, gameState]) => !gameState.player.movementDirection)
     )
     .subscribe(([direction, gameState]) => {
-      gameState.player.facingDirection = direction;
-      gameState.player.movementDirection = direction;
-
-      gameState$.next(gameState);
+      const newState = updatePlayerDirection(direction, gameState);
+      gameState$.next(newState);
     });
 
-  frame$.pipe(withLatestFrom(gameState$)).subscribe(([_, gameState]) => {
-    // move camera
-    gameState.camera.x = gameState.player.positionX;
-    gameState.camera.y = gameState.player.positionY;
+  frameWithGameState$.subscribe(([_, gameState]) => {
+    let newState = gameState;
+    newState = updateCameraPosition(newState);
+    newState = updatePlayerAnimation(newState);
 
-    // render player
-    renderPlayer(gameState.player, gameState.camera);
-    renderPlayer(gameState.otherPlayer, gameState.camera);
-
-    // animate player
-    const currentAnimation = decideCurrentAnimation(gameState.player);
-    gameState.player.animationIndex = nextAnimationFrame(
-      currentAnimation,
-      gameState.player.animationIndex
-    );
-
-    gameState$.next(gameState);
+    gameState$.next(newState);
   });
 
-  frame$
-    .pipe(
-      withLatestFrom(gameState$),
-      filter(([_, gameState]) => !!gameState.player.movementDirection)
-    )
+  frameWithGameState$.subscribe(([_, gameState]) => {
+    renderPlayer(gameState.player, gameState.camera);
+    renderPlayer(gameState.otherPlayer, gameState.camera);
+  });
+
+  frameWithGameState$
+    .pipe(filter(([_, gameState]) => !!gameState.player.movementDirection))
     .subscribe(([_, gameState]) => {
-      if (gameState.player.movementDirection == Direction.UP) {
-        gameState.player.positionY -= gameState.player.movementSpeed;
+      const newState = updatePlayerMovement(gameState);
 
-        if (gameState.player.positionY % GRID_INTERVAL === 0) {
-          gameState.player.movementDirection = Direction.NONE;
-        }
-      }
-
-      if (gameState.player.movementDirection == Direction.RIGHT) {
-        gameState.player.positionX += gameState.player.movementSpeed;
-
-        if (gameState.player.positionX % GRID_INTERVAL === 0) {
-          gameState.player.movementDirection = Direction.NONE;
-        }
-      }
-
-      if (gameState.player.movementDirection == Direction.DOWN) {
-        gameState.player.positionY += gameState.player.movementSpeed;
-
-        if (gameState.player.positionY % GRID_INTERVAL === 0) {
-          gameState.player.movementDirection = Direction.NONE;
-        }
-      }
-
-      if (gameState.player.movementDirection == Direction.LEFT) {
-        gameState.player.positionX -= gameState.player.movementSpeed;
-
-        if (gameState.player.positionX % GRID_INTERVAL === 0) {
-          gameState.player.movementDirection = Direction.NONE;
-        }
-      }
-
-      gameState$.next(gameState);
+      gameState$.next(newState);
     });
 
-  var body = document.getElementsByTagName("body")[0];
-  body.style.backgroundColor = "black";
-  var gameArea = document.createElement("div");
-  gameArea.style.width = `${CAMERA_WIDTH}px`;
-  gameArea.style.height = `${CAMERA_HEIGHT}px`;
-  gameArea.style.marginLeft = "auto";
-  gameArea.style.marginRight = "auto";
-  body.appendChild(gameArea);
-  const canvas = document.createElement("canvas");
-  canvas.width = CAMERA_WIDTH;
-  canvas.height = CAMERA_HEIGHT;
-  canvas.style.zIndex = "1";
-  canvas.style.position = "absolute";
-  gameArea.appendChild(canvas);
-  var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-  ctx.fillStyle = "green";
-  for (var x = 0; x < 1000; x++) {
-    for (var y = 0; y < 1000; y++) {
-      ctx.fillRect(
-        x * GRID_INTERVAL,
-        y * GRID_INTERVAL,
-        GRID_INTERVAL,
-        GRID_INTERVAL
-      );
-    }
-  }
-
-  gameArea.appendChild(player.canvas);
-
-  gameArea.appendChild(otherPlayer.canvas);
-
   gameState$.next(initialGameState);
+
+  renderGameSpace([player, otherPlayer]);
 }
 
 index();
