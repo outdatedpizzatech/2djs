@@ -7,29 +7,17 @@ import {
 } from "./common";
 import { BehaviorSubject, fromEvent, interval, merge } from "rxjs";
 import { filter, map, scan, withLatestFrom } from "rxjs/operators";
-import SpriteSheet from "./player_spritesheet.png";
-
-interface Camera {
-  x: number;
-  y: number;
-  offset: () => { x: number; y: number };
-}
+import { Camera, cameraFactory } from "./camera";
+import {
+  decideCurrentAnimation,
+  nextAnimationFrame,
+  Player,
+  playerFactory,
+  renderPlayer,
+} from "./player";
 
 interface KeyMap {
   [key: string]: boolean;
-}
-
-interface Player {
-  color: string;
-  x: number;
-  y: number;
-  canvas: HTMLCanvasElement;
-  movementDirection: Direction;
-  facingDirection: Direction;
-  positionX: number;
-  positionY: number;
-  animationIndex: number;
-  movementSpeed: number;
 }
 
 interface GameState {
@@ -39,54 +27,22 @@ interface GameState {
 }
 
 function index() {
-  let canvas = document.createElement("canvas");
-  canvas.style.zIndex = "2";
-  canvas.style.position = "absolute";
-  canvas.width = CAMERA_WIDTH;
-  canvas.height = CAMERA_HEIGHT;
-
-  const player: Player = {
+  const player: Player = playerFactory({
     color: "red",
     x: 0,
     y: 0,
-    movementDirection: Direction.NONE,
-    facingDirection: Direction.DOWN,
-    canvas,
-    positionX: 0,
-    positionY: 0,
-    animationIndex: 0,
-    movementSpeed: 1,
-  };
+  });
 
-  canvas = document.createElement("canvas");
-  canvas.style.zIndex = "2";
-  canvas.style.position = "absolute";
-  canvas.width = CAMERA_WIDTH;
-  canvas.height = CAMERA_HEIGHT;
-
-  const otherPlayer: Player = {
+  const otherPlayer: Player = playerFactory({
     color: "blue",
     x: 192,
     y: 64,
-    movementDirection: Direction.NONE,
-    facingDirection: Direction.DOWN,
-    canvas,
-    positionX: 192,
-    positionY: 64,
-    animationIndex: 0,
-    movementSpeed: 1,
-  };
+  });
 
-  const camera = {
+  const camera = cameraFactory({
     x: 0,
     y: 0,
-    offset: function () {
-      return {
-        x: CAMERA_WIDTH / 2 - this.x,
-        y: CAMERA_HEIGHT / 2 - this.y,
-      };
-    },
-  };
+  });
 
   const gameState: GameState = {
     player,
@@ -136,7 +92,7 @@ function index() {
     renderPlayer(gameState.otherPlayer, gameState.camera);
 
     // animate player
-    const currentAnimation = _decideCurrentAnimation(gameState.player);
+    const currentAnimation = decideCurrentAnimation(gameState.player);
     const animationIndex = nextAnimationFrame(
       currentAnimation,
       gameState.player.animationIndex
@@ -203,128 +159,6 @@ function index() {
     return direction;
   }
 
-  function nextAnimationFrame(
-    currentAnimation: number[],
-    animationIndex: number
-  ): number {
-    if (currentAnimation) {
-      const nextAnimationIndex = animationIndex + 1;
-
-      if (currentAnimation.length <= nextAnimationIndex) {
-        return 0;
-      } else {
-        return nextAnimationIndex;
-      }
-    } else {
-      return -1;
-    }
-  }
-
-  function _getSpriteFrame(
-    facingDirection: Direction,
-    currentAnimation: number[],
-    animationIndex: number
-  ): number {
-    if (currentAnimation) {
-      return currentAnimation[animationIndex];
-    }
-
-    if (facingDirection == Direction.DOWN) {
-      return 0;
-    } else if (facingDirection == Direction.UP) {
-      return 2;
-    } else if (facingDirection == Direction.LEFT) {
-      return 4;
-    } else if (facingDirection == Direction.RIGHT) {
-      return 6;
-    }
-
-    return 0;
-  }
-
-  function renderPlayer(targetPlayer: Player, camera: Camera) {
-    const ctx = targetPlayer.canvas.getContext("2d");
-    ctx.restore();
-
-    const { x, y } = camera.offset();
-    ctx.clearRect(0, 0, targetPlayer.canvas.width, targetPlayer.canvas.height);
-    ctx.fillStyle = targetPlayer.color;
-    ctx.fillRect(
-      targetPlayer.positionX + x,
-      targetPlayer.positionY + y,
-      GRID_INTERVAL,
-      GRID_INTERVAL
-    );
-
-    ctx.save();
-
-    const currentAnimation = _decideCurrentAnimation(targetPlayer);
-    const animationIndex = nextAnimationFrame(
-      currentAnimation,
-      targetPlayer.animationIndex
-    );
-    const frameIndex = _getSpriteFrame(
-      targetPlayer.facingDirection,
-      currentAnimation,
-      animationIndex
-    );
-
-    ctx.beginPath();
-    ctx.rect(
-      targetPlayer.positionX + x,
-      targetPlayer.positionY + y,
-      GRID_INTERVAL,
-      GRID_INTERVAL
-    );
-    ctx.clip();
-
-    var img = new Image();
-    img.src = SpriteSheet;
-
-    ctx.drawImage(
-      img,
-      targetPlayer.positionX + x - frameIndex * GRID_INTERVAL,
-      targetPlayer.positionY + y
-    );
-  }
-
-  function _decideCurrentAnimation(targetPlayer: Player): number[] {
-    const walkingDownAnimation = [0, 1];
-    const walkingUpAnimation = [2, 3];
-    const walkingLeftAnimation = [4, 5];
-    const walkingRightAnimation = [6, 7];
-    const dilationBaseline = 6;
-
-    const movementDirection = targetPlayer.movementDirection;
-
-    const dilate = (timeline: number[], count: number) => {
-      return timeline.reduce((accumulator, currentValue) => {
-        const stretched = new Array(count).fill(currentValue);
-        return accumulator.concat(stretched);
-      }, []);
-    };
-
-    if (movementDirection == Direction.NONE) {
-      return null;
-    }
-
-    let animation: number[];
-
-    if (movementDirection == Direction.DOWN) {
-      animation = walkingDownAnimation;
-    } else if (movementDirection == Direction.UP) {
-      animation = walkingUpAnimation;
-    } else if (movementDirection == Direction.RIGHT) {
-      animation = walkingRightAnimation;
-    } else if (movementDirection == Direction.LEFT) {
-      animation = walkingLeftAnimation;
-    } else {
-      animation = walkingDownAnimation;
-    }
-
-    return dilate(animation, dilationBaseline / targetPlayer.movementSpeed);
-  }
-
   var body = document.getElementsByTagName("body")[0];
   body.style.backgroundColor = "black";
   var gameArea = document.createElement("div");
@@ -333,13 +167,13 @@ function index() {
   gameArea.style.marginLeft = "auto";
   gameArea.style.marginRight = "auto";
   body.appendChild(gameArea);
-  canvas = document.createElement("canvas");
+  const canvas = document.createElement("canvas");
   canvas.width = CAMERA_WIDTH;
   canvas.height = CAMERA_HEIGHT;
   canvas.style.zIndex = "1";
   canvas.style.position = "absolute";
   gameArea.appendChild(canvas);
-  var ctx = canvas.getContext("2d");
+  var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   ctx.fillStyle = "green";
   for (var x = 0; x < 1000; x++) {
     for (var y = 0; y < 1000; y++) {
