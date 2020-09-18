@@ -52,8 +52,8 @@ export class PlayerRenderer {
     ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
     ctx.fillStyle = this._color;
     ctx.fillRect(
-      this._player.positionX() + x,
-      this._player.positionY() + y,
+      this._player.positionX + x,
+      this._player.positionY + y,
       GRID_INTERVAL,
       GRID_INTERVAL
     );
@@ -72,8 +72,8 @@ export class PlayerRenderer {
 
     ctx.beginPath();
     ctx.rect(
-      this._player.positionX() + x,
-      this._player.positionY() + y,
+      this._player.positionX + x,
+      this._player.positionY + y,
       GRID_INTERVAL,
       GRID_INTERVAL
     );
@@ -84,13 +84,13 @@ export class PlayerRenderer {
 
     ctx.drawImage(
       img,
-      this._player.positionX() + x - frameIndex * GRID_INTERVAL,
-      this._player.positionY() + y
+      this._player.positionX + x - frameIndex * GRID_INTERVAL,
+      this._player.positionY + y
     );
   }
 
   private _decideCurrentAnimation(): number[] {
-    const movementDirection = this._player.movementDirection();
+    const movementDirection = this._player.movementDirection;
 
     if (movementDirection == Direction.NONE) {
       return null;
@@ -110,7 +110,7 @@ export class PlayerRenderer {
       animation = walkingDownAnimation;
     }
 
-    return dilate(animation, dilationBaseline / this._player.movementSpeed());
+    return dilate(animation, dilationBaseline / this._player.movementSpeed);
   }
 
   private _advanceAnimation(
@@ -138,7 +138,7 @@ export class PlayerRenderer {
       return currentAnimation[animationIndex];
     }
 
-    const facingDirection = this._player.facingDirection();
+    const facingDirection = this._player.facingDirection;
 
     if (facingDirection == Direction.DOWN) {
       return 0;
@@ -149,6 +149,8 @@ export class PlayerRenderer {
     } else if (facingDirection == Direction.RIGHT) {
       return 6;
     }
+
+    console.log("facingDirection ", facingDirection);
 
     return 0;
   }

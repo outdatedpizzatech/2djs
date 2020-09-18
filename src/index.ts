@@ -7,16 +7,41 @@ import {
   FRAMERATE,
   GRID_INTERVAL,
 } from "./common";
-import { fromEvent, interval, merge } from "rxjs";
-import { scan, withLatestFrom } from "rxjs/operators";
+import {
+  BehaviorSubject,
+  combineLatest,
+  fromEvent,
+  interval,
+  merge,
+} from "rxjs";
+import { filter, map, scan, withLatestFrom } from "rxjs/operators";
+
+interface KeyMap {
+  [key: string]: boolean;
+}
+
+interface GameState {
+  player: Player;
+}
 
 function index() {
+  const player = new Player({
+    color: "red",
+    x: 0,
+    y: 0,
+    icon: "star",
+  });
+
+  const gameState: GameState = {
+    player,
+  };
+
   const frame$ = interval(1000 / FRAMERATE);
   const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
   const keyup$ = fromEvent<KeyboardEvent>(document, "keyup");
   const keyActions$ = merge(keydown$, keyup$);
   const keyMap$ = keyActions$.pipe(
-    scan<KeyboardEvent, { [key: string]: boolean }>((acc, val) => {
+    scan<KeyboardEvent, KeyMap>((acc, val) => {
       acc[val.code] = val.type == "keydown";
       return acc;
     }, {})
@@ -24,12 +49,73 @@ function index() {
 
   const keysMapPerFrame$ = frame$.pipe(withLatestFrom(keyMap$));
 
+  frame$.subscribe(() => {
+    handleRendering(treasure);
+  });
+
+  const directionForFrame$ = keysMapPerFrame$.pipe(
+    map(([_, keymap]) => getDirectionFromKeyMap(keymap)),
+    filter((direction) => direction != Direction.NONE)
+  );
+
+  const gameState$ = new BehaviorSubject(gameState);
+
+  directionForFrame$
+    .pipe(
+      withLatestFrom(gameState$),
+      filter(([_, gameState]) => !gameState.player.movementDirection)
+    )
+    .subscribe(([direction, gameState]) => {
+      gameState.player.facingDirection = direction;
+      gameState.player.movementDirection = direction;
+
+      gameState$.next(gameState);
+    });
+
+  frame$
+    .pipe(
+      withLatestFrom(gameState$),
+      filter(([_, gameState]) => !!gameState.player.movementDirection)
+    )
+    .subscribe(([direction, gameState]) => {
+      if (gameState.player.movementDirection == Direction.UP) {
+        gameState.player.positionY -= gameState.player.movementSpeed;
+
+        if (gameState.player.positionY % GRID_INTERVAL === 0) {
+          gameState.player.movementDirection = Direction.NONE;
+        }
+      }
+
+      if (gameState.player.movementDirection == Direction.RIGHT) {
+        gameState.player.positionX += gameState.player.movementSpeed;
+
+        if (gameState.player.positionX % GRID_INTERVAL === 0) {
+          gameState.player.movementDirection = Direction.NONE;
+        }
+      }
+
+      if (gameState.player.movementDirection == Direction.DOWN) {
+        gameState.player.positionY += gameState.player.movementSpeed;
+
+        if (gameState.player.positionY % GRID_INTERVAL === 0) {
+          gameState.player.movementDirection = Direction.NONE;
+        }
+      }
+
+      if (gameState.player.movementDirection == Direction.LEFT) {
+        gameState.player.positionX -= gameState.player.movementSpeed;
+
+        if (gameState.player.positionX % GRID_INTERVAL === 0) {
+          gameState.player.movementDirection = Direction.NONE;
+        }
+      }
+
+      gameState$.next(gameState);
+    });
+
   const camera = new Camera();
 
-  function handlePlayerMovement(
-    player: Player,
-    keymap: { [key: string]: boolean }
-  ) {
+  function getDirectionFromKeyMap(keymap: KeyMap): Direction {
     let direction = Direction.NONE;
 
     if (keymap["ArrowUp"]) {
@@ -42,14 +128,11 @@ function index() {
       direction = Direction.LEFT;
     }
 
-    if (direction != Direction.NONE) {
-      player.moveBy(direction);
-    }
-    player.refreshMovement();
+    return direction;
   }
 
-  function handleRendering(player: Player, treasure: Player) {
-    camera.setPosition(player.positionX(), player.positionY());
+  function handleRendering(treasure: Player) {
+    camera.setPosition(player.positionX, player.positionY);
     player.render(camera);
     treasure.render(camera);
   }
@@ -81,12 +164,6 @@ function index() {
     }
   }
 
-  const player = new Player({
-    color: "red",
-    x: 0,
-    y: 0,
-    icon: "star",
-  });
   gameArea.appendChild(player.view());
 
   const treasure = new Player({
@@ -96,16 +173,6 @@ function index() {
     icon: "heart",
   });
   gameArea.appendChild(treasure.view());
-
-  keysMapPerFrame$.subscribe(([_frame, keyMap]) => {
-    handlePlayerMovement(player, keyMap);
-  });
-
-  keyMap$.subscribe((keyMap) => console.log(keyMap));
-
-  frame$.subscribe(() => {
-    handleRendering(player, treasure);
-  });
 }
 
 index();
