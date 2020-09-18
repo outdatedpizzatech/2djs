@@ -1,5 +1,3 @@
-import { Player } from "./player";
-import { Camera } from "./camera";
 import {
   CAMERA_HEIGHT,
   CAMERA_WIDTH,
@@ -11,8 +9,27 @@ import { BehaviorSubject, fromEvent, interval, merge } from "rxjs";
 import { filter, map, scan, withLatestFrom } from "rxjs/operators";
 import SpriteSheet from "./player_spritesheet.png";
 
+interface Camera {
+  x: number;
+  y: number;
+  offset: () => { x: number; y: number };
+}
+
 interface KeyMap {
   [key: string]: boolean;
+}
+
+interface Player {
+  color: string;
+  x: number;
+  y: number;
+  canvas: HTMLCanvasElement;
+  movementDirection: Direction;
+  facingDirection: Direction;
+  positionX: number;
+  positionY: number;
+  animationIndex: number;
+  movementSpeed: number;
 }
 
 interface GameState {
@@ -22,21 +39,54 @@ interface GameState {
 }
 
 function index() {
-  const player = new Player({
+  let canvas = document.createElement("canvas");
+  canvas.style.zIndex = "2";
+  canvas.style.position = "absolute";
+  canvas.width = CAMERA_WIDTH;
+  canvas.height = CAMERA_HEIGHT;
+
+  const player: Player = {
     color: "red",
     x: 0,
     y: 0,
-    icon: "star",
-  });
+    movementDirection: Direction.NONE,
+    facingDirection: Direction.DOWN,
+    canvas,
+    positionX: 0,
+    positionY: 0,
+    animationIndex: 0,
+    movementSpeed: 1,
+  };
 
-  const otherPlayer = new Player({
+  canvas = document.createElement("canvas");
+  canvas.style.zIndex = "2";
+  canvas.style.position = "absolute";
+  canvas.width = CAMERA_WIDTH;
+  canvas.height = CAMERA_HEIGHT;
+
+  const otherPlayer: Player = {
     color: "blue",
     x: 192,
     y: 64,
-    icon: "heart",
-  });
+    movementDirection: Direction.NONE,
+    facingDirection: Direction.DOWN,
+    canvas,
+    positionX: 192,
+    positionY: 64,
+    animationIndex: 0,
+    movementSpeed: 1,
+  };
 
-  const camera = new Camera();
+  const camera = {
+    x: 0,
+    y: 0,
+    offset: function () {
+      return {
+        x: CAMERA_WIDTH / 2 - this.x,
+        y: CAMERA_HEIGHT / 2 - this.y,
+      };
+    },
+  };
 
   const gameState: GameState = {
     player,
@@ -283,7 +333,7 @@ function index() {
   gameArea.style.marginLeft = "auto";
   gameArea.style.marginRight = "auto";
   body.appendChild(gameArea);
-  var canvas = document.createElement("canvas");
+  canvas = document.createElement("canvas");
   canvas.width = CAMERA_WIDTH;
   canvas.height = CAMERA_HEIGHT;
   canvas.style.zIndex = "1";
@@ -302,9 +352,9 @@ function index() {
     }
   }
 
-  gameArea.appendChild(player.view());
+  gameArea.appendChild(player.canvas);
 
-  gameArea.appendChild(otherPlayer.view());
+  gameArea.appendChild(otherPlayer.canvas);
 }
 
 index();
