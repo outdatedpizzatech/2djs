@@ -7,14 +7,9 @@ import {
   FRAMERATE,
   GRID_INTERVAL,
 } from "./common";
-import {
-  BehaviorSubject,
-  combineLatest,
-  fromEvent,
-  interval,
-  merge,
-} from "rxjs";
+import { BehaviorSubject, fromEvent, interval, merge } from "rxjs";
 import { filter, map, scan, withLatestFrom } from "rxjs/operators";
+import SpriteSheet from "./player_spritesheet.png";
 
 interface KeyMap {
   [key: string]: boolean;
@@ -22,6 +17,8 @@ interface KeyMap {
 
 interface GameState {
   player: Player;
+  otherPlayer: Player;
+  camera: Camera;
 }
 
 function index() {
@@ -32,8 +29,19 @@ function index() {
     icon: "star",
   });
 
+  const otherPlayer = new Player({
+    color: "blue",
+    x: 192,
+    y: 64,
+    icon: "heart",
+  });
+
+  const camera = new Camera();
+
   const gameState: GameState = {
     player,
+    camera,
+    otherPlayer,
   };
 
   const frame$ = interval(1000 / FRAMERATE);
@@ -48,10 +56,6 @@ function index() {
   );
 
   const keysMapPerFrame$ = frame$.pipe(withLatestFrom(keyMap$));
-
-  frame$.subscribe(() => {
-    handleRendering(treasure);
-  });
 
   const directionForFrame$ = keysMapPerFrame$.pipe(
     map(([_, keymap]) => getDirectionFromKeyMap(keymap)),
@@ -72,12 +76,32 @@ function index() {
       gameState$.next(gameState);
     });
 
+  frame$.pipe(withLatestFrom(gameState$)).subscribe(([_, gameState]) => {
+    // move camera
+    gameState.camera.x = gameState.player.positionX;
+    gameState.camera.y = gameState.player.positionY;
+
+    // render player
+    renderPlayer(gameState.player, gameState.camera);
+    renderPlayer(gameState.otherPlayer, gameState.camera);
+
+    // animate player
+    const currentAnimation = _decideCurrentAnimation(gameState.player);
+    const animationIndex = nextAnimationFrame(
+      currentAnimation,
+      gameState.player.animationIndex
+    );
+    gameState.player.animationIndex = animationIndex;
+
+    gameState$.next(gameState);
+  });
+
   frame$
     .pipe(
       withLatestFrom(gameState$),
       filter(([_, gameState]) => !!gameState.player.movementDirection)
     )
-    .subscribe(([direction, gameState]) => {
+    .subscribe(([_, gameState]) => {
       if (gameState.player.movementDirection == Direction.UP) {
         gameState.player.positionY -= gameState.player.movementSpeed;
 
@@ -113,8 +137,6 @@ function index() {
       gameState$.next(gameState);
     });
 
-  const camera = new Camera();
-
   function getDirectionFromKeyMap(keymap: KeyMap): Direction {
     let direction = Direction.NONE;
 
@@ -131,10 +153,126 @@ function index() {
     return direction;
   }
 
-  function handleRendering(treasure: Player) {
-    camera.setPosition(player.positionX, player.positionY);
-    player.render(camera);
-    treasure.render(camera);
+  function nextAnimationFrame(
+    currentAnimation: number[],
+    animationIndex: number
+  ): number {
+    if (currentAnimation) {
+      const nextAnimationIndex = animationIndex + 1;
+
+      if (currentAnimation.length <= nextAnimationIndex) {
+        return 0;
+      } else {
+        return nextAnimationIndex;
+      }
+    } else {
+      return -1;
+    }
+  }
+
+  function _getSpriteFrame(
+    facingDirection: Direction,
+    currentAnimation: number[],
+    animationIndex: number
+  ): number {
+    if (currentAnimation) {
+      return currentAnimation[animationIndex];
+    }
+
+    if (facingDirection == Direction.DOWN) {
+      return 0;
+    } else if (facingDirection == Direction.UP) {
+      return 2;
+    } else if (facingDirection == Direction.LEFT) {
+      return 4;
+    } else if (facingDirection == Direction.RIGHT) {
+      return 6;
+    }
+
+    return 0;
+  }
+
+  function renderPlayer(targetPlayer: Player, camera: Camera) {
+    const ctx = targetPlayer.canvas.getContext("2d");
+    ctx.restore();
+
+    const { x, y } = camera.offset();
+    ctx.clearRect(0, 0, targetPlayer.canvas.width, targetPlayer.canvas.height);
+    ctx.fillStyle = targetPlayer.color;
+    ctx.fillRect(
+      targetPlayer.positionX + x,
+      targetPlayer.positionY + y,
+      GRID_INTERVAL,
+      GRID_INTERVAL
+    );
+
+    ctx.save();
+
+    const currentAnimation = _decideCurrentAnimation(targetPlayer);
+    const animationIndex = nextAnimationFrame(
+      currentAnimation,
+      targetPlayer.animationIndex
+    );
+    const frameIndex = _getSpriteFrame(
+      targetPlayer.facingDirection,
+      currentAnimation,
+      animationIndex
+    );
+
+    ctx.beginPath();
+    ctx.rect(
+      targetPlayer.positionX + x,
+      targetPlayer.positionY + y,
+      GRID_INTERVAL,
+      GRID_INTERVAL
+    );
+    ctx.clip();
+
+    var img = new Image();
+    img.src = SpriteSheet;
+
+    ctx.drawImage(
+      img,
+      targetPlayer.positionX + x - frameIndex * GRID_INTERVAL,
+      targetPlayer.positionY + y
+    );
+  }
+
+  function _decideCurrentAnimation(targetPlayer: Player): number[] {
+    const walkingDownAnimation = [0, 1];
+    const walkingUpAnimation = [2, 3];
+    const walkingLeftAnimation = [4, 5];
+    const walkingRightAnimation = [6, 7];
+    const dilationBaseline = 6;
+
+    const movementDirection = targetPlayer.movementDirection;
+
+    const dilate = (timeline: number[], count: number) => {
+      return timeline.reduce((accumulator, currentValue) => {
+        const stretched = new Array(count).fill(currentValue);
+        return accumulator.concat(stretched);
+      }, []);
+    };
+
+    if (movementDirection == Direction.NONE) {
+      return null;
+    }
+
+    let animation: number[];
+
+    if (movementDirection == Direction.DOWN) {
+      animation = walkingDownAnimation;
+    } else if (movementDirection == Direction.UP) {
+      animation = walkingUpAnimation;
+    } else if (movementDirection == Direction.RIGHT) {
+      animation = walkingRightAnimation;
+    } else if (movementDirection == Direction.LEFT) {
+      animation = walkingLeftAnimation;
+    } else {
+      animation = walkingDownAnimation;
+    }
+
+    return dilate(animation, dilationBaseline / targetPlayer.movementSpeed);
   }
 
   var body = document.getElementsByTagName("body")[0];
@@ -166,13 +304,7 @@ function index() {
 
   gameArea.appendChild(player.view());
 
-  const treasure = new Player({
-    color: "blue",
-    x: 192,
-    y: 64,
-    icon: "heart",
-  });
-  gameArea.appendChild(treasure.view());
+  gameArea.appendChild(otherPlayer.view());
 }
 
 index();

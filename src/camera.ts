@@ -1,13 +1,8 @@
-import {CAMERA_HEIGHT, CAMERA_WIDTH} from "./common";
+import { CAMERA_HEIGHT, CAMERA_WIDTH } from "./common";
 
 export class Camera {
-  private x: number;
-  private y: number;
-
-  setPosition(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
+  public x: number;
+  public y: number;
 
   offset() {
     return {
