@@ -5,7 +5,7 @@ import {
   GRID_INTERVAL,
 } from "./common";
 import { Camera } from "./camera";
-import SpriteSheet from "./player_spritesheet.png";
+import SpriteSheet from "./assets/player_spritesheet.png";
 
 export interface Player {
   color: string;
@@ -14,8 +14,8 @@ export interface Player {
   canvas: HTMLCanvasElement;
   movementDirection: Direction;
   facingDirection: Direction;
-  positionX: number;
-  positionY: number;
+  worldX: number;
+  worldY: number;
   animationIndex: number;
   movementSpeed: number;
 }
@@ -29,8 +29,8 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     y: attributes.y || 0,
     movementDirection: attributes.movementDirection || Direction.NONE,
     facingDirection: attributes.facingDirection || Direction.DOWN,
-    positionX: attributes.x || 0,
-    positionY: attributes.y || 0,
+    worldX: (attributes.x || 0) * GRID_INTERVAL,
+    worldY: (attributes.y || 0) * GRID_INTERVAL,
     movementSpeed: attributes.movementSpeed || 1,
     animationIndex: 0,
     canvas,
@@ -45,8 +45,8 @@ export const renderPlayer = (targetPlayer: Player, camera: Camera) => {
   ctx.clearRect(0, 0, targetPlayer.canvas.width, targetPlayer.canvas.height);
   ctx.fillStyle = targetPlayer.color;
   ctx.fillRect(
-    targetPlayer.positionX + x,
-    targetPlayer.positionY + y,
+    targetPlayer.worldX + x,
+    targetPlayer.worldY + y,
     GRID_INTERVAL,
     GRID_INTERVAL
   );
@@ -66,8 +66,8 @@ export const renderPlayer = (targetPlayer: Player, camera: Camera) => {
 
   ctx.beginPath();
   ctx.rect(
-    targetPlayer.positionX + x,
-    targetPlayer.positionY + y,
+    targetPlayer.worldX + x,
+    targetPlayer.worldY + y,
     GRID_INTERVAL,
     GRID_INTERVAL
   );
@@ -78,8 +78,8 @@ export const renderPlayer = (targetPlayer: Player, camera: Camera) => {
 
   ctx.drawImage(
     img,
-    targetPlayer.positionX + x - frameIndex * GRID_INTERVAL,
-    targetPlayer.positionY + y
+    targetPlayer.worldX + x - frameIndex * GRID_INTERVAL,
+    targetPlayer.worldY + y
   );
 };
 

@@ -1,7 +1,8 @@
 import {Player} from "./player";
 import {CAMERA_HEIGHT, CAMERA_WIDTH, GRID_INTERVAL} from "./common";
+import {Tree} from "./tree";
 
-export function renderGameSpace(players: Player[]){
+export function renderGameSpace(players: Player[], trees: Tree[]){
   var body = document.getElementsByTagName("body")[0];
   body.style.backgroundColor = "black";
   var gameArea = document.createElement("div");
@@ -31,6 +32,10 @@ export function renderGameSpace(players: Player[]){
 
   players.forEach((player) => {
     gameArea.appendChild(player.canvas);
+  });
+
+  trees.forEach((tree) => {
+    gameArea.appendChild(tree.canvas);
   });
 }
 
