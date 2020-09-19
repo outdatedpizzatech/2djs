@@ -55,20 +55,23 @@ function index() {
   directionForFrame$
     .pipe(
       withLatestFrom(gameState$),
-      filter(([_, gameState]) => !gameState.player.movementDirection)
+      filter(([_, gameState]) => !gameState.player.movementDirection),
+      map(([direction, gameState]) =>
+        updatePlayerDirection(direction, gameState)
+      )
     )
-    .subscribe(([direction, gameState]) => {
-      const newState = updatePlayerDirection(direction, gameState);
-      gameState$.next(newState);
+    .subscribe((gameState) => {
+      gameState$.next(gameState);
     });
 
-  frameWithGameState$.subscribe(([_, gameState]) => {
-    let newState = gameState;
-    newState = updateCameraPosition(newState);
-    newState = updatePlayerAnimation(newState);
-
-    gameState$.next(newState);
-  });
+  frameWithGameState$
+    .pipe(
+      map(([_, gameState]) => updateCameraPosition(gameState)),
+      map(updatePlayerAnimation)
+    )
+    .subscribe((gameState) => {
+      gameState$.next(gameState);
+    });
 
   frameWithGameState$.subscribe(([_, gameState]) => {
     renderPlayer(gameState.player, gameState.camera);
@@ -76,11 +79,12 @@ function index() {
   });
 
   frameWithGameState$
-    .pipe(filter(([_, gameState]) => !!gameState.player.movementDirection))
-    .subscribe(([_, gameState]) => {
-      const newState = updatePlayerMovement(gameState);
-
-      gameState$.next(newState);
+    .pipe(
+      filter(([_, gameState]) => !!gameState.player.movementDirection),
+      map(([_, gameState]) => updatePlayerMovement(gameState))
+    )
+    .subscribe((gameState) => {
+      gameState$.next(gameState);
     });
 
   gameState$.next(initialGameState);
