@@ -1,8 +1,16 @@
-import {Player} from "./player";
-import {CAMERA_HEIGHT, CAMERA_WIDTH, GRID_INTERVAL} from "./common";
-import {Tree} from "./tree";
+import { Player } from "./player";
+import { CAMERA_HEIGHT, CAMERA_WIDTH, GRID_INTERVAL } from "./common";
+import { Tree } from "./tree";
+import { debug } from "webpack";
 
-export function renderGameSpace(players: Player[], trees: Tree[]){
+interface RenderFixture {
+  debugArea: CanvasRenderingContext2D;
+}
+
+export function renderGameSpace(
+  players: Player[],
+  trees: Tree[]
+): RenderFixture {
   var body = document.getElementsByTagName("body")[0];
   body.style.backgroundColor = "black";
   var gameArea = document.createElement("div");
@@ -37,5 +45,15 @@ export function renderGameSpace(players: Player[], trees: Tree[]){
   trees.forEach((tree) => {
     gameArea.appendChild(tree.canvas);
   });
-}
 
+  const debugCanvas = document.createElement("canvas");
+  debugCanvas.width = CAMERA_WIDTH;
+  debugCanvas.height = CAMERA_HEIGHT;
+  debugCanvas.style.zIndex = "10000";
+  debugCanvas.style.position = "absolute";
+  gameArea.appendChild(debugCanvas);
+
+  return {
+    debugArea: debugCanvas.getContext("2d") as CanvasRenderingContext2D,
+  };
+}

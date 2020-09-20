@@ -8,7 +8,6 @@ import { Camera } from "./camera";
 import SpriteSheet from "./assets/player_spritesheet.png";
 
 export interface Player {
-  color: string;
   x: number;
   y: number;
   canvas: HTMLCanvasElement;
@@ -18,13 +17,15 @@ export interface Player {
   worldY: number;
   animationIndex: number;
   movementSpeed: number;
+  debug: {
+    color?: string;
+  };
 }
 
 export const playerFactory = (attributes: Partial<Player>): Player => {
   const canvas = _addCanvas();
 
   return {
-    color: attributes.color || "red",
     x: attributes.x || 0,
     y: attributes.y || 0,
     movementDirection: attributes.movementDirection || Direction.NONE,
@@ -34,6 +35,9 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     movementSpeed: attributes.movementSpeed || 1,
     animationIndex: 0,
     canvas,
+    debug: {
+      color: attributes.debug?.color,
+    },
   };
 };
 
@@ -43,13 +47,15 @@ export const renderPlayer = (targetPlayer: Player, camera: Camera) => {
 
   const { x, y } = camera.offset();
   ctx.clearRect(0, 0, targetPlayer.canvas.width, targetPlayer.canvas.height);
-  ctx.fillStyle = targetPlayer.color;
-  ctx.fillRect(
-    targetPlayer.worldX + x,
-    targetPlayer.worldY + y,
-    GRID_INTERVAL,
-    GRID_INTERVAL
-  );
+  if (targetPlayer.debug.color) {
+    ctx.fillStyle = targetPlayer.debug.color;
+    ctx.fillRect(
+      targetPlayer.worldX + x,
+      targetPlayer.worldY + y,
+      GRID_INTERVAL,
+      GRID_INTERVAL
+    );
+  }
 
   ctx.save();
 

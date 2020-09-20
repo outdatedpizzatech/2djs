@@ -11,16 +11,15 @@ import {
 import { updateCameraPosition } from "./reducers/camera";
 import { renderGameSpace } from "./game_renderer";
 import { renderTree, treeFactory } from "./tree";
+import { renderGridLines } from "./debug";
 
 function index() {
   const player: Player = playerFactory({
-    color: "red",
     x: 0,
     y: 0,
   });
 
   const otherPlayer: Player = playerFactory({
-    color: "blue",
     x: 12,
     y: 4,
   });
@@ -51,6 +50,8 @@ function index() {
     otherPlayer,
     trees,
   };
+
+  const { debugArea } = renderGameSpace([player, otherPlayer], trees);
 
   directionForFrame$
     .pipe(
@@ -90,9 +91,22 @@ function index() {
       gameState$.next(gameState);
     });
 
-  gameState$.next(initialGameState);
+  // START: debugger config
+  // START: debugger config
+  if (process.env.DEBUG) {
+    frameWithGameState$.subscribe(([_, gameState]) => {
+      renderGridLines(debugArea);
+    });
+    player.debug.color = "red";
+    otherPlayer.debug.color = "blue";
+    trees.forEach((tree) => {
+      tree.debug.color = "white";
+    });
+  }
+  // END: debugger config
+  // END: debugger config
 
-  renderGameSpace([player, otherPlayer], trees);
+  gameState$.next(initialGameState);
 }
 
 index();

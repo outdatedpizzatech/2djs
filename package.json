@@ -4,6 +4,7 @@
     "build": "webpack",
     "watch": "webpack --watch",
     "start": "webpack-dev-server --open",
+    "debug": "DEBUG=true yarn start",
     "server": "node server.js"
   },
   "dependencies": {

@@ -3,12 +3,14 @@ import { Camera } from "./camera";
 import SpriteSheet from "./assets/tree_spritesheet.png";
 
 export interface Tree {
-  color: string;
   x: number;
   y: number;
   worldX: number;
   worldY: number;
   canvas: HTMLCanvasElement;
+  debug: {
+    color?: string;
+  };
 }
 
 export const treeFactory = (attributes: Partial<Tree>): Tree => {
@@ -20,7 +22,9 @@ export const treeFactory = (attributes: Partial<Tree>): Tree => {
     worldX: (attributes.x || 0) * GRID_INTERVAL,
     worldY: (attributes.y || 0) * GRID_INTERVAL,
     canvas,
-    color: attributes.color || "white",
+    debug: {
+      color: attributes.debug?.color,
+    },
   };
 };
 
@@ -29,13 +33,15 @@ export const renderTree = (targetTree: Tree, camera: Camera) => {
 
   const { x, y } = camera.offset();
   ctx.clearRect(0, 0, targetTree.canvas.width, targetTree.canvas.height);
-  ctx.fillStyle = targetTree.color;
-  ctx.fillRect(
-    targetTree.worldX + x,
-    targetTree.worldY + y,
-    GRID_INTERVAL,
-    GRID_INTERVAL
-  );
+  if (targetTree.debug.color) {
+    ctx.fillStyle = targetTree.debug.color;
+    ctx.fillRect(
+      targetTree.worldX + x,
+      targetTree.worldY + y,
+      GRID_INTERVAL,
+      GRID_INTERVAL
+    );
+  }
 
   const img = new Image();
   img.src = SpriteSheet;
