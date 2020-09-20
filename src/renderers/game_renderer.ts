@@ -4,6 +4,7 @@ import { Renderable } from "../types";
 
 interface RenderFixture {
   debugArea: CanvasRenderingContext2D;
+  visibleCanvas: HTMLCanvasElement;
 }
 
 export function renderGameSpace(
@@ -17,27 +18,25 @@ export function renderGameSpace(
   gameArea.style.marginLeft = "auto";
   gameArea.style.marginRight = "auto";
   body.appendChild(gameArea);
-  const canvas = document.createElement("canvas");
-  canvas.width = CAMERA_WIDTH;
-  canvas.height = CAMERA_HEIGHT;
-  canvas.style.zIndex = "1";
-  canvas.style.position = "absolute";
-  gameArea.appendChild(canvas);
-  const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+  const visibleCanvas = document.createElement("canvas");
+  visibleCanvas.width = CAMERA_WIDTH;
+  visibleCanvas.height = CAMERA_HEIGHT;
+  visibleCanvas.style.zIndex = "1";
+  visibleCanvas.style.position = "absolute";
+  gameArea.appendChild(visibleCanvas);
+  const ctx = visibleCanvas.getContext("2d") as CanvasRenderingContext2D;
   ctx.fillStyle = "green";
-  for (let x = 0; x < 1000; x++) {
-    for (let y = 0; y < 1000; y++) {
-      ctx.fillRect(
-        x * GRID_INTERVAL,
-        y * GRID_INTERVAL,
-        GRID_INTERVAL,
-        GRID_INTERVAL
-      );
-    }
-  }
+  ctx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
+
+  const offlineGameArea = document.createElement("div");
+  offlineGameArea.style.display = `none`;
+  offlineGameArea.style.width = `${CAMERA_WIDTH}px`;
+  offlineGameArea.style.height = `${CAMERA_HEIGHT}px`;
+  offlineGameArea.style.marginLeft = "auto";
+  offlineGameArea.style.marginRight = "auto";
 
   renderables.forEach((renderable) => {
-    gameArea.appendChild(renderable.view);
+    offlineGameArea.appendChild(renderable.view);
   });
 
   const debugCanvas = document.createElement("canvas");
@@ -49,5 +48,6 @@ export function renderGameSpace(
 
   return {
     debugArea: debugCanvas.getContext("2d") as CanvasRenderingContext2D,
+    visibleCanvas,
   };
 }

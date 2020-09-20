@@ -138,7 +138,7 @@ function index() {
     .concat(trees)
     .concat(walls);
 
-  const { debugArea } = renderGameSpace(renderables);
+  const { debugArea, visibleCanvas } = renderGameSpace(renderables);
 
   directionForFrame$
     .pipe(
@@ -179,6 +179,15 @@ function index() {
       if (isWall(fieldRenderable)) {
         renderWall(fieldRenderable, gameState.camera);
       }
+    });
+
+    const ctx = visibleCanvas.getContext("2d") as CanvasRenderingContext2D;
+    ctx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
+    ctx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
+    ctx.drawImage(gameState.player.view, 0, 0);
+    ctx.drawImage(gameState.otherPlayer.view, 0, 0);
+    gameState.fieldRenderables.forEach((fieldRenderable) => {
+      ctx.drawImage(fieldRenderable.view, 0, 0);
     });
   });
 
