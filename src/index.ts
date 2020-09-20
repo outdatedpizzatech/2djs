@@ -1,21 +1,24 @@
 import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { cameraFactory } from "./camera";
-import { Player, playerFactory } from "./player";
+import { Player, playerFactory } from "./models/player";
 import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
 import { CoordinateMap, GameState, updateCoordinateMap } from "./game_state";
 import {
   updatePlayerAnimation,
+  updatePlayerCoordinates,
   updatePlayerDirection,
   updatePlayerMovement,
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
-import { treeFactory } from "./tree";
+import { isTree, treeFactory } from "./models/tree";
 import { renderGridLines } from "./debug";
-import { Positionable } from "./types";
+import { Positionable, Renderable } from "./types";
 import { getModsFromDirection } from "./direction";
 import { renderPlayer } from "./renderers/player_renderer";
 import { renderTree } from "./renderers/tree_renderer";
+import { isWall, wallFactory } from "./models/wall";
+import { renderWall } from "./renderers/wall_renderer";
 
 function index() {
   const player: Player = playerFactory({
@@ -44,29 +47,59 @@ function index() {
     [14, 5],
   ];
 
+  const wallCoordinates = [
+    [0, 5],
+    [20, 0],
+    [20, 1],
+  ];
+
   const trees = treeCoordinates.map((treeCoordinate) =>
     treeFactory({ x: treeCoordinate[0], y: treeCoordinate[1] })
   );
 
-  const players: Positionable[] = [player, otherPlayer];
-  const coordinateMap: CoordinateMap = {};
-  const occupants: Positionable[] = players.concat(trees);
+  const walls = wallCoordinates.map((wallCoordinate) =>
+    wallFactory({ x: wallCoordinate[0], y: wallCoordinate[1] })
+  );
 
-  occupants.forEach((occupant) => {
-    const xRow = coordinateMap[occupant.x] || {};
-    xRow[occupant.y] = occupant;
-    coordinateMap[occupant.x] = xRow;
+  const positionables = new Array<Positionable>()
+    .concat([player, otherPlayer])
+    .concat(trees)
+    .concat(walls);
+
+  const coordinateMap: CoordinateMap = positionables.reduce(
+    (acc, positionable) => {
+      const xRow = acc[positionable.x] || {};
+      xRow[positionable.y] = positionable;
+      acc[positionable.x] = xRow;
+      return acc;
+    },
+    {} as CoordinateMap
+  );
+
+  positionables.forEach((positionable) => {
+    const xRow = coordinateMap[positionable.x] || {};
+    xRow[positionable.y] = positionable;
+    coordinateMap[positionable.x] = xRow;
   });
+
+  const fieldRenderables = new Array<Renderable<HTMLCanvasElement>>()
+    .concat(trees)
+    .concat(walls);
 
   const initialGameState: GameState = {
     player,
     camera,
     otherPlayer,
-    trees,
     coordinateMap,
+    fieldRenderables,
   };
 
-  const { debugArea } = renderGameSpace([player, otherPlayer], trees);
+  const renderables = new Array<Renderable<HTMLCanvasElement>>()
+    .concat([player, otherPlayer])
+    .concat(trees)
+    .concat(walls);
+
+  const { debugArea } = renderGameSpace(renderables);
 
   directionForFrame$
     .pipe(
@@ -80,10 +113,11 @@ function index() {
         const xRow = gameState.coordinateMap[x + xMod] || {};
         return !xRow[y + yMod];
       }),
-      map((params) => updatePlayerDirection(...params)),
-      map((params) => updateCoordinateMap(...params))
+      map((params) => updateCoordinateMap(...params)),
+      map((params) => updatePlayerCoordinates(...params)),
+      map((params) => updatePlayerDirection(...params))
     )
-    .subscribe((gameState) => {
+    .subscribe(([_, gameState]) => {
       gameState$.next(gameState);
     });
 
@@ -99,8 +133,13 @@ function index() {
   frameWithGameState$.subscribe(([_, gameState]) => {
     renderPlayer(gameState.player, gameState.camera);
     renderPlayer(gameState.otherPlayer, gameState.camera);
-    gameState.trees.forEach((tree) => {
-      renderTree(tree, gameState.camera);
+    gameState.fieldRenderables.forEach((fieldRenderable) => {
+      if (isTree(fieldRenderable)) {
+        renderTree(fieldRenderable, gameState.camera);
+      }
+      if (isWall(fieldRenderable)) {
+        renderWall(fieldRenderable, gameState.camera);
+      }
     });
   });
 
@@ -126,6 +165,9 @@ function index() {
     otherPlayer.debug.color = "blue";
     trees.forEach((tree) => {
       tree.debug.color = "white";
+    });
+    walls.forEach((wall) => {
+      wall.debug.color = "yellow";
     });
   }
   // END: debugger config

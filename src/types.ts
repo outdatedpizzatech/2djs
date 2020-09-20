@@ -1,7 +1,3 @@
-export interface Typeable {
-  objectType: string;
-}
-
 export interface Positionable {
   x: number;
   y: number;

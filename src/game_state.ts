@@ -1,9 +1,7 @@
-import { Player } from "./player";
+import { Player } from "./models/player";
 import { Camera } from "./camera";
-import { Tree } from "./tree";
-import { Direction } from "./direction";
-import { Positionable } from "./types";
-import { getModsFromDirection } from "./direction";
+import { Direction, getModsFromDirection } from "./direction";
+import { Positionable, Renderable } from "./types";
 
 export interface CoordinateMap {
   [key: number]:
@@ -17,14 +15,14 @@ export interface GameState {
   player: Player;
   otherPlayer: Player;
   camera: Camera;
-  trees: Tree[];
+  fieldRenderables: Renderable<HTMLCanvasElement>[];
   coordinateMap: CoordinateMap;
 }
 
 export const updateCoordinateMap = (
   direction: Direction,
   gameState: GameState
-) => {
+): [Direction, GameState] => {
   const { coordinateMap, player } = gameState;
   const { x, y } = player;
 
@@ -38,11 +36,7 @@ export const updateCoordinateMap = (
   delete xRowRemove[y];
   coordinateMap[x] = xRowRemove;
 
-  player.x = x + xMod;
-  player.y = y + yMod;
-
   gameState.coordinateMap = coordinateMap;
-  gameState.player = player;
 
-  return gameState;
+  return [direction, gameState];
 };

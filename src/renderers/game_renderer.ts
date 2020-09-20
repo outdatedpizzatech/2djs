@@ -1,15 +1,13 @@
-import { Player } from "../player";
 import { GRID_INTERVAL } from "../common";
-import { Tree } from "../tree";
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
+import { Renderable } from "../types";
 
 interface RenderFixture {
   debugArea: CanvasRenderingContext2D;
 }
 
 export function renderGameSpace(
-  players: Player[],
-  trees: Tree[]
+  renderables: Renderable<HTMLCanvasElement>[]
 ): RenderFixture {
   const body = document.getElementsByTagName("body")[0];
   body.style.backgroundColor = "black";
@@ -38,12 +36,8 @@ export function renderGameSpace(
     }
   }
 
-  players.forEach((player) => {
-    gameArea.appendChild(player.view);
-  });
-
-  trees.forEach((tree) => {
-    gameArea.appendChild(tree.view);
+  renderables.forEach((renderable) => {
+    gameArea.appendChild(renderable.view);
   });
 
   const debugCanvas = document.createElement("canvas");

@@ -1,7 +1,7 @@
 import { GRID_INTERVAL } from "../common";
 import { Camera } from "../camera";
 import SpriteSheet from "../assets/tree_spritesheet.png";
-import { Tree } from "../tree";
+import { Tree } from "../models/tree";
 
 export const renderTree = (targetTree: Tree, camera: Camera) => {
   const ctx = targetTree.view.getContext("2d") as CanvasRenderingContext2D;

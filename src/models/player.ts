@@ -1,14 +1,14 @@
-import { GRID_INTERVAL } from "./common";
-import { Positionable, Renderable, Typeable } from "./types";
-import { Debuggable } from "./debug";
-import { Direction } from "./direction";
-import { addView } from "./renderers/canvas_renderer";
+import { GRID_INTERVAL } from "../common";
+import { Positionable, Renderable } from "../types";
+import { Debuggable } from "../debug";
+import { Direction } from "../direction";
+import { addView } from "../renderers/canvas_renderer";
 
 export interface Player
-  extends Typeable,
-    Positionable,
+  extends Positionable,
     Debuggable,
     Renderable<HTMLCanvasElement> {
+  objectType: "Player";
   movementDirection: Direction;
   facingDirection: Direction;
   animationIndex: number;

@@ -1,6 +1,6 @@
 import { GameState } from "../game_state";
 import { GRID_INTERVAL } from "../common";
-import { getAnimationFrames, nextAnimationFrame } from "../player";
+import { getAnimationFrames, nextAnimationFrame } from "../models/player";
 import { Direction, getModsFromDirection } from "../direction";
 
 export const updatePlayerDirection = (
@@ -9,6 +9,18 @@ export const updatePlayerDirection = (
 ): [Direction, GameState] => {
   gameState.player.facingDirection = direction;
   gameState.player.movementDirection = direction;
+
+  return [direction, gameState];
+};
+
+export const updatePlayerCoordinates = (
+  direction: Direction,
+  gameState: GameState
+): [Direction, GameState] => {
+  const [xMod, yMod] = getModsFromDirection(direction);
+
+  gameState.player.x += xMod;
+  gameState.player.y += yMod;
 
   return [direction, gameState];
 };

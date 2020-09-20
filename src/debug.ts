@@ -1,5 +1,5 @@
 import { GRID_INTERVAL } from "./common";
-import { CAMERA_WIDTH, CAMERA_HEIGHT } from "./camera";
+import { CAMERA_HEIGHT, CAMERA_WIDTH } from "./camera";
 
 export interface Debuggable {
   debug: {

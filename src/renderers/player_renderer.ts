@@ -1,7 +1,11 @@
 import { Camera } from "../camera";
 import { GRID_INTERVAL } from "../common";
 import SpriteSheet from "../assets/player_spritesheet.png";
-import { getAnimationFrames, nextAnimationFrame, Player } from "../player";
+import {
+  getAnimationFrames,
+  nextAnimationFrame,
+  Player,
+} from "../models/player";
 import { Direction } from "../direction";
 
 export const renderPlayer = (targetPlayer: Player, camera: Camera) => {
