@@ -1,7 +1,18 @@
-import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
+import {
+  filter,
+  map,
+  pairwise,
+  throttleTime,
+  withLatestFrom,
+} from "rxjs/operators";
 import { cameraFactory } from "./camera";
 import { Player, playerFactory } from "./models/player";
-import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
+import {
+  directionForFrame$,
+  frame$,
+  frameWithGameState$,
+  gameState$,
+} from "./signals";
 import { CoordinateMap, GameState, updateCoordinateMap } from "./game_state";
 import {
   updatePlayerAnimation,
@@ -36,7 +47,7 @@ function index() {
     y: 0,
   });
 
-  const treeCoordinates = [];
+  const treeCoordinates = [[6, 5]];
 
   const wallCoordinates = [
     [0, 5],
@@ -45,12 +56,40 @@ function index() {
     [3, 5],
     [4, 5],
     [5, 5],
-    [10, 5],
     [11, 5],
     [12, 5],
     [13, 5],
     [14, 5],
     [15, 5],
+    [16, 5],
+    [0, 4],
+    [0, 3],
+    [0, 2],
+    [0, 1],
+    [0, 0],
+    [0, -1],
+    [-1, -1],
+    [-2, -1],
+    [-3, -1],
+    [-4, -1],
+    [-5, -1],
+    [-6, -1],
+    [-7, -1],
+    [-7, -2],
+    [-7, -3],
+    [-7, -4],
+    [-7, -5],
+    [-7, -6],
+    [-7, -7],
+    [-7, -8],
+    [-7, -9],
+    [-7, -10],
+    [-7, -11],
+    [-7, -12],
+    [-7, -13],
+    [-7, -14],
+    [-7, -15],
+    [-7, -16],
   ];
 
   const trees = treeCoordinates.map((treeCoordinate) =>
