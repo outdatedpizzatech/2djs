@@ -22,13 +22,13 @@ import { renderWall } from "./renderers/wall_renderer";
 
 function index() {
   const player: Player = playerFactory({
-    x: 0,
-    y: 0,
+    x: 8,
+    y: 10,
   });
 
   const otherPlayer: Player = playerFactory({
-    x: 12,
-    y: 4,
+    x: 9,
+    y: -5,
   });
 
   const camera = cameraFactory({
@@ -36,21 +36,21 @@ function index() {
     y: 0,
   });
 
-  const treeCoordinates = [
-    [1, 1],
-    [20, 12],
-    [40, 4],
-    [2, 40],
-    [-13, -16],
-    [-90, 40],
-    [3, 10],
-    [14, 5],
-  ];
+  const treeCoordinates = [];
 
   const wallCoordinates = [
     [0, 5],
-    [20, 0],
-    [20, 1],
+    [1, 5],
+    [2, 5],
+    [3, 5],
+    [4, 5],
+    [5, 5],
+    [10, 5],
+    [11, 5],
+    [12, 5],
+    [13, 5],
+    [14, 5],
+    [15, 5],
   ];
 
   const trees = treeCoordinates.map((treeCoordinate) =>
