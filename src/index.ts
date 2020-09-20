@@ -1,17 +1,21 @@
-import { filter, map, withLatestFrom } from "rxjs/operators";
+import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { cameraFactory } from "./camera";
-import { Player, playerFactory, renderPlayer } from "./player";
+import { Player, playerFactory } from "./player";
 import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
-import { GameState } from "./game_state";
+import { CoordinateMap, GameState, updateCoordinateMap } from "./game_state";
 import {
   updatePlayerAnimation,
   updatePlayerDirection,
   updatePlayerMovement,
-} from "./reducers/player";
-import { updateCameraPosition } from "./reducers/camera";
-import { renderGameSpace } from "./game_renderer";
-import { renderTree, treeFactory } from "./tree";
+} from "./reducers/player_reducer";
+import { updateCameraPosition } from "./reducers/camera_reducer";
+import { renderGameSpace } from "./renderers/game_renderer";
+import { treeFactory } from "./tree";
 import { renderGridLines } from "./debug";
+import { Positionable } from "./types";
+import { getModsFromDirection } from "./direction";
+import { renderPlayer } from "./renderers/player_renderer";
+import { renderTree } from "./renderers/tree_renderer";
 
 function index() {
   const player: Player = playerFactory({
@@ -44,11 +48,22 @@ function index() {
     treeFactory({ x: treeCoordinate[0], y: treeCoordinate[1] })
   );
 
+  const players: Positionable[] = [player, otherPlayer];
+  const coordinateMap: CoordinateMap = {};
+  const occupants: Positionable[] = players.concat(trees);
+
+  occupants.forEach((occupant) => {
+    const xRow = coordinateMap[occupant.x] || {};
+    xRow[occupant.y] = occupant;
+    coordinateMap[occupant.x] = xRow;
+  });
+
   const initialGameState: GameState = {
     player,
     camera,
     otherPlayer,
     trees,
+    coordinateMap,
   };
 
   const { debugArea } = renderGameSpace([player, otherPlayer], trees);
@@ -57,9 +72,16 @@ function index() {
     .pipe(
       withLatestFrom(gameState$),
       filter(([_, gameState]) => !gameState.player.movementDirection),
-      map(([direction, gameState]) =>
-        updatePlayerDirection(direction, gameState)
-      )
+      filter(([direction, gameState]) => {
+        const { x, y } = player;
+
+        const [xMod, yMod] = getModsFromDirection(direction);
+
+        const xRow = gameState.coordinateMap[x + xMod] || {};
+        return !xRow[y + yMod];
+      }),
+      map((params) => updatePlayerDirection(...params)),
+      map((params) => updateCoordinateMap(...params))
     )
     .subscribe((gameState) => {
       gameState$.next(gameState);
@@ -84,8 +106,9 @@ function index() {
 
   frameWithGameState$
     .pipe(
-      filter(([_, gameState]) => !!gameState.player.movementDirection),
-      map(([_, gameState]) => updatePlayerMovement(gameState))
+      map(([_, gameState]) => gameState),
+      filter((gameState) => !!gameState.player.movementDirection),
+      map(updatePlayerMovement)
     )
     .subscribe((gameState) => {
       gameState$.next(gameState);
@@ -94,8 +117,10 @@ function index() {
   // START: debugger config
   // START: debugger config
   if (process.env.DEBUG) {
-    frameWithGameState$.subscribe(([_, gameState]) => {
-      renderGridLines(debugArea);
+    renderGridLines(debugArea);
+
+    gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
+      console.log("gameState: ", gameState);
     });
     player.debug.color = "red";
     otherPlayer.debug.color = "blue";

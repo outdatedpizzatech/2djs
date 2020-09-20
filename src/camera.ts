@@ -1,11 +1,11 @@
-import { CAMERA_HEIGHT, CAMERA_WIDTH, GRID_INTERVAL } from "./common";
+import { GRID_INTERVAL } from "./common";
+import { Positionable } from "./types";
 
-export interface Camera {
-  x: number;
-  y: number;
-  worldX: number;
-  worldY: number;
-  offset: () => { x: number; y: number };
+export const CAMERA_WIDTH = 1152;
+export const CAMERA_HEIGHT = 648;
+
+export interface Camera extends Positionable {
+  offset: () => { worldX: number; worldY: number };
 }
 
 export const cameraFactory = (attributes: Partial<Camera>): Camera => {
@@ -16,8 +16,8 @@ export const cameraFactory = (attributes: Partial<Camera>): Camera => {
     worldY: (attributes.y || 0) * GRID_INTERVAL,
     offset: function () {
       return {
-        x: CAMERA_WIDTH / 2 - this.worldX,
-        y: CAMERA_HEIGHT / 2 - this.worldY,
+        worldX: CAMERA_WIDTH / 2 - this.worldX,
+        worldY: CAMERA_HEIGHT / 2 - this.worldY,
       };
     },
   };

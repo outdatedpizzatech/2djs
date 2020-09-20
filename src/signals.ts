@@ -1,8 +1,9 @@
 import { fromEvent, interval, merge, Subject } from "rxjs";
-import { Direction, FRAMERATE } from "./common";
+import { FRAMERATE } from "./common";
 import { filter, map, scan, withLatestFrom } from "rxjs/operators";
 import { getDirectionFromKeyMap, KeyMap } from "./input";
 import { GameState } from "./game_state";
+import { Direction } from "./direction";
 
 // primitives
 const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");

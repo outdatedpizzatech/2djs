@@ -1,4 +1,4 @@
-import { Direction } from "./common";
+import { Direction } from "./direction";
 
 export interface KeyMap {
   [key: string]: boolean;
