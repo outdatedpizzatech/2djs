@@ -1,7 +1,7 @@
 import { Player } from "./models/player";
 import { Camera } from "./camera";
 import { Direction, getModsFromDirection } from "./direction";
-import { Positionable, Renderable } from "./types";
+import { Positionable } from "./types";
 
 export interface CoordinateMap {
   [key: number]:
@@ -15,7 +15,7 @@ export interface GameState {
   player: Player;
   otherPlayer: Player;
   camera: Camera;
-  fieldRenderables: Renderable<HTMLCanvasElement>[];
+  fieldRenderables: any[];
   coordinateMap: CoordinateMap;
 }
 

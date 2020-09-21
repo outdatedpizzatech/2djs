@@ -4,7 +4,3 @@ export interface Positionable {
   worldX: number;
   worldY: number;
 }
-
-export interface Renderable<T> {
-  view: T;
-}

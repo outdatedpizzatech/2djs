@@ -1,15 +1,15 @@
-import { GRID_INTERVAL } from "../common";
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
-import { Renderable } from "../types";
 
 interface RenderFixture {
-  debugArea: CanvasRenderingContext2D;
   visibleCanvas: HTMLCanvasElement;
+  bufferCanvas: HTMLCanvasElement;
+  gameArea: HTMLDivElement;
+  debug?: {
+    gridlines: HTMLInputElement;
+  };
 }
 
-export function renderGameSpace(
-  renderables: Renderable<HTMLCanvasElement>[]
-): RenderFixture {
+export function renderGameSpace(): RenderFixture {
   const body = document.getElementsByTagName("body")[0];
   body.style.backgroundColor = "black";
   const gameArea = document.createElement("div");
@@ -24,30 +24,41 @@ export function renderGameSpace(
   visibleCanvas.style.zIndex = "1";
   visibleCanvas.style.position = "absolute";
   gameArea.appendChild(visibleCanvas);
-  const ctx = visibleCanvas.getContext("2d") as CanvasRenderingContext2D;
+
+  const bufferCanvas = document.createElement("canvas");
+  bufferCanvas.width = CAMERA_WIDTH;
+  bufferCanvas.height = CAMERA_HEIGHT;
+  const ctx = bufferCanvas.getContext("2d") as CanvasRenderingContext2D;
   ctx.fillStyle = "green";
   ctx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
 
-  const offlineGameArea = document.createElement("div");
-  offlineGameArea.style.display = `none`;
-  offlineGameArea.style.width = `${CAMERA_WIDTH}px`;
-  offlineGameArea.style.height = `${CAMERA_HEIGHT}px`;
-  offlineGameArea.style.marginLeft = "auto";
-  offlineGameArea.style.marginRight = "auto";
-
-  renderables.forEach((renderable) => {
-    offlineGameArea.appendChild(renderable.view);
-  });
-
-  const debugCanvas = document.createElement("canvas");
-  debugCanvas.width = CAMERA_WIDTH;
-  debugCanvas.height = CAMERA_HEIGHT;
-  debugCanvas.style.zIndex = "10000";
-  debugCanvas.style.position = "absolute";
-  gameArea.appendChild(debugCanvas);
-
-  return {
-    debugArea: debugCanvas.getContext("2d") as CanvasRenderingContext2D,
+  const exportable: RenderFixture = {
+    bufferCanvas,
     visibleCanvas,
+    gameArea,
   };
+
+  if (process.env.DEBUG) {
+    const debugArea = document.createElement("div");
+    debugArea.style.width = `${CAMERA_WIDTH}px`;
+    debugArea.style.height = `100px`;
+    debugArea.style.marginTop = `10px`;
+    debugArea.style.marginLeft = "auto";
+    debugArea.style.marginRight = "auto";
+    debugArea.style.background = "gray";
+    body.appendChild(debugArea);
+
+    const gridLinesSpan = document.createElement("span");
+    const gridLinesInput = document.createElement("input");
+    gridLinesInput.type = "checkbox";
+    gridLinesSpan.innerText = "Show Gridlines";
+    debugArea.appendChild(gridLinesSpan);
+    gridLinesSpan.prepend(gridLinesInput);
+
+    exportable.debug = {
+      gridlines: gridLinesInput,
+    };
+  }
+
+  return exportable;
 }

@@ -1,13 +1,15 @@
 import { GRID_INTERVAL } from "../common";
 import { Camera } from "../camera";
-import SpriteSheet from "../assets/tree_spritesheet.png";
 import { Tree } from "../models/tree";
+import sprites from "../sprite_collections/tree_sprite_collection";
 
-export const renderTree = (targetTree: Tree, camera: Camera) => {
-  const ctx = targetTree.view.getContext("2d") as CanvasRenderingContext2D;
-
+export const renderTree = (
+  targetTree: Tree,
+  camera: Camera,
+  ctx: CanvasRenderingContext2D
+) => {
   const { worldX, worldY } = camera.offset();
-  ctx.clearRect(0, 0, targetTree.view.width, targetTree.view.height);
+
   if (targetTree.debug.color) {
     ctx.fillStyle = targetTree.debug.color;
     ctx.fillRect(
@@ -18,8 +20,9 @@ export const renderTree = (targetTree: Tree, camera: Camera) => {
     );
   }
 
-  const img = new Image();
-  img.src = SpriteSheet;
-
-  ctx.drawImage(img, targetTree.worldX + worldX, targetTree.worldY + worldY);
+  ctx.drawImage(
+    sprites[0],
+    targetTree.worldX + worldX,
+    targetTree.worldY + worldY
+  );
 };

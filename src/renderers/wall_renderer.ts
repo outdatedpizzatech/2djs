@@ -1,16 +1,16 @@
 import { GRID_INTERVAL } from "../common";
 import { Camera } from "../camera";
-import SpriteSheet from "../assets/wall_spritesheet.png";
 import { Wall } from "../models/wall";
+import sprites from "../sprite_collections/wall_sprite_collection";
 
-export const renderWall = (targetWall: Wall, camera: Camera) => {
-  const { worldX, worldY, view, debug } = targetWall;
+export const renderWall = (
+  targetWall: Wall,
+  camera: Camera,
+  ctx: CanvasRenderingContext2D
+) => {
+  const { worldX, worldY, debug } = targetWall;
   const { worldX: cameraX, worldY: cameraY } = camera.offset();
 
-  const ctx = view.getContext("2d") as CanvasRenderingContext2D;
-  ctx.restore();
-
-  ctx.clearRect(0, 0, view.width, view.height);
   if (debug.color) {
     ctx.fillStyle = debug.color;
     ctx.fillRect(
@@ -23,12 +23,5 @@ export const renderWall = (targetWall: Wall, camera: Camera) => {
 
   ctx.save();
 
-  ctx.beginPath();
-  ctx.rect(worldX + cameraX, worldY + cameraY, GRID_INTERVAL, GRID_INTERVAL);
-  ctx.clip();
-
-  const img = new Image();
-  img.src = SpriteSheet;
-
-  ctx.drawImage(img, worldX + cameraX, worldY + cameraY);
+  ctx.drawImage(sprites[0], worldX + cameraX, worldY + cameraY);
 };

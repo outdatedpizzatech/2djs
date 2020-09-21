@@ -1,13 +1,9 @@
 import { GRID_INTERVAL } from "../common";
-import { Positionable, Renderable } from "../types";
+import { Positionable } from "../types";
 import { Debuggable } from "../debug";
 import { Direction } from "../direction";
-import { addView } from "../renderers/canvas_renderer";
 
-export interface Player
-  extends Positionable,
-    Debuggable,
-    Renderable<HTMLCanvasElement> {
+export interface Player extends Positionable, Debuggable {
   objectType: "Player";
   movementDirection: Direction;
   facingDirection: Direction;
@@ -19,8 +15,6 @@ export interface Player
 }
 
 export const playerFactory = (attributes: Partial<Player>): Player => {
-  const view = addView();
-
   return {
     objectType: "Player",
     x: attributes.x || 0,
@@ -31,7 +25,6 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     worldY: (attributes.y || 0) * GRID_INTERVAL,
     movementSpeed: attributes.movementSpeed || 1,
     animationIndex: 0,
-    view,
     debug: {
       color: attributes.debug?.color,
     },

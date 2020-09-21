@@ -1,28 +1,26 @@
 import { Camera } from "../camera";
 import { GRID_INTERVAL } from "../common";
-import SpriteSheet from "../assets/player_spritesheet.png";
 import {
   getAnimationFrames,
   nextAnimationFrame,
   Player,
 } from "../models/player";
 import { Direction } from "../direction";
+import sprites from "../sprite_collections/player_sprite_collection";
 
-export const renderPlayer = (targetPlayer: Player, camera: Camera) => {
+export const renderPlayer = (
+  targetPlayer: Player,
+  camera: Camera,
+  ctx: CanvasRenderingContext2D
+) => {
   const {
-    view,
     worldX,
     worldY,
     debug,
     animationIndex,
     facingDirection,
   } = targetPlayer;
-  const ctx = view.getContext("2d") as CanvasRenderingContext2D;
-  ctx.restore();
-
   const { worldX: cameraX, worldY: cameraY } = camera.offset();
-
-  ctx.clearRect(0, 0, view.width, view.height);
 
   if (debug.color) {
     ctx.fillStyle = debug.color;
@@ -33,8 +31,6 @@ export const renderPlayer = (targetPlayer: Player, camera: Camera) => {
       GRID_INTERVAL
     );
   }
-
-  ctx.save();
 
   const currentAnimation = getAnimationFrames(targetPlayer);
   const newAnimationIndex = nextAnimationFrame(
@@ -47,18 +43,7 @@ export const renderPlayer = (targetPlayer: Player, camera: Camera) => {
     newAnimationIndex
   );
 
-  ctx.beginPath();
-  ctx.rect(worldX + cameraX, worldY + cameraY, GRID_INTERVAL, GRID_INTERVAL);
-  ctx.clip();
-
-  const img = new Image();
-  img.src = SpriteSheet;
-
-  ctx.drawImage(
-    img,
-    worldX + cameraX - frameIndex * GRID_INTERVAL,
-    worldY + cameraY
-  );
+  ctx.drawImage(sprites[frameIndex], worldX + cameraX, worldY + cameraY);
 };
 
 function _getSpriteFrame(

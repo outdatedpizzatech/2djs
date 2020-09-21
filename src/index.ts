@@ -2,17 +2,13 @@ import {
   filter,
   map,
   pairwise,
+  take,
   throttleTime,
   withLatestFrom,
 } from "rxjs/operators";
-import { cameraFactory } from "./camera";
+import { CAMERA_HEIGHT, CAMERA_WIDTH, cameraFactory } from "./camera";
 import { Player, playerFactory } from "./models/player";
-import {
-  directionForFrame$,
-  frame$,
-  frameWithGameState$,
-  gameState$,
-} from "./signals";
+import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
 import { CoordinateMap, GameState, updateCoordinateMap } from "./game_state";
 import {
   updatePlayerAnimation,
@@ -24,17 +20,24 @@ import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
 import { isTree, treeFactory } from "./models/tree";
 import { renderGridLines } from "./debug";
-import { Positionable, Renderable } from "./types";
+import { Positionable } from "./types";
 import { getModsFromDirection } from "./direction";
 import { renderPlayer } from "./renderers/player_renderer";
 import { renderTree } from "./renderers/tree_renderer";
 import { isWall, wallFactory } from "./models/wall";
 import { renderWall } from "./renderers/wall_renderer";
+import { GRID_INTERVAL } from "./common";
+import { debug } from "webpack";
+import { addView } from "./renderers/canvas_renderer";
+import { fromEvent } from "rxjs";
 
 function index() {
+  const buffer = addView();
+  const bufferCtx = buffer.getContext("2d") as CanvasRenderingContext2D;
+
   const player: Player = playerFactory({
-    x: 8,
-    y: 10,
+    x: -20,
+    y: -20,
   });
 
   const otherPlayer: Player = playerFactory({
@@ -47,7 +50,14 @@ function index() {
     y: 0,
   });
 
-  const treeCoordinates = [[6, 5]];
+  const treeCoordinates = [];
+  for (let i = 0; i < 80; i++) {
+    if (i != 40) {
+      for (let a = 0; a < 50; a++) {
+        treeCoordinates.push([i, a]);
+      }
+    }
+  }
 
   const wallCoordinates = [
     [0, 5],
@@ -121,9 +131,7 @@ function index() {
     coordinateMap[positionable.x] = xRow;
   });
 
-  const fieldRenderables = new Array<Renderable<HTMLCanvasElement>>()
-    .concat(trees)
-    .concat(walls);
+  const fieldRenderables = new Array<any>().concat(trees).concat(walls);
 
   const initialGameState: GameState = {
     player,
@@ -133,12 +141,9 @@ function index() {
     fieldRenderables,
   };
 
-  const renderables = new Array<Renderable<HTMLCanvasElement>>()
-    .concat([player, otherPlayer])
-    .concat(trees)
-    .concat(walls);
+  const { visibleCanvas, gameArea, debug } = renderGameSpace();
 
-  const { debugArea, visibleCanvas } = renderGameSpace(renderables);
+  const visibleCtx = visibleCanvas.getContext("2d") as CanvasRenderingContext2D;
 
   directionForFrame$
     .pipe(
@@ -170,25 +175,23 @@ function index() {
     });
 
   frameWithGameState$.subscribe(([_, gameState]) => {
-    renderPlayer(gameState.player, gameState.camera);
-    renderPlayer(gameState.otherPlayer, gameState.camera);
+    bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
+
+    renderPlayer(gameState.player, gameState.camera, bufferCtx);
+    renderPlayer(gameState.otherPlayer, gameState.camera, bufferCtx);
     gameState.fieldRenderables.forEach((fieldRenderable) => {
       if (isTree(fieldRenderable)) {
-        renderTree(fieldRenderable, gameState.camera);
+        renderTree(fieldRenderable, gameState.camera, bufferCtx);
       }
       if (isWall(fieldRenderable)) {
-        renderWall(fieldRenderable, gameState.camera);
+        renderWall(fieldRenderable, gameState.camera, bufferCtx);
       }
     });
 
-    const ctx = visibleCanvas.getContext("2d") as CanvasRenderingContext2D;
-    ctx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
-    ctx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
-    ctx.drawImage(gameState.player.view, 0, 0);
-    ctx.drawImage(gameState.otherPlayer.view, 0, 0);
-    gameState.fieldRenderables.forEach((fieldRenderable) => {
-      ctx.drawImage(fieldRenderable.view, 0, 0);
-    });
+    visibleCtx.fillStyle = "green";
+    visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
+    visibleCtx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
+    visibleCtx.drawImage(buffer, 0, 0);
   });
 
   frameWithGameState$
@@ -204,7 +207,27 @@ function index() {
   // START: debugger config
   // START: debugger config
   if (process.env.DEBUG) {
-    renderGridLines(debugArea);
+    const $gridlineValue = fromEvent<InputEvent>(
+      debug?.gridlines as HTMLInputElement,
+      "change"
+    ).pipe(map((e) => (e?.target as HTMLInputElement).checked));
+
+    const gridCanvas = document.createElement("canvas");
+    gridCanvas.width = CAMERA_WIDTH;
+    gridCanvas.height = CAMERA_HEIGHT;
+    gridCanvas.style.zIndex = "10000";
+    gridCanvas.style.position = "absolute";
+    gameArea.appendChild(gridCanvas);
+
+    const gridCtx = gridCanvas.getContext("2d") as CanvasRenderingContext2D;
+
+    $gridlineValue.subscribe((checked) => {
+      if (checked) {
+        renderGridLines(gridCtx);
+      } else {
+        gridCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+      }
+    });
 
     gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
       console.log("gameState: ", gameState);

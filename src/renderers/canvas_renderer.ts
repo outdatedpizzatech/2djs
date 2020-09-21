@@ -9,3 +9,13 @@ export const addView = () => {
 
   return canvas;
 };
+
+export const convertImportsToImages = (
+  imageNames: string[]
+): HTMLImageElement[] => {
+  return imageNames.map((imageName) => {
+    const image = new Image();
+    image.src = imageName;
+    return image;
+  });
+};
