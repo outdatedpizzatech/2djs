@@ -2,7 +2,13 @@ import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { CAMERA_HEIGHT, CAMERA_WIDTH, cameraFactory } from "./camera";
 import { Player, playerFactory } from "./models/player";
 import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
-import { CoordinateMap, GameState, updateCoordinateMap } from "./game_state";
+import {
+  addToCoordinateMap,
+  CoordinateMap,
+  GameState,
+  getFromCoordinateMap,
+  updateCoordinateMap,
+} from "./game_state";
 import {
   updatePlayerAnimation,
   updatePlayerCoordinates,
@@ -106,14 +112,14 @@ function index() {
     .concat(trees)
     .concat(walls);
 
-  const coordinateMap: CoordinateMap = positionables.reduce(
+  const coordinateMap: CoordinateMap<Positionable> = positionables.reduce(
     (acc, positionable) => {
       const xRow = acc[positionable.x] || {};
       xRow[positionable.y] = positionable;
       acc[positionable.x] = xRow;
       return acc;
     },
-    {} as CoordinateMap
+    {} as CoordinateMap<Positionable>
   );
 
   positionables.forEach((positionable) => {
@@ -142,11 +148,13 @@ function index() {
       filter(([_, gameState]) => !gameState.player.movementDirection),
       filter(([direction, gameState]) => {
         const { x, y } = player;
-
         const [xMod, yMod] = getModsFromDirection(direction);
 
-        const xRow = gameState.coordinateMap[x + xMod] || {};
-        return !xRow[y + yMod];
+        return !getFromCoordinateMap(
+          x + xMod,
+          y + yMod,
+          gameState.coordinateMap
+        );
       }),
       map((params) => updateCoordinateMap(...params)),
       map((params) => updatePlayerCoordinates(...params)),
@@ -176,16 +184,52 @@ function index() {
       renderPlayer(otherPlayer, camera, bufferCtx);
     }
 
-    fieldRenderables.forEach((renderable) => {
+    let renderedMap = {} as CoordinateMap<boolean>;
+    let doNotRenderMap = {} as CoordinateMap<boolean>;
+
+    for (let i = 0; i < fieldRenderables.length; i++) {
+      const renderable = fieldRenderables[i];
+      const { x, y } = renderable;
+
       if (camera.withinLens(renderable)) {
         if (isTree(renderable)) {
-          renderTree(renderable, camera, bufferCtx);
+          if (!getFromCoordinateMap(x, y, doNotRenderMap)) {
+            let neighborCount = 0;
+            let canContinue = true;
+
+            while (canContinue) {
+              const neighborXIndex = x + 1 + neighborCount;
+              const neighbor = getFromCoordinateMap(
+                neighborXIndex,
+                y,
+                gameState.coordinateMap
+              );
+              if (
+                neighbor &&
+                isTree(neighbor) &&
+                !getFromCoordinateMap(neighborXIndex, y, renderedMap)
+              ) {
+                doNotRenderMap = addToCoordinateMap(
+                  neighborXIndex,
+                  y,
+                  doNotRenderMap,
+                  true
+                );
+                neighborCount++;
+              } else {
+                canContinue = false;
+              }
+            }
+
+            renderTree(renderable, camera, bufferCtx, neighborCount + 1);
+            renderedMap = addToCoordinateMap(x, y, renderedMap, true);
+          }
         }
         if (isWall(renderable)) {
           renderWall(renderable, camera, bufferCtx);
         }
       }
-    });
+    }
 
     visibleCtx.fillStyle = "green";
     visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);

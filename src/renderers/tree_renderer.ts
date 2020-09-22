@@ -6,7 +6,8 @@ import sprites from "../sprite_collections/tree_sprite_collection";
 export const renderTree = (
   targetTree: Tree,
   camera: Camera,
-  ctx: CanvasRenderingContext2D
+  ctx: CanvasRenderingContext2D,
+  xCount: number
 ) => {
   const { worldX, worldY } = camera.project(targetTree);
 
@@ -15,5 +16,13 @@ export const renderTree = (
     ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 
-  ctx.drawImage(sprites[0], worldX, worldY);
+  if (xCount > 1) {
+    const pattern = ctx.createPattern(sprites[0], "repeat") as CanvasPattern;
+    ctx.fillStyle = pattern;
+    ctx.translate(worldX, worldY);
+    ctx.fillRect(0, 0, GRID_INTERVAL * xCount, GRID_INTERVAL);
+    ctx.translate(-worldX, -worldY);
+  } else {
+    ctx.drawImage(sprites[0], worldX, worldY);
+  }
 };
