@@ -13,23 +13,12 @@ export const renderPlayer = (
   camera: Camera,
   ctx: CanvasRenderingContext2D
 ) => {
-  const {
-    worldX,
-    worldY,
-    debug,
-    animationIndex,
-    facingDirection,
-  } = targetPlayer;
-  const { worldX: cameraX, worldY: cameraY } = camera.offset();
+  const { debug, animationIndex, facingDirection } = targetPlayer;
+  const { worldX, worldY } = camera.project(targetPlayer);
 
   if (debug.color) {
     ctx.fillStyle = debug.color;
-    ctx.fillRect(
-      worldX + cameraX,
-      worldY + cameraY,
-      GRID_INTERVAL,
-      GRID_INTERVAL
-    );
+    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 
   const currentAnimation = getAnimationFrames(targetPlayer);
@@ -43,7 +32,7 @@ export const renderPlayer = (
     newAnimationIndex
   );
 
-  ctx.drawImage(sprites[frameIndex], worldX + cameraX, worldY + cameraY);
+  ctx.drawImage(sprites[frameIndex], worldX, worldY);
 };
 
 function _getSpriteFrame(

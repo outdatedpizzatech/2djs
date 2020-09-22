@@ -8,20 +8,15 @@ export const renderWall = (
   camera: Camera,
   ctx: CanvasRenderingContext2D
 ) => {
-  const { worldX, worldY, debug } = targetWall;
-  const { worldX: cameraX, worldY: cameraY } = camera.offset();
+  const { debug } = targetWall;
+  const { worldX, worldY } = camera.project(targetWall);
 
   if (debug.color) {
     ctx.fillStyle = debug.color;
-    ctx.fillRect(
-      worldX + cameraX,
-      worldY + cameraY,
-      GRID_INTERVAL,
-      GRID_INTERVAL
-    );
+    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 
   ctx.save();
 
-  ctx.drawImage(sprites[0], worldX + cameraX, worldY + cameraY);
+  ctx.drawImage(sprites[0], worldX, worldY);
 };

@@ -14,6 +14,10 @@ export interface Player extends Positionable, Debuggable {
   };
 }
 
+export const isPlayer = (unknownObject: any): unknownObject is Player => {
+  return (unknownObject as Player).objectType === "Player";
+};
+
 export const playerFactory = (attributes: Partial<Player>): Player => {
   return {
     objectType: "Player",

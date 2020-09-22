@@ -8,21 +8,12 @@ export const renderTree = (
   camera: Camera,
   ctx: CanvasRenderingContext2D
 ) => {
-  const { worldX, worldY } = camera.offset();
+  const { worldX, worldY } = camera.project(targetTree);
 
   if (targetTree.debug.color) {
     ctx.fillStyle = targetTree.debug.color;
-    ctx.fillRect(
-      targetTree.worldX + worldX,
-      targetTree.worldY + worldY,
-      GRID_INTERVAL,
-      GRID_INTERVAL
-    );
+    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 
-  ctx.drawImage(
-    sprites[0],
-    targetTree.worldX + worldX,
-    targetTree.worldY + worldY
-  );
+  ctx.drawImage(sprites[0], worldX, worldY);
 };

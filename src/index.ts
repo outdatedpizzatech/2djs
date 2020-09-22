@@ -1,11 +1,4 @@
-import {
-  filter,
-  map,
-  pairwise,
-  take,
-  throttleTime,
-  withLatestFrom,
-} from "rxjs/operators";
+import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { CAMERA_HEIGHT, CAMERA_WIDTH, cameraFactory } from "./camera";
 import { Player, playerFactory } from "./models/player";
 import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
@@ -26,8 +19,6 @@ import { renderPlayer } from "./renderers/player_renderer";
 import { renderTree } from "./renderers/tree_renderer";
 import { isWall, wallFactory } from "./models/wall";
 import { renderWall } from "./renderers/wall_renderer";
-import { GRID_INTERVAL } from "./common";
-import { debug } from "webpack";
 import { addView } from "./renderers/canvas_renderer";
 import { fromEvent } from "rxjs";
 
@@ -177,14 +168,22 @@ function index() {
   frameWithGameState$.subscribe(([_, gameState]) => {
     bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
 
-    renderPlayer(gameState.player, gameState.camera, bufferCtx);
-    renderPlayer(gameState.otherPlayer, gameState.camera, bufferCtx);
-    gameState.fieldRenderables.forEach((fieldRenderable) => {
-      if (isTree(fieldRenderable)) {
-        renderTree(fieldRenderable, gameState.camera, bufferCtx);
-      }
-      if (isWall(fieldRenderable)) {
-        renderWall(fieldRenderable, gameState.camera, bufferCtx);
+    const { player, otherPlayer, camera, fieldRenderables } = gameState;
+
+    renderPlayer(player, camera, bufferCtx);
+
+    if (camera.withinLens(otherPlayer)) {
+      renderPlayer(otherPlayer, camera, bufferCtx);
+    }
+
+    fieldRenderables.forEach((renderable) => {
+      if (camera.withinLens(renderable)) {
+        if (isTree(renderable)) {
+          renderTree(renderable, camera, bufferCtx);
+        }
+        if (isWall(renderable)) {
+          renderWall(renderable, camera, bufferCtx);
+        }
       }
     });
 
