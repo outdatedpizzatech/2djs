@@ -2,13 +2,7 @@ import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { CAMERA_HEIGHT, CAMERA_WIDTH, cameraFactory } from "./camera";
 import { Player, playerFactory } from "./models/player";
 import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
-import {
-  addToCoordinateMap,
-  CoordinateMap,
-  GameState,
-  getFromCoordinateMap,
-  updateCoordinateMap,
-} from "./game_state";
+import { GameState, updateCoordinateMap } from "./game_state";
 import {
   updatePlayerAnimation,
   updatePlayerCoordinates,
@@ -17,16 +11,15 @@ import {
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
-import { isTree, treeFactory } from "./models/tree";
+import { treeFactory } from "./models/tree";
 import { renderGridLines } from "./debug";
 import { Positionable } from "./types";
 import { getModsFromDirection } from "./direction";
-import { renderPlayer } from "./renderers/player_renderer";
-import { renderTree } from "./renderers/tree_renderer";
-import { isWall, wallFactory } from "./models/wall";
-import { renderWall } from "./renderers/wall_renderer";
+import { wallFactory } from "./models/wall";
 import { addView } from "./renderers/canvas_renderer";
 import { fromEvent } from "rxjs";
+import { renderFieldRenderables } from "./render_pipeline";
+import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
 
 function index() {
   const buffer = addView();
@@ -176,60 +169,7 @@ function index() {
   frameWithGameState$.subscribe(([_, gameState]) => {
     bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
 
-    const { player, otherPlayer, camera, fieldRenderables } = gameState;
-
-    renderPlayer(player, camera, bufferCtx);
-
-    if (camera.withinLens(otherPlayer)) {
-      renderPlayer(otherPlayer, camera, bufferCtx);
-    }
-
-    let renderedMap = {} as CoordinateMap<boolean>;
-    let doNotRenderMap = {} as CoordinateMap<boolean>;
-
-    for (let i = 0; i < fieldRenderables.length; i++) {
-      const renderable = fieldRenderables[i];
-      const { x, y } = renderable;
-
-      if (camera.withinLens(renderable)) {
-        if (isTree(renderable)) {
-          if (!getFromCoordinateMap(x, y, doNotRenderMap)) {
-            let neighborCount = 0;
-            let canContinue = true;
-
-            while (canContinue) {
-              const neighborXIndex = x + 1 + neighborCount;
-              const neighbor = getFromCoordinateMap(
-                neighborXIndex,
-                y,
-                gameState.coordinateMap
-              );
-              if (
-                neighbor &&
-                isTree(neighbor) &&
-                !getFromCoordinateMap(neighborXIndex, y, renderedMap)
-              ) {
-                doNotRenderMap = addToCoordinateMap(
-                  neighborXIndex,
-                  y,
-                  doNotRenderMap,
-                  true
-                );
-                neighborCount++;
-              } else {
-                canContinue = false;
-              }
-            }
-
-            renderTree(renderable, camera, bufferCtx, neighborCount + 1);
-            renderedMap = addToCoordinateMap(x, y, renderedMap, true);
-          }
-        }
-        if (isWall(renderable)) {
-          renderWall(renderable, camera, bufferCtx);
-        }
-      }
-    }
+    renderFieldRenderables(bufferCtx, gameState);
 
     visibleCtx.fillStyle = "green";
     visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
