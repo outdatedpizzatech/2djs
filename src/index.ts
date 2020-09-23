@@ -1,10 +1,14 @@
 import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { CAMERA_HEIGHT, CAMERA_WIDTH, cameraFactory } from "./camera";
 import { Player, playerFactory } from "./models/player";
-import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
+import {
+  directionForFrame$,
+  frame$,
+  frameWithGameState$,
+  gameState$,
+} from "./signals";
 import { GameState, updateCoordinateMap } from "./game_state";
 import {
-  updatePlayerAnimation,
   updatePlayerCoordinates,
   updatePlayerDirection,
   updatePlayerMovement,
@@ -158,10 +162,7 @@ function index() {
     });
 
   frameWithGameState$
-    .pipe(
-      map(([_, gameState]) => updateCameraPosition(gameState)),
-      map(updatePlayerAnimation)
-    )
+    .pipe(map(([_, gameState]) => updateCameraPosition(gameState)))
     .subscribe((gameState) => {
       gameState$.next(gameState);
     });
@@ -179,9 +180,10 @@ function index() {
 
   frameWithGameState$
     .pipe(
-      map(([_, gameState]) => gameState),
-      filter((gameState) => !!gameState.player.movementDirection),
-      map(updatePlayerMovement)
+      filter(([_, gameState]) => !!gameState.player.movementDirection),
+      map(([deltaTime, gameState]) =>
+        updatePlayerMovement(deltaTime, gameState)
+      )
     )
     .subscribe((gameState) => {
       gameState$.next(gameState);
@@ -190,39 +192,56 @@ function index() {
   // START: debugger config
   // START: debugger config
   if (process.env.DEBUG) {
-    const $gridlineValue = fromEvent<InputEvent>(
-      debug?.gridlines as HTMLInputElement,
-      "change"
-    ).pipe(map((e) => (e?.target as HTMLInputElement).checked));
+    if (debug) {
+      frame$.pipe(throttleTime(1000)).subscribe((deltaTime) => {
+        debug.fps.innerText = `FPS: ${Math.round(1 / deltaTime)}`;
+      });
 
-    const gridCanvas = document.createElement("canvas");
-    gridCanvas.width = CAMERA_WIDTH;
-    gridCanvas.height = CAMERA_HEIGHT;
-    gridCanvas.style.zIndex = "10000";
-    gridCanvas.style.position = "absolute";
-    gameArea.appendChild(gridCanvas);
+      frameWithGameState$.subscribe(([_, gameState]) => {
+        const { camera, player, otherPlayer, fieldRenderables } = gameState;
+        const positionables = new Array<Positionable>()
+          .concat([player, otherPlayer])
+          .concat(fieldRenderables);
+        const objectsInView = positionables.filter((positionable) =>
+          camera.withinLens(positionable)
+        );
+        debug.objects.innerText = `Rendered Objects: ${objectsInView.length}`;
+      });
 
-    const gridCtx = gridCanvas.getContext("2d") as CanvasRenderingContext2D;
+      const $gridlineValue = fromEvent<InputEvent>(
+        debug?.gridlines as HTMLInputElement,
+        "change"
+      ).pipe(map((e) => (e?.target as HTMLInputElement).checked));
 
-    $gridlineValue.subscribe((checked) => {
-      if (checked) {
-        renderGridLines(gridCtx);
-      } else {
-        gridCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-      }
-    });
+      const gridCanvas = document.createElement("canvas");
+      gridCanvas.width = CAMERA_WIDTH;
+      gridCanvas.height = CAMERA_HEIGHT;
+      gridCanvas.style.zIndex = "10000";
+      gridCanvas.style.position = "absolute";
+      gameArea.appendChild(gridCanvas);
 
-    gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
-      console.log("gameState: ", gameState);
-    });
-    player.debug.color = "red";
-    otherPlayer.debug.color = "blue";
-    trees.forEach((tree) => {
-      tree.debug.color = "white";
-    });
-    walls.forEach((wall) => {
-      wall.debug.color = "yellow";
-    });
+      const gridCtx = gridCanvas.getContext("2d") as CanvasRenderingContext2D;
+
+      $gridlineValue.subscribe((checked) => {
+        if (checked) {
+          renderGridLines(gridCtx);
+        } else {
+          gridCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+        }
+      });
+
+      gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
+        console.log("gameState: ", gameState);
+      });
+      player.debug.color = "red";
+      otherPlayer.debug.color = "blue";
+      trees.forEach((tree) => {
+        tree.debug.color = "white";
+      });
+      walls.forEach((wall) => {
+        wall.debug.color = "yellow";
+      });
+    }
   }
   // END: debugger config
   // END: debugger config

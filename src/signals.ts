@@ -1,6 +1,13 @@
-import { fromEvent, interval, merge, Subject } from "rxjs";
+import {
+  animationFrame,
+  animationFrameScheduler,
+  fromEvent,
+  interval,
+  merge,
+  Subject,
+} from "rxjs";
 import { FRAMERATE } from "./common";
-import { filter, map, scan, withLatestFrom } from "rxjs/operators";
+import { filter, map, pairwise, scan, withLatestFrom } from "rxjs/operators";
 import { getDirectionFromKeyMap, KeyMap } from "./input";
 import { GameState } from "./game_state";
 import { Direction } from "./direction";
@@ -10,7 +17,12 @@ const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
 const keyup$ = fromEvent<KeyboardEvent>(document, "keyup");
 
 // exportable
-export const frame$ = interval(1000 / FRAMERATE);
+export const frame$ = interval(1000 / FRAMERATE, animationFrameScheduler).pipe(
+  map(() => performance.now()),
+  pairwise(),
+  map(([previous, current]) => (current - previous) / 1000)
+);
+
 export const gameState$: Subject<GameState> = new Subject();
 
 // composites

@@ -1,6 +1,5 @@
 import { GameState } from "../game_state";
 import { GRID_INTERVAL } from "../common";
-import { getAnimationFrames, nextAnimationFrame } from "../models/player";
 import { Direction, getModsFromDirection } from "../direction";
 
 export const updatePlayerDirection = (
@@ -25,43 +24,41 @@ export const updatePlayerCoordinates = (
   return [direction, gameState];
 };
 
-export const updatePlayerMovement = (gameState: GameState): GameState => {
+export const updatePlayerMovement = (
+  deltaTime: number,
+  gameState: GameState
+): GameState => {
   const { movementDirection, movementSpeed } = gameState.player;
 
   const [xMod, yMod] = getModsFromDirection(movementDirection);
 
-  gameState.player.worldX += xMod * movementSpeed;
-  gameState.player.worldY += yMod * movementSpeed;
+  const destinationX = gameState.player.x * GRID_INTERVAL;
+  const destinationY = gameState.player.y * GRID_INTERVAL;
+
+  gameState.player.worldX += xMod * movementSpeed * deltaTime;
+  gameState.player.worldY += yMod * movementSpeed * deltaTime;
 
   let haltMovement = false;
 
   const { worldX, worldY } = gameState.player;
 
-  if (
-    movementDirection == Direction.UP ||
-    movementDirection == Direction.DOWN
-  ) {
-    haltMovement = worldY % GRID_INTERVAL === 0;
-  } else if (
-    movementDirection == Direction.RIGHT ||
-    movementDirection == Direction.LEFT
-  ) {
-    haltMovement = worldX % GRID_INTERVAL === 0;
+  if (movementDirection == Direction.UP) {
+    haltMovement = worldY < destinationY;
+    if (haltMovement) gameState.player.worldY = destinationY;
+  } else if (movementDirection == Direction.DOWN) {
+    haltMovement = worldY > destinationY;
+    if (haltMovement) gameState.player.worldY = destinationY;
+  } else if (movementDirection == Direction.LEFT) {
+    haltMovement = worldX < destinationX;
+    if (haltMovement) gameState.player.worldX = destinationX;
+  } else if (movementDirection == Direction.RIGHT) {
+    haltMovement = worldX > destinationX;
+    if (haltMovement) gameState.player.worldX = destinationX;
   }
 
   if (haltMovement) {
     gameState.player.movementDirection = Direction.NONE;
   }
-
-  return gameState;
-};
-
-export const updatePlayerAnimation = (gameState: GameState): GameState => {
-  const currentAnimation = getAnimationFrames(gameState.player);
-  gameState.player.animationIndex = nextAnimationFrame(
-    currentAnimation,
-    gameState.player.animationIndex
-  );
 
   return gameState;
 };

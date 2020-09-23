@@ -2,8 +2,9 @@ import { Camera } from "../camera";
 import { GRID_INTERVAL } from "../common";
 import {
   getAnimationFrames,
-  nextAnimationFrame,
   Player,
+  walkingDownAnimation,
+  walkingUpAnimation,
 } from "../models/player";
 import { Direction } from "../direction";
 import sprites from "../sprite_collections/player_sprite_collection";
@@ -13,7 +14,7 @@ export const renderPlayer = (
   camera: Camera,
   ctx: CanvasRenderingContext2D
 ) => {
-  const { debug, animationIndex, facingDirection } = targetPlayer;
+  const { debug, facingDirection } = targetPlayer;
   const { worldX, worldY } = camera.project(targetPlayer);
 
   if (debug.color) {
@@ -22,14 +23,11 @@ export const renderPlayer = (
   }
 
   const currentAnimation = getAnimationFrames(targetPlayer);
-  const newAnimationIndex = nextAnimationFrame(
-    currentAnimation,
-    animationIndex
-  );
+  const animationIndex = _getAnimationIndex(currentAnimation, targetPlayer);
   const frameIndex = _getSpriteFrame(
     facingDirection,
     currentAnimation,
-    newAnimationIndex
+    animationIndex
   );
 
   ctx.drawImage(sprites[frameIndex], worldX, worldY);
@@ -55,4 +53,28 @@ function _getSpriteFrame(
   }
 
   return 0;
+}
+
+function _getAnimationIndex(
+  currentAnimation: number[] | null,
+  player: Player
+): number {
+  let animationIndex = -1;
+
+  if (currentAnimation) {
+    const frameLength = GRID_INTERVAL / currentAnimation.length;
+
+    const progressMetric =
+      currentAnimation == walkingDownAnimation ||
+      currentAnimation == walkingUpAnimation
+        ? player.worldY
+        : player.worldX;
+
+    const progress = Math.abs(progressMetric) % GRID_INTERVAL;
+    const normalizedProgress = progress / frameLength;
+    animationIndex = Math.ceil(normalizedProgress) - 1;
+    if (animationIndex < 0) animationIndex = 0;
+  }
+
+  return animationIndex;
 }

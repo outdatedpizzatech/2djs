@@ -7,7 +7,6 @@ export interface Player extends Positionable, Debuggable {
   objectType: "Player";
   movementDirection: Direction;
   facingDirection: Direction;
-  animationIndex: number;
   movementSpeed: number;
   debug: {
     color?: string;
@@ -18,6 +17,11 @@ export const isPlayer = (unknownObject: any): unknownObject is Player => {
   return (unknownObject as Player).objectType === "Player";
 };
 
+export const walkingDownAnimation = [0, 1];
+export const walkingUpAnimation = [2, 3];
+export const walkingLeftAnimation = [4, 5];
+export const walkingRightAnimation = [6, 7];
+
 export const playerFactory = (attributes: Partial<Player>): Player => {
   return {
     objectType: "Player",
@@ -27,46 +31,15 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     facingDirection: attributes.facingDirection || Direction.DOWN,
     worldX: (attributes.x || 0) * GRID_INTERVAL,
     worldY: (attributes.y || 0) * GRID_INTERVAL,
-    movementSpeed: attributes.movementSpeed || 1,
-    animationIndex: 0,
+    movementSpeed: attributes.movementSpeed || 80,
     debug: {
       color: attributes.debug?.color,
     },
   };
 };
 
-export const nextAnimationFrame = (
-  currentAnimation: number[] | null,
-  animationIndex: number
-): number => {
-  if (currentAnimation) {
-    const nextAnimationIndex = animationIndex + 1;
-
-    if (currentAnimation.length <= nextAnimationIndex) {
-      return 0;
-    } else {
-      return nextAnimationIndex;
-    }
-  } else {
-    return -1;
-  }
-};
-
 export const getAnimationFrames = (targetPlayer: Player): number[] | null => {
-  const walkingDownAnimation = [0, 1];
-  const walkingUpAnimation = [2, 3];
-  const walkingLeftAnimation = [4, 5];
-  const walkingRightAnimation = [6, 7];
-  const dilationBaseline = 6;
-
   const movementDirection = targetPlayer.movementDirection;
-
-  const dilate = (timeline: number[], count: number) => {
-    return timeline.reduce((accumulator, currentValue) => {
-      const stretched = new Array(count).fill(currentValue);
-      return accumulator.concat(stretched);
-    }, [] as number[]);
-  };
 
   if (movementDirection == Direction.NONE) {
     return null;
@@ -86,5 +59,5 @@ export const getAnimationFrames = (targetPlayer: Player): number[] | null => {
     animation = walkingDownAnimation;
   }
 
-  return dilate(animation, dilationBaseline / targetPlayer.movementSpeed);
+  return animation;
 };

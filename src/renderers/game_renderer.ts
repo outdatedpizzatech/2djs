@@ -6,6 +6,8 @@ interface RenderFixture {
   gameArea: HTMLDivElement;
   debug?: {
     gridlines: HTMLInputElement;
+    fps: HTMLDivElement;
+    objects: HTMLDivElement;
   };
 }
 
@@ -55,8 +57,20 @@ export function renderGameSpace(): RenderFixture {
     debugArea.appendChild(gridLinesSpan);
     gridLinesSpan.prepend(gridLinesInput);
 
+    const fpsDiv = document.createElement("div");
+    fpsDiv.style.background = "green";
+    fpsDiv.style.color = "white";
+    debugArea.appendChild(fpsDiv);
+
+    const objectsDiv = document.createElement("div");
+    objectsDiv.style.background = "blue";
+    objectsDiv.style.color = "white";
+    debugArea.appendChild(objectsDiv);
+
     exportable.debug = {
       gridlines: gridLinesInput,
+      fps: fpsDiv,
+      objects: objectsDiv,
     };
   }
 
