@@ -1,9 +1,9 @@
 import { GRID_INTERVAL } from "../common";
-import { Positionable } from "../types";
+import { Placeable } from "../types";
 import { Debuggable } from "../debug";
 import { Direction } from "../direction";
 
-export interface Player extends Positionable, Debuggable {
+export interface Player extends Placeable, Debuggable {
   objectType: "Player";
   movementDirection: Direction;
   facingDirection: Direction;
@@ -14,6 +14,7 @@ export interface Player extends Positionable, Debuggable {
 }
 
 export const isPlayer = (unknownObject: any): unknownObject is Player => {
+  if (!unknownObject) return false;
   return (unknownObject as Player).objectType === "Player";
 };
 
@@ -35,6 +36,7 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     debug: {
       color: attributes.debug?.color,
     },
+    passable: false,
   };
 };
 

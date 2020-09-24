@@ -15,28 +15,31 @@ import {
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
-import { treeFactory } from "./models/tree";
+import { Tree, treeFactory } from "./models/tree";
 import { renderGridLines } from "./debug";
-import { Positionable } from "./types";
+import { Placeable, Positionable } from "./types";
 import { getModsFromDirection } from "./direction";
-import { wallFactory } from "./models/wall";
+import { Wall, wallFactory } from "./models/wall";
 import { addView } from "./renderers/canvas_renderer";
 import { fromEvent } from "rxjs";
 import { renderFieldRenderables } from "./render_pipeline";
 import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
+import corneriaMap from "./maps/corneria.txt";
+import { Water, waterFactory } from "./models/water";
+import { Street, streetFactory } from "./models/street";
 
 function index() {
   const buffer = addView();
   const bufferCtx = buffer.getContext("2d") as CanvasRenderingContext2D;
 
   const player: Player = playerFactory({
-    x: -20,
-    y: -20,
+    x: 10,
+    y: 30,
   });
 
   const otherPlayer: Player = playerFactory({
-    x: 9,
-    y: -5,
+    x: 20,
+    y: 30,
   });
 
   const camera = cameraFactory({
@@ -44,94 +47,55 @@ function index() {
     y: 0,
   });
 
-  const treeCoordinates = [];
-  for (let i = 0; i < 80; i++) {
-    if (i != 40) {
-      for (let a = 0; a < 50; a++) {
-        treeCoordinates.push([i, a]);
+  let walls = new Array<Wall>();
+  let trees = new Array<Tree>();
+  let waters = new Array<Water>();
+  let streets = new Array<Street>();
+
+  (corneriaMap as string).split(/\n/).forEach((line, y) => {
+    line.split("").forEach((code, x) => {
+      if (code == "x") {
+        walls.push(wallFactory({ x, y }));
       }
-    }
-  }
+      if (code == "l") {
+        trees.push(treeFactory({ x, y }));
+      }
+      if (code == "o") {
+        waters.push(waterFactory({ x, y }));
+      }
+      if (code == "m") {
+        streets.push(streetFactory({ x, y }));
+      }
+    });
+  });
 
-  const wallCoordinates = [
-    [0, 5],
-    [1, 5],
-    [2, 5],
-    [3, 5],
-    [4, 5],
-    [5, 5],
-    [11, 5],
-    [12, 5],
-    [13, 5],
-    [14, 5],
-    [15, 5],
-    [16, 5],
-    [0, 4],
-    [0, 3],
-    [0, 2],
-    [0, 1],
-    [0, 0],
-    [0, -1],
-    [-1, -1],
-    [-2, -1],
-    [-3, -1],
-    [-4, -1],
-    [-5, -1],
-    [-6, -1],
-    [-7, -1],
-    [-7, -2],
-    [-7, -3],
-    [-7, -4],
-    [-7, -5],
-    [-7, -6],
-    [-7, -7],
-    [-7, -8],
-    [-7, -9],
-    [-7, -10],
-    [-7, -11],
-    [-7, -12],
-    [-7, -13],
-    [-7, -14],
-    [-7, -15],
-    [-7, -16],
-  ];
-
-  const trees = treeCoordinates.map((treeCoordinate) =>
-    treeFactory({ x: treeCoordinate[0], y: treeCoordinate[1] })
-  );
-
-  const walls = wallCoordinates.map((wallCoordinate) =>
-    wallFactory({ x: wallCoordinate[0], y: wallCoordinate[1] })
-  );
-
-  const positionables = new Array<Positionable>()
+  const positionables = new Array<Placeable>()
     .concat([player, otherPlayer])
     .concat(trees)
+    .concat(waters)
+    .concat(streets)
     .concat(walls);
 
-  const coordinateMap: CoordinateMap<Positionable> = positionables.reduce(
-    (acc, positionable) => {
+  const coordinateMap: CoordinateMap<Positionable> = positionables
+    .filter((positionable) => !positionable.passable)
+    .reduce((acc, positionable) => {
       const xRow = acc[positionable.x] || {};
       xRow[positionable.y] = positionable;
       acc[positionable.x] = xRow;
       return acc;
-    },
-    {} as CoordinateMap<Positionable>
-  );
+    }, {} as CoordinateMap<Positionable>);
 
-  positionables.forEach((positionable) => {
-    const xRow = coordinateMap[positionable.x] || {};
-    xRow[positionable.y] = positionable;
-    coordinateMap[positionable.x] = xRow;
-  });
-
-  const fieldRenderables = new Array<any>().concat(trees).concat(walls);
+  const fieldRenderables = new Array<any>()
+    .concat(trees)
+    .concat(walls)
+    .concat(streets)
+    .concat(waters);
 
   const initialGameState: GameState = {
     player,
     camera,
     otherPlayer,
-    coordinateMap,
+    collisionMap: coordinateMap,
     fieldRenderables,
   };
 
@@ -150,7 +114,7 @@ function index() {
         return !getFromCoordinateMap(
           x + xMod,
           y + yMod,
-          gameState.coordinateMap
+          gameState.collisionMap
         );
       }),
       map((params) => updateCoordinateMap(...params)),
@@ -240,6 +204,12 @@ function index() {
       });
       walls.forEach((wall) => {
         wall.debug.color = "yellow";
+      });
+      waters.forEach((water) => {
+        water.debug.color = "black";
+      });
+      streets.forEach((street) => {
+        street.debug.color = "#DDDDDD";
       });
     }
   }

@@ -2,18 +2,18 @@ import { GRID_INTERVAL } from "../common";
 import { Placeable } from "../types";
 import { Debuggable } from "../debug";
 
-export interface Tree extends Debuggable, Placeable {
-  objectType: "Tree";
+export interface Water extends Debuggable, Placeable {
+  objectType: "Water";
 }
 
-export const isTree = (unknownObject: any): unknownObject is Tree => {
+export const isWater = (unknownObject: any): unknownObject is Water => {
   if (!unknownObject) return false;
-  return (unknownObject as Tree).objectType === "Tree";
+  return (unknownObject as Water).objectType === "Water";
 };
 
-export const treeFactory = (attributes: Partial<Tree>): Tree => {
+export const waterFactory = (attributes: Partial<Water>): Water => {
   return {
-    objectType: "Tree",
+    objectType: "Water",
     x: attributes.x || 0,
     y: attributes.y || 0,
     worldX: (attributes.x || 0) * GRID_INTERVAL,

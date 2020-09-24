@@ -1,12 +1,13 @@
 import { GRID_INTERVAL } from "../common";
-import { Positionable } from "../types";
+import { Placeable } from "../types";
 import { Debuggable } from "../debug";
 
-export interface Wall extends Debuggable, Positionable {
+export interface Wall extends Debuggable, Placeable {
   objectType: "Wall";
 }
 
 export const isWall = (unknownObject: any): unknownObject is Wall => {
+  if (!unknownObject) return false;
   return (unknownObject as Wall).objectType === "Wall";
 };
 
@@ -20,5 +21,6 @@ export const wallFactory = (attributes: Partial<Wall>): Wall => {
     debug: {
       color: attributes.debug?.color,
     },
+    passable: false,
   };
 };

@@ -1,14 +1,17 @@
 import { GRID_INTERVAL } from "../common";
 import { Camera } from "../camera";
-import { Wall } from "../models/wall";
+import { isWall, Wall } from "../models/wall";
 import sprites from "../sprite_collections/wall_sprite_collection";
+import { CoordinateMap, getFromCoordinateMap } from "../coordinate_map";
+import { Positionable } from "../types";
 
 export const renderWall = (
   targetWall: Wall,
   camera: Camera,
-  ctx: CanvasRenderingContext2D
+  ctx: CanvasRenderingContext2D,
+  coordinateMap: CoordinateMap<Positionable>
 ) => {
-  const { debug } = targetWall;
+  const { debug, x, y } = targetWall;
   const { worldX, worldY } = camera.project(targetWall);
 
   if (debug.color) {
@@ -16,7 +19,9 @@ export const renderWall = (
     ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 
-  ctx.save();
-
-  ctx.drawImage(sprites[0], worldX, worldY);
+  const hasVerticalWallNeighbors =
+    isWall(getFromCoordinateMap(x, y + 1, coordinateMap)) ||
+    isWall(getFromCoordinateMap(x, y + 1, coordinateMap));
+  const spriteIndex = hasVerticalWallNeighbors ? 1 : 0;
+  ctx.drawImage(sprites[spriteIndex], worldX, worldY);
 };

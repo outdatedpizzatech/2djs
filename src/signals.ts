@@ -1,5 +1,4 @@
 import {
-  animationFrame,
   animationFrameScheduler,
   fromEvent,
   interval,

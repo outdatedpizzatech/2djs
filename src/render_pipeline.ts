@@ -10,6 +10,10 @@ import { renderTree } from "./renderers/tree_renderer";
 import { isWall } from "./models/wall";
 import { renderWall } from "./renderers/wall_renderer";
 import { GameState } from "./game_state";
+import { isWater } from "./models/water";
+import { renderWater } from "./renderers/water_renderer";
+import { isStreet } from "./models/street";
+import { renderStreet } from "./renderers/street_renderer";
 
 // renderWithPatterning
 // Determines the number of squares that could be covered by a single canvas pattern.
@@ -84,14 +88,8 @@ export const renderFieldRenderables = (
     otherPlayer,
     camera,
     fieldRenderables,
-    coordinateMap,
+    collisionMap,
   } = gameState;
-
-  renderPlayer(player, camera, bufferCtx);
-
-  if (camera.withinLens(otherPlayer)) {
-    renderPlayer(otherPlayer, camera, bufferCtx);
-  }
 
   let renderedMap = {} as CoordinateMap<boolean>;
   let doNotRenderMap = {} as CoordinateMap<boolean>;
@@ -103,7 +101,7 @@ export const renderFieldRenderables = (
       if (isTree(renderable)) {
         [doNotRenderMap, renderedMap] = renderWithPatterning(
           renderable,
-          coordinateMap,
+          collisionMap,
           doNotRenderMap,
           renderedMap,
           (count: number) => {
@@ -115,14 +113,42 @@ export const renderFieldRenderables = (
       if (isWall(renderable)) {
         renderWithoutPatterning(
           renderable,
-          coordinateMap,
+          collisionMap,
           doNotRenderMap,
           renderedMap,
           () => {
-            renderWall(renderable, camera, bufferCtx);
+            renderWall(renderable, camera, bufferCtx, collisionMap);
+          }
+        );
+      }
+      if (isWater(renderable)) {
+        renderWithoutPatterning(
+          renderable,
+          collisionMap,
+          doNotRenderMap,
+          renderedMap,
+          () => {
+            renderWater(renderable, camera, bufferCtx);
+          }
+        );
+      }
+      if (isStreet(renderable)) {
+        renderWithoutPatterning(
+          renderable,
+          collisionMap,
+          doNotRenderMap,
+          renderedMap,
+          () => {
+            renderStreet(renderable, camera, bufferCtx);
           }
         );
       }
     }
+  }
+
+  renderPlayer(player, camera, bufferCtx);
+
+  if (camera.withinLens(otherPlayer)) {
+    renderPlayer(otherPlayer, camera, bufferCtx);
   }
 };

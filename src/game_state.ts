@@ -13,14 +13,14 @@ export interface GameState {
   otherPlayer: Player;
   camera: Camera;
   fieldRenderables: any[];
-  coordinateMap: CoordinateMap<Positionable>;
+  collisionMap: CoordinateMap<Positionable>;
 }
 
 export const updateCoordinateMap = (
   direction: Direction,
   gameState: GameState
 ): [Direction, GameState] => {
-  const { coordinateMap, player } = gameState;
+  const { collisionMap, player } = gameState;
   const { x, y } = player;
 
   const [xMod, yMod] = getModsFromDirection(direction);
@@ -28,12 +28,12 @@ export const updateCoordinateMap = (
   let modifiedMap = addToCoordinateMap(
     x + xMod,
     y + yMod,
-    coordinateMap,
+    collisionMap,
     player
   );
   modifiedMap = removeFromCoordinateMap(x, y, modifiedMap);
 
-  gameState.coordinateMap = modifiedMap;
+  gameState.collisionMap = modifiedMap;
 
   return [direction, gameState];
 };

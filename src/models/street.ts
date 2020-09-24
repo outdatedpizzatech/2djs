@@ -2,18 +2,18 @@ import { GRID_INTERVAL } from "../common";
 import { Placeable } from "../types";
 import { Debuggable } from "../debug";
 
-export interface Tree extends Debuggable, Placeable {
-  objectType: "Tree";
+export interface Street extends Debuggable, Placeable {
+  objectType: "Street";
 }
 
-export const isTree = (unknownObject: any): unknownObject is Tree => {
+export const isStreet = (unknownObject: any): unknownObject is Street => {
   if (!unknownObject) return false;
-  return (unknownObject as Tree).objectType === "Tree";
+  return (unknownObject as Street).objectType === "Street";
 };
 
-export const treeFactory = (attributes: Partial<Tree>): Tree => {
+export const streetFactory = (attributes: Partial<Street>): Street => {
   return {
-    objectType: "Tree",
+    objectType: "Street",
     x: attributes.x || 0,
     y: attributes.y || 0,
     worldX: (attributes.x || 0) * GRID_INTERVAL,
@@ -21,6 +21,6 @@ export const treeFactory = (attributes: Partial<Tree>): Tree => {
     debug: {
       color: attributes.debug?.color,
     },
-    passable: false,
+    passable: true,
   };
 };
