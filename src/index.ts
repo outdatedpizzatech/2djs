@@ -1,6 +1,6 @@
 import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { CAMERA_HEIGHT, CAMERA_WIDTH, cameraFactory } from "./camera";
-import { Player, playerFactory } from "./models/player";
+import { isPlayer, Player, playerFactory } from "./models/player";
 import {
   directionForFrame$,
   frame$,
@@ -28,6 +28,8 @@ import corneriaMap from "./maps/corneria.txt";
 import { Water, waterFactory } from "./models/water";
 import { Street, streetFactory } from "./models/street";
 import { renderGround } from "./renderers/ground_renderer";
+import { HouseWall, houseWallFactory } from "./models/house_wall";
+import { HouseFloor, houseFloorFactory } from "./models/house_floor";
 
 function index() {
   const buffer = addView();
@@ -51,6 +53,8 @@ function index() {
   let walls = new Array<Wall>();
   let trees = new Array<Tree>();
   let waters = new Array<Water>();
+  let houseWalls = new Array<HouseWall>();
+  let houseFloors = new Array<HouseFloor>();
   let streets = new Array<Street>();
 
   (corneriaMap as string).split(/\n/).forEach((line, y) => {
@@ -67,6 +71,12 @@ function index() {
       if (code == "m") {
         streets.push(streetFactory({ x, y }));
       }
+      if (code == "u") {
+        houseWalls.push(houseWallFactory({ x, y }));
+      }
+      if (code == "r") {
+        houseFloors.push(houseFloorFactory({ x, y }));
+      }
     });
   });
 
@@ -75,6 +85,8 @@ function index() {
     .concat(trees)
     .concat(waters)
     .concat(streets)
+    .concat(houseWalls)
+    .concat(houseFloors)
     .concat(walls);
 
   const coordinateMap: CoordinateMap<Positionable> = positionables
@@ -86,11 +98,9 @@ function index() {
       return acc;
     }, {} as CoordinateMap<Positionable>);
 
-  const fieldRenderables = new Array<any>()
-    .concat(trees)
-    .concat(walls)
-    .concat(streets)
-    .concat(waters);
+  const fieldRenderables = positionables.filter(
+    (positionable) => !isPlayer(positionable)
+  );
 
   const initialGameState: GameState = {
     player,
@@ -211,6 +221,12 @@ function index() {
       });
       streets.forEach((street) => {
         street.debug.color = "#DDDDDD";
+      });
+      houseWalls.forEach((houseWall) => {
+        houseWall.debug.color = "#5D2F77";
+      });
+      houseFloors.forEach((houseFloor) => {
+        houseFloor.debug.color = "#33FF88";
       });
     }
   }

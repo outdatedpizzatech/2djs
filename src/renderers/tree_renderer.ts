@@ -17,8 +17,7 @@ export const renderTree = (
   }
 
   if (xCount > 1) {
-    const pattern = ctx.createPattern(sprites[0], "repeat") as CanvasPattern;
-    ctx.fillStyle = pattern;
+    ctx.fillStyle = ctx.createPattern(sprites[0], "repeat") as CanvasPattern;
     ctx.translate(worldX, worldY);
     ctx.fillRect(0, 0, GRID_INTERVAL * xCount, GRID_INTERVAL);
     ctx.translate(-worldX, -worldY);

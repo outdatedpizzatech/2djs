@@ -14,6 +14,10 @@ import { isWater } from "./models/water";
 import { renderWater } from "./renderers/water_renderer";
 import { isStreet } from "./models/street";
 import { renderStreet } from "./renderers/street_renderer";
+import { isHouseWall } from "./models/house_wall";
+import { renderHouseWall } from "./renderers/house_wall_renderer";
+import { isHouseFloor } from "./models/house_floor";
+import { renderHouseFloor } from "./renderers/house_floor_renderer";
 
 // renderWithPatterning
 // Determines the number of squares that could be covered by a single canvas pattern.
@@ -98,6 +102,28 @@ export const renderFieldRenderables = (
     const renderable = fieldRenderables[i];
 
     if (camera.withinLens(renderable)) {
+      if (isStreet(renderable)) {
+        renderWithoutPatterning(
+          renderable,
+          collisionMap,
+          doNotRenderMap,
+          renderedMap,
+          () => {
+            renderStreet(renderable, camera, bufferCtx);
+          }
+        );
+      }
+      if (isHouseFloor(renderable)) {
+        renderWithoutPatterning(
+          renderable,
+          collisionMap,
+          doNotRenderMap,
+          renderedMap,
+          () => {
+            renderHouseFloor(renderable, camera, bufferCtx);
+          }
+        );
+      }
       if (isTree(renderable)) {
         [doNotRenderMap, renderedMap] = renderWithPatterning(
           renderable,
@@ -111,7 +137,7 @@ export const renderFieldRenderables = (
         );
       }
       if (isWall(renderable)) {
-        renderWithoutPatterning(
+        [doNotRenderMap, renderedMap] = renderWithoutPatterning(
           renderable,
           collisionMap,
           doNotRenderMap,
@@ -119,6 +145,18 @@ export const renderFieldRenderables = (
           () => {
             renderWall(renderable, camera, bufferCtx, collisionMap);
           }
+        );
+      }
+      if (isHouseWall(renderable)) {
+        [doNotRenderMap, renderedMap] = renderWithPatterning(
+          renderable,
+          collisionMap,
+          doNotRenderMap,
+          renderedMap,
+          (count: number) => {
+            renderHouseWall(renderable, camera, bufferCtx, count);
+          },
+          isHouseWall
         );
       }
       if (isWater(renderable)) {
@@ -129,17 +167,6 @@ export const renderFieldRenderables = (
           renderedMap,
           () => {
             renderWater(renderable, camera, bufferCtx);
-          }
-        );
-      }
-      if (isStreet(renderable)) {
-        renderWithoutPatterning(
-          renderable,
-          collisionMap,
-          doNotRenderMap,
-          renderedMap,
-          () => {
-            renderStreet(renderable, camera, bufferCtx);
           }
         );
       }
