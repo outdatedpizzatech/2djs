@@ -14,12 +14,14 @@ interface RenderFixture {
 export function renderGameSpace(): RenderFixture {
   const body = document.getElementsByTagName("body")[0];
   body.style.backgroundColor = "black";
+
   const gameArea = document.createElement("div");
   gameArea.style.width = `${CAMERA_WIDTH}px`;
   gameArea.style.height = `${CAMERA_HEIGHT}px`;
   gameArea.style.marginLeft = "auto";
   gameArea.style.marginRight = "auto";
   body.appendChild(gameArea);
+
   const visibleCanvas = document.createElement("canvas");
   visibleCanvas.width = CAMERA_WIDTH;
   visibleCanvas.height = CAMERA_HEIGHT;
@@ -30,9 +32,6 @@ export function renderGameSpace(): RenderFixture {
   const bufferCanvas = document.createElement("canvas");
   bufferCanvas.width = CAMERA_WIDTH;
   bufferCanvas.height = CAMERA_HEIGHT;
-  const ctx = bufferCanvas.getContext("2d") as CanvasRenderingContext2D;
-  ctx.fillStyle = "green";
-  ctx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
 
   const exportable: RenderFixture = {
     bufferCanvas,

@@ -27,6 +27,7 @@ import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
 import corneriaMap from "./maps/corneria.txt";
 import { Water, waterFactory } from "./models/water";
 import { Street, streetFactory } from "./models/street";
+import { renderGround } from "./renderers/ground_renderer";
 
 function index() {
   const buffer = addView();
@@ -134,9 +135,9 @@ function index() {
   frameWithGameState$.subscribe(([_, gameState]) => {
     bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
 
+    renderGround(bufferCtx, camera);
     renderFieldRenderables(bufferCtx, gameState);
 
-    visibleCtx.fillStyle = "green";
     visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
     visibleCtx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
     visibleCtx.drawImage(buffer, 0, 0);
