@@ -1,5 +1,5 @@
 import { Placeable } from "../types";
-import { Debuggable } from "../debug";
+import { Debuggable } from "../debug/grid_lines";
 import { positionableFactory } from "./helpers/positionable_factory";
 
 export interface Tree extends Debuggable, Placeable {

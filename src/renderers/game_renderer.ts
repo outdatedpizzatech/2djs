@@ -4,11 +4,7 @@ interface RenderFixture {
   visibleCanvas: HTMLCanvasElement;
   bufferCanvas: HTMLCanvasElement;
   gameArea: HTMLDivElement;
-  debug?: {
-    gridlines: HTMLInputElement;
-    fps: HTMLDivElement;
-    objects: HTMLDivElement;
-  };
+  body: HTMLBodyElement;
 }
 
 export function renderGameSpace(): RenderFixture {
@@ -37,41 +33,8 @@ export function renderGameSpace(): RenderFixture {
     bufferCanvas,
     visibleCanvas,
     gameArea,
+    body,
   };
-
-  if (process.env.DEBUG) {
-    const debugArea = document.createElement("div");
-    debugArea.style.width = `${CAMERA_WIDTH}px`;
-    debugArea.style.height = `100px`;
-    debugArea.style.marginTop = `10px`;
-    debugArea.style.marginLeft = "auto";
-    debugArea.style.marginRight = "auto";
-    debugArea.style.background = "gray";
-    body.appendChild(debugArea);
-
-    const gridLinesSpan = document.createElement("span");
-    const gridLinesInput = document.createElement("input");
-    gridLinesInput.type = "checkbox";
-    gridLinesSpan.innerText = "Show Gridlines";
-    debugArea.appendChild(gridLinesSpan);
-    gridLinesSpan.prepend(gridLinesInput);
-
-    const fpsDiv = document.createElement("div");
-    fpsDiv.style.background = "green";
-    fpsDiv.style.color = "white";
-    debugArea.appendChild(fpsDiv);
-
-    const objectsDiv = document.createElement("div");
-    objectsDiv.style.background = "blue";
-    objectsDiv.style.color = "white";
-    debugArea.appendChild(objectsDiv);
-
-    exportable.debug = {
-      gridlines: gridLinesInput,
-      fps: fpsDiv,
-      objects: objectsDiv,
-    };
-  }
 
   return exportable;
 }

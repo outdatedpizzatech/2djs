@@ -1,12 +1,7 @@
-import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
-import { CAMERA_HEIGHT, CAMERA_WIDTH, cameraFactory } from "./camera";
+import { filter, map, withLatestFrom } from "rxjs/operators";
+import { cameraFactory } from "./camera";
 import { isPlayer, Player, playerFactory } from "./models/player";
-import {
-  directionForFrame$,
-  frame$,
-  frameWithGameState$,
-  gameState$,
-} from "./signals";
+import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
 import { GameState, updateCoordinateMap } from "./game_state";
 import {
   updatePlayerCoordinates,
@@ -16,12 +11,10 @@ import {
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
 import { Tree, treeFactory } from "./models/tree";
-import { renderGridLines } from "./debug";
 import { Placeable, Positionable } from "./types";
 import { getModsFromDirection } from "./direction";
 import { Wall, wallFactory } from "./models/wall";
 import { addView } from "./renderers/canvas_renderer";
-import { fromEvent } from "rxjs";
 import { renderFieldRenderables } from "./render_pipeline";
 import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
 import corneriaMap from "./maps/corneria.txt";
@@ -30,6 +23,7 @@ import { Street, streetFactory } from "./models/street";
 import { renderGround } from "./renderers/ground_renderer";
 import { HouseWall, houseWallFactory } from "./models/house_wall";
 import { HouseFloor, houseFloorFactory } from "./models/house_floor";
+import { loadDebugger, mountDebugArea } from "./debug/debugger";
 
 function index() {
   const buffer = addView();
@@ -110,7 +104,7 @@ function index() {
     fieldRenderables,
   };
 
-  const { visibleCanvas, gameArea, debug } = renderGameSpace();
+  const { visibleCanvas, gameArea, body } = renderGameSpace();
 
   const visibleCtx = visibleCanvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -164,74 +158,9 @@ function index() {
       gameState$.next(gameState);
     });
 
-  // START: debugger config
-  // START: debugger config
   if (process.env.DEBUG) {
-    if (debug) {
-      frame$.pipe(throttleTime(1000)).subscribe((deltaTime) => {
-        debug.fps.innerText = `FPS: ${Math.round(1 / deltaTime)}`;
-      });
-
-      frameWithGameState$.subscribe(([_, gameState]) => {
-        const { camera, player, otherPlayer, fieldRenderables } = gameState;
-        const positionables = new Array<Positionable>()
-          .concat([player, otherPlayer])
-          .concat(fieldRenderables);
-        const objectsInView = positionables.filter((positionable) =>
-          camera.withinLens(positionable)
-        );
-        debug.objects.innerText = `Rendered Objects: ${objectsInView.length}`;
-      });
-
-      const $gridlineValue = fromEvent<InputEvent>(
-        debug?.gridlines as HTMLInputElement,
-        "change"
-      ).pipe(map((e) => (e?.target as HTMLInputElement).checked));
-
-      const gridCanvas = document.createElement("canvas");
-      gridCanvas.width = CAMERA_WIDTH;
-      gridCanvas.height = CAMERA_HEIGHT;
-      gridCanvas.style.zIndex = "10000";
-      gridCanvas.style.position = "absolute";
-      gameArea.appendChild(gridCanvas);
-
-      const gridCtx = gridCanvas.getContext("2d") as CanvasRenderingContext2D;
-
-      $gridlineValue.subscribe((checked) => {
-        if (checked) {
-          renderGridLines(gridCtx);
-        } else {
-          gridCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-        }
-      });
-
-      gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
-        console.log("gameState: ", gameState);
-      });
-      player.debug.color = "red";
-      otherPlayer.debug.color = "blue";
-      trees.forEach((tree) => {
-        tree.debug.color = "white";
-      });
-      walls.forEach((wall) => {
-        wall.debug.color = "yellow";
-      });
-      waters.forEach((water) => {
-        water.debug.color = "black";
-      });
-      streets.forEach((street) => {
-        street.debug.color = "#DDDDDD";
-      });
-      houseWalls.forEach((houseWall) => {
-        houseWall.debug.color = "#5D2F77";
-      });
-      houseFloors.forEach((houseFloor) => {
-        houseFloor.debug.color = "#33FF88";
-      });
-    }
+    loadDebugger(body, gameArea, [player, otherPlayer], fieldRenderables);
   }
-  // END: debugger config
-  // END: debugger config
 
   gameState$.next(initialGameState);
 }
