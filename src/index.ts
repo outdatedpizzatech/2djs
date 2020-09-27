@@ -10,20 +10,14 @@ import {
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
-import { Tree, treeFactory } from "./models/tree";
 import { Placeable, Positionable } from "./types";
 import { getModsFromDirection } from "./direction";
-import { Wall, wallFactory } from "./models/wall";
 import { addView } from "./renderers/canvas_renderer";
 import { renderFieldRenderables } from "./render_pipeline";
 import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
-import corneriaMap from "./maps/corneria.txt";
-import { Water, waterFactory } from "./models/water";
-import { Street, streetFactory } from "./models/street";
 import { renderGround } from "./renderers/ground_renderer";
-import { HouseWall, houseWallFactory } from "./models/house_wall";
-import { HouseFloor, houseFloorFactory } from "./models/house_floor";
 import { loadDebugger } from "./debug/debugger";
+import { generateMap } from "./map_generator";
 
 function index() {
   const buffer = addView();
@@ -44,44 +38,11 @@ function index() {
     y: 0,
   });
 
-  let walls = new Array<Wall>();
-  let trees = new Array<Tree>();
-  let waters = new Array<Water>();
-  let houseWalls = new Array<HouseWall>();
-  let houseFloors = new Array<HouseFloor>();
-  let streets = new Array<Street>();
-
-  (corneriaMap as string).split(/\n/).forEach((line, y) => {
-    line.split("").forEach((code, x) => {
-      if (code == "x") {
-        walls.push(wallFactory({ x, y }));
-      }
-      if (code == "l") {
-        trees.push(treeFactory({ x, y }));
-      }
-      if (code == "o") {
-        waters.push(waterFactory({ x, y }));
-      }
-      if (code == "m") {
-        streets.push(streetFactory({ x, y }));
-      }
-      if (code == "u") {
-        houseWalls.push(houseWallFactory({ x, y }));
-      }
-      if (code == "r") {
-        houseFloors.push(houseFloorFactory({ x, y }));
-      }
-    });
-  });
+  const mapPlaceables = generateMap();
 
   const positionables = new Array<Placeable>()
     .concat([player, otherPlayer])
-    .concat(trees)
-    .concat(waters)
-    .concat(streets)
-    .concat(houseWalls)
-    .concat(houseFloors)
-    .concat(walls);
+    .concat(mapPlaceables);
 
   const coordinateMap: CoordinateMap<Positionable> = positionables
     .filter((positionable) => !positionable.passable)
