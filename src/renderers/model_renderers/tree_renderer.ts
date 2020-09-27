@@ -1,18 +1,18 @@
-import { GRID_INTERVAL } from "../common";
-import { Camera } from "../camera";
-import { Tree } from "../models/tree";
-import sprites from "../sprite_collections/tree_sprite_collection";
+import { GRID_INTERVAL } from "../../common";
+import { Camera } from "../../camera";
+import { Tree } from "../../models/tree";
+import sprites from "../../sprite_collections/tree_sprite_collection";
 
 export const renderTree = (
-  targetTree: Tree,
+  model: Tree,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
   xCount: number
 ) => {
-  const { worldX, worldY } = camera.project(targetTree);
+  const { worldX, worldY } = camera.project(model);
 
-  if (targetTree.debug.color) {
-    ctx.fillStyle = targetTree.debug.color;
+  if (model.debug.color) {
+    ctx.fillStyle = model.debug.color;
     ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 

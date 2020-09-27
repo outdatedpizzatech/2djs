@@ -23,7 +23,7 @@ import { Street, streetFactory } from "./models/street";
 import { renderGround } from "./renderers/ground_renderer";
 import { HouseWall, houseWallFactory } from "./models/house_wall";
 import { HouseFloor, houseFloorFactory } from "./models/house_floor";
-import { loadDebugger, mountDebugArea } from "./debug/debugger";
+import { loadDebugger } from "./debug/debugger";
 
 function index() {
   const buffer = addView();

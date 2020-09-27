@@ -1,29 +1,29 @@
-import { Camera } from "../camera";
-import { GRID_INTERVAL } from "../common";
+import { Camera } from "../../camera";
+import { GRID_INTERVAL } from "../../common";
 import {
   getAnimationFrames,
   Player,
   walkingDownAnimation,
   walkingUpAnimation,
-} from "../models/player";
-import { Direction } from "../direction";
-import sprites from "../sprite_collections/player_sprite_collection";
+} from "../../models/player";
+import { Direction } from "../../direction";
+import sprites from "../../sprite_collections/player_sprite_collection";
 
 export const renderPlayer = (
-  targetPlayer: Player,
+  model: Player,
   camera: Camera,
   ctx: CanvasRenderingContext2D
 ) => {
-  const { debug, facingDirection } = targetPlayer;
-  const { worldX, worldY } = camera.project(targetPlayer);
+  const { debug, facingDirection } = model;
+  const { worldX, worldY } = camera.project(model);
 
   if (debug.color) {
     ctx.fillStyle = debug.color;
     ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 
-  const currentAnimation = getAnimationFrames(targetPlayer);
-  const animationIndex = _getAnimationIndex(currentAnimation, targetPlayer);
+  const currentAnimation = getAnimationFrames(model);
+  const animationIndex = _getAnimationIndex(currentAnimation, model);
   const frameIndex = _getSpriteFrame(
     facingDirection,
     currentAnimation,
