@@ -1,8 +1,8 @@
-import { Layer, Placeable } from "../types";
+import { GameObject, Layer } from "../types";
 import { Debuggable } from "../debug/grid_lines";
 import { positionableFactory } from "./helpers/positionable_factory";
 
-export interface Tree extends Debuggable, Placeable {
+export interface Tree extends Debuggable, GameObject {
   objectType: "Tree";
 }
 
@@ -19,6 +19,7 @@ export const treeFactory = (attributes: Partial<Tree>): Tree => {
       color: attributes.debug?.color,
     },
     layer: Layer.INTERACTION,
+    groupId: attributes.groupId,
   };
 
   return { ...positionableProperties, ...particularProperties };

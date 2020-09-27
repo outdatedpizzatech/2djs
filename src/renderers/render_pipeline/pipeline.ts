@@ -1,6 +1,5 @@
 import { isTree } from "../../models/tree";
 import { CoordinateMap, LayerMaps, LayerMark } from "../../coordinate_map";
-import { Layerable, Placeable, Positionable } from "../../types";
 import { renderPlayer } from "../model_renderers/player_renderer";
 import { renderTree } from "../model_renderers/tree_renderer";
 import { isWall } from "../../models/wall";

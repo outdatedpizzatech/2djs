@@ -5,11 +5,11 @@ import { waterFactory } from "./models/water";
 import { streetFactory } from "./models/street";
 import { houseWallFactory } from "./models/house_wall";
 import { houseFloorFactory } from "./models/house_floor";
-import { Placeable } from "./types";
+import { GameObject } from "./types";
 import { roofFactory } from "./models/roof";
 
-export const generateMap = (): Placeable[] => {
-  const placeables = new Array<Placeable>();
+export const generateMap = (): GameObject[] => {
+  const placeables = new Array<GameObject>();
 
   (corneriaMap as string).split(/\n/).forEach((line, y) => {
     line.split("").forEach((code, x) => {
@@ -27,11 +27,11 @@ export const generateMap = (): Placeable[] => {
       }
       if (code == "u") {
         placeables.push(houseWallFactory({ x, y }));
-        placeables.push(roofFactory({ x, y }));
+        placeables.push(roofFactory({ x, y, groupId: 1 }));
       }
       if (code == "r") {
         placeables.push(houseFloorFactory({ x, y }));
-        placeables.push(roofFactory({ x, y }));
+        placeables.push(roofFactory({ x, y, groupId: 1 }));
       }
     });
   });

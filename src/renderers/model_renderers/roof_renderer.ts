@@ -1,7 +1,6 @@
 import { Camera } from "../../camera";
 import sprites from "../../sprite_collections/roof_sprite_collection";
 import { Roof } from "../../models/roof";
-import { renderModel } from "../helpers/render_model";
 import { GRID_INTERVAL } from "../../common";
 
 export const renderRoof = (

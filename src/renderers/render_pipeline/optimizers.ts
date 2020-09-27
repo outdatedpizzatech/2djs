@@ -13,7 +13,6 @@ import {
   LayerMark,
   LayerMarkKey,
 } from "../../coordinate_map";
-import { isRoof } from "../../models/roof";
 
 export function renderWithPatterning(
   renderable: Placeable,

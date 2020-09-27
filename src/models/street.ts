@@ -1,8 +1,8 @@
-import { Layer, Placeable } from "../types";
+import { GameObject, Layer } from "../types";
 import { Debuggable } from "../debug/grid_lines";
 import { positionableFactory } from "./helpers/positionable_factory";
 
-export interface Street extends Debuggable, Placeable {
+export interface Street extends Debuggable, GameObject {
   objectType: "Street";
 }
 
@@ -19,6 +19,7 @@ export const streetFactory = (attributes: Partial<Street>): Street => {
       color: attributes.debug?.color,
     },
     layer: Layer.GROUND,
+    groupId: attributes.groupId,
   };
 
   return { ...positionableProperties, ...particularProperties };

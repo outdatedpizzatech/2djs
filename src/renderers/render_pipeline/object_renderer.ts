@@ -52,14 +52,28 @@ export const renderAllObjects = (
     );
   });
 
+  const idsOverlappingPlayer: { [key: number]: boolean } = {};
+
   overheadRenderables.forEach((renderable) => {
-    [doNotRenderMap, renderedMap] = pipelineRender(
-      renderable,
-      camera,
-      layerMaps,
-      doNotRenderMap,
-      renderedMap,
-      bufferCtx
-    );
+    if (
+      renderable.groupId &&
+      renderable.x === player.x &&
+      renderable.y === player.y
+    ) {
+      idsOverlappingPlayer[renderable.groupId] = true;
+    }
+  });
+
+  overheadRenderables.forEach((renderable) => {
+    if (!renderable.groupId || !idsOverlappingPlayer[renderable.groupId]) {
+      [doNotRenderMap, renderedMap] = pipelineRender(
+        renderable,
+        camera,
+        layerMaps,
+        doNotRenderMap,
+        renderedMap,
+        bufferCtx
+      );
+    }
   });
 };

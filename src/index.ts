@@ -10,7 +10,7 @@ import {
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
-import { Layer, Placeable, Positionable } from "./types";
+import { Layer, Placeable } from "./types";
 import { getModsFromDirection } from "./direction";
 import { addView } from "./renderers/canvas_renderer";
 import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
