@@ -1,16 +1,13 @@
-import { GRID_INTERVAL } from "../common";
 import { Placeable } from "../types";
 import { Debuggable } from "../debug";
 import { Direction } from "../direction";
+import { positionableFactory } from "./helpers/positionable_factory";
 
 export interface Player extends Placeable, Debuggable {
   objectType: "Player";
   movementDirection: Direction;
   facingDirection: Direction;
   movementSpeed: number;
-  debug: {
-    color?: string;
-  };
 }
 
 export const isPlayer = (unknownObject: any): unknownObject is Player => {
@@ -24,20 +21,20 @@ export const walkingLeftAnimation = [4, 5];
 export const walkingRightAnimation = [6, 7];
 
 export const playerFactory = (attributes: Partial<Player>): Player => {
-  return {
-    objectType: "Player",
-    x: attributes.x || 0,
-    y: attributes.y || 0,
+  const positionableProperties = positionableFactory(attributes);
+
+  const particularProperties = {
+    objectType: "Player" as "Player",
     movementDirection: attributes.movementDirection || Direction.NONE,
     facingDirection: attributes.facingDirection || Direction.DOWN,
-    worldX: (attributes.x || 0) * GRID_INTERVAL,
-    worldY: (attributes.y || 0) * GRID_INTERVAL,
     movementSpeed: attributes.movementSpeed || 80,
     debug: {
       color: attributes.debug?.color,
     },
     passable: false,
   };
+
+  return { ...positionableProperties, ...particularProperties };
 };
 
 export const getAnimationFrames = (targetPlayer: Player): number[] | null => {

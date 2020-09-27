@@ -1,6 +1,6 @@
-import { GRID_INTERVAL } from "../common";
 import { Placeable } from "../types";
 import { Debuggable } from "../debug";
+import { positionableFactory } from "./helpers/positionable_factory";
 
 export interface Street extends Debuggable, Placeable {
   objectType: "Street";
@@ -12,15 +12,14 @@ export const isStreet = (unknownObject: any): unknownObject is Street => {
 };
 
 export const streetFactory = (attributes: Partial<Street>): Street => {
-  return {
-    objectType: "Street",
-    x: attributes.x || 0,
-    y: attributes.y || 0,
-    worldX: (attributes.x || 0) * GRID_INTERVAL,
-    worldY: (attributes.y || 0) * GRID_INTERVAL,
+  const positionableProperties = positionableFactory(attributes);
+  const particularProperties = {
+    objectType: "Street" as "Street",
     debug: {
       color: attributes.debug?.color,
     },
     passable: true,
   };
+
+  return { ...positionableProperties, ...particularProperties };
 };
