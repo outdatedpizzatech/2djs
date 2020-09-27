@@ -5,8 +5,9 @@ import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
 import { GameState, updateCoordinateMap } from "./game_state";
 import {
   updatePlayerCoordinates,
-  updatePlayerDirection,
+  updatePlayerFacingDirection,
   updatePlayerMovement,
+  updatePlayerMovementDirection,
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
@@ -137,7 +138,17 @@ function index() {
       }),
       map((params) => updateCoordinateMap(...params)),
       map((params) => updatePlayerCoordinates(...params)),
-      map((params) => updatePlayerDirection(...params))
+      map((params) => updatePlayerMovementDirection(...params))
+    )
+    .subscribe(([_, gameState]) => {
+      gameState$.next(gameState);
+    });
+
+  directionForFrame$
+    .pipe(
+      withLatestFrom(gameState$),
+      filter(([_, gameState]) => !gameState.player.moving),
+      map((params) => updatePlayerFacingDirection(...params))
     )
     .subscribe(([_, gameState]) => {
       gameState$.next(gameState);

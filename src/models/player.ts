@@ -6,6 +6,7 @@ import { positionableFactory } from "./helpers/positionable_factory";
 export interface Player extends Debuggable, GameObject {
   objectType: "Player";
   movementDirection: Direction;
+  moving: boolean;
   facingDirection: Direction;
   movementSpeed: number;
 }
@@ -33,6 +34,7 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     },
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
+    moving: false,
   };
 
   return { ...positionableProperties, ...particularProperties };

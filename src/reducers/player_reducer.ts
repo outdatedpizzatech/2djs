@@ -2,12 +2,20 @@ import { GameState } from "../game_state";
 import { GRID_INTERVAL } from "../common";
 import { Direction, getModsFromDirection } from "../direction";
 
-export const updatePlayerDirection = (
+export const updatePlayerMovementDirection = (
+  direction: Direction,
+  gameState: GameState
+): [Direction, GameState] => {
+  gameState.player.movementDirection = direction;
+
+  return [direction, gameState];
+};
+
+export const updatePlayerFacingDirection = (
   direction: Direction,
   gameState: GameState
 ): [Direction, GameState] => {
   gameState.player.facingDirection = direction;
-  gameState.player.movementDirection = direction;
 
   return [direction, gameState];
 };
@@ -37,6 +45,7 @@ export const updatePlayerMovement = (
 
   gameState.player.worldX += xMod * movementSpeed * deltaTime;
   gameState.player.worldY += yMod * movementSpeed * deltaTime;
+  gameState.player.moving = true;
 
   let haltMovement = false;
 
@@ -57,6 +66,7 @@ export const updatePlayerMovement = (
   }
 
   if (haltMovement) {
+    gameState.player.moving = false;
     gameState.player.movementDirection = Direction.NONE;
   }
 
