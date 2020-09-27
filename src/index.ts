@@ -1,6 +1,6 @@
 import { filter, map, withLatestFrom } from "rxjs/operators";
 import { cameraFactory } from "./camera";
-import { isPlayer, Player, playerFactory } from "./models/player";
+import { Player, playerFactory } from "./models/player";
 import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
 import { GameState, updateCoordinateMap } from "./game_state";
 import {
@@ -10,14 +10,14 @@ import {
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
-import { Placeable, Positionable } from "./types";
+import { Layer, Placeable, Positionable } from "./types";
 import { getModsFromDirection } from "./direction";
 import { addView } from "./renderers/canvas_renderer";
-import { renderFieldRenderables } from "./render_pipeline";
 import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
 import { renderGround } from "./renderers/ground_renderer";
 import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
+import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
 
 function index() {
   const buffer = addView();
@@ -44,8 +44,8 @@ function index() {
     .concat([player, otherPlayer])
     .concat(mapPlaceables);
 
-  const coordinateMap: CoordinateMap<Positionable> = positionables
-    .filter((positionable) => !positionable.passable)
+  const interactableMap: CoordinateMap<Positionable> = positionables
+    .filter((positionable) => positionable.layer == Layer.INTERACTION)
     .reduce((acc, positionable) => {
       const xRow = acc[positionable.x] || {};
       xRow[positionable.y] = positionable;
@@ -53,16 +53,12 @@ function index() {
       return acc;
     }, {} as CoordinateMap<Positionable>);
 
-  const fieldRenderables = positionables.filter(
-    (positionable) => !isPlayer(positionable)
-  );
-
   const initialGameState: GameState = {
     player,
     camera,
     otherPlayer,
-    collisionMap: coordinateMap,
-    fieldRenderables,
+    collisionMap: interactableMap,
+    fieldRenderables: mapPlaceables,
   };
 
   const { visibleCanvas, gameArea, body } = renderGameSpace();
@@ -101,7 +97,7 @@ function index() {
     bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
 
     renderGround(bufferCtx, camera);
-    renderFieldRenderables(bufferCtx, gameState);
+    renderAllObjects(bufferCtx, gameState);
 
     visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
     visibleCtx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
@@ -120,7 +116,7 @@ function index() {
     });
 
   if (process.env.DEBUG) {
-    loadDebugger(body, gameArea, [player, otherPlayer], fieldRenderables);
+    loadDebugger(body, gameArea, [player, otherPlayer], mapPlaceables);
   }
 
   gameState$.next(initialGameState);

@@ -22,12 +22,12 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   debugArea.style.background = "gray";
   body.appendChild(debugArea);
 
-  const gridLinesSpan = document.createElement("span");
+  const gridLinesLabel = document.createElement("label");
   const gridLinesInput = document.createElement("input");
   gridLinesInput.type = "checkbox";
-  gridLinesSpan.innerText = "Show Gridlines";
-  debugArea.appendChild(gridLinesSpan);
-  gridLinesSpan.prepend(gridLinesInput);
+  gridLinesLabel.innerText = "Show Gridlines";
+  debugArea.appendChild(gridLinesLabel);
+  gridLinesLabel.prepend(gridLinesInput);
 
   const fpsDiv = document.createElement("div");
   fpsDiv.style.background = "green";

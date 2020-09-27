@@ -1,4 +1,4 @@
-import { Placeable } from "../types";
+import { Layer, Placeable } from "../types";
 import { Debuggable } from "../debug/grid_lines";
 import { positionableFactory } from "./helpers/positionable_factory";
 
@@ -18,7 +18,7 @@ export const waterFactory = (attributes: Partial<Water>): Water => {
     debug: {
       color: attributes.debug?.color,
     },
-    passable: false,
+    layer: Layer.INTERACTION,
   };
 
   return { ...positionableProperties, ...particularProperties };

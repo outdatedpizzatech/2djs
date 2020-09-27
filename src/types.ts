@@ -1,3 +1,9 @@
+export enum Layer {
+  GROUND,
+  INTERACTION,
+  OVERHEAD,
+}
+
 export interface Positionable {
   x: number;
   y: number;
@@ -5,8 +11,8 @@ export interface Positionable {
   worldY: number;
 }
 
-export interface Massable {
-  passable: boolean;
+export interface Layerable {
+  layer: Layer;
 }
 
-export interface Placeable extends Positionable, Massable {}
+export interface Placeable extends Positionable, Layerable {}
