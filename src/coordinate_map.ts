@@ -11,6 +11,7 @@ export interface CoordinateMap<T> {
 export interface LayerMark {
   interaction: boolean;
   ground: boolean;
+  passive: boolean;
   overhead: boolean;
 }
 
@@ -19,6 +20,7 @@ export type LayerMarkKey = keyof LayerMark;
 export interface LayerMaps {
   interactableMap: CoordinateMap<Placeable>;
   groundMap: CoordinateMap<Placeable>;
+  passiveMap: CoordinateMap<Placeable>;
   overheadMap: CoordinateMap<Placeable>;
 }
 

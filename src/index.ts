@@ -18,7 +18,6 @@ import { renderGround } from "./renderers/ground_renderer";
 import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
-import { partition } from "underscore";
 
 function index() {
   const buffer = addView();
@@ -45,17 +44,27 @@ function index() {
     .concat([player, otherPlayer])
     .concat(mapPlaceables);
 
-  const [groundPlaceables, nonGroundPlaceables] = partition(
-    placeables,
-    (placeable) => placeable.layer == Layer.GROUND
-  );
+  const groundPlaceables = new Array<Placeable>();
+  const passivePlaceables = new Array<Placeable>();
+  const interactivePlaceables = new Array<Placeable>();
+  const overheadPlaceables = new Array<Placeable>();
 
-  const [interactionPlaceables, overheadPlaceables] = partition(
-    nonGroundPlaceables,
-    (placeable) => placeable.layer == Layer.INTERACTION
-  );
+  placeables.forEach((placeable) => {
+    if (placeable.layer == Layer.GROUND) {
+      groundPlaceables.push(placeable);
+    }
+    if (placeable.layer == Layer.PASSIVE) {
+      passivePlaceables.push(placeable);
+    }
+    if (placeable.layer == Layer.INTERACTIVE) {
+      interactivePlaceables.push(placeable);
+    }
+    if (placeable.layer == Layer.OVERHEAD) {
+      overheadPlaceables.push(placeable);
+    }
+  });
 
-  const interactableMap: CoordinateMap<Placeable> = interactionPlaceables.reduce(
+  const interactableMap: CoordinateMap<Placeable> = interactivePlaceables.reduce(
     (acc, placeable) => {
       const xRow = acc[placeable.x] || {};
       xRow[placeable.y] = placeable;
@@ -66,6 +75,16 @@ function index() {
   );
 
   const groundMap: CoordinateMap<Placeable> = groundPlaceables.reduce(
+    (acc, placeable) => {
+      const xRow = acc[placeable.x] || {};
+      xRow[placeable.y] = placeable;
+      acc[placeable.x] = xRow;
+      return acc;
+    },
+    {} as CoordinateMap<Placeable>
+  );
+
+  const passiveMap: CoordinateMap<Placeable> = passivePlaceables.reduce(
     (acc, placeable) => {
       const xRow = acc[placeable.x] || {};
       xRow[placeable.y] = placeable;
@@ -93,6 +112,7 @@ function index() {
       interactableMap,
       groundMap,
       overheadMap,
+      passiveMap,
     },
     fieldRenderables: mapPlaceables,
   };

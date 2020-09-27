@@ -31,7 +31,7 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     debug: {
       color: attributes.debug?.color,
     },
-    layer: Layer.INTERACTION,
+    layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
   };
 

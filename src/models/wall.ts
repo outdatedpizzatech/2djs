@@ -18,7 +18,7 @@ export const wallFactory = (attributes: Partial<Wall>): Wall => {
     debug: {
       color: attributes.debug?.color,
     },
-    layer: Layer.INTERACTION,
+    layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
   };
 

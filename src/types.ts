@@ -1,6 +1,7 @@
 export enum Layer {
   GROUND,
-  INTERACTION,
+  PASSIVE,
+  INTERACTIVE,
   OVERHEAD,
 }
 

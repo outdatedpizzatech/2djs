@@ -18,7 +18,7 @@ export const waterFactory = (attributes: Partial<Water>): Water => {
     debug: {
       color: attributes.debug?.color,
     },
-    layer: Layer.INTERACTION,
+    layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
   };
 

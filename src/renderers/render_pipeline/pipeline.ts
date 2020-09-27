@@ -17,6 +17,8 @@ import { isPlayer } from "../../models/player";
 import { renderWithoutPatterning, renderWithPatterning } from "./optimizers";
 import { isRoof } from "../../models/roof";
 import { renderRoof } from "../model_renderers/roof_renderer";
+import { isDoor } from "../../models/door";
+import { renderDoor } from "../model_renderers/door_renderer";
 
 export const pipelineRender = (
   renderable: any,
@@ -103,6 +105,17 @@ export const pipelineRender = (
         renderedMap,
         () => {
           renderPlayer(renderable, camera, bufferCtx);
+        }
+      );
+    }
+    if (isDoor(renderable)) {
+      [doNotRenderMap, renderedMap] = renderWithoutPatterning(
+        renderable,
+        layerMaps,
+        doNotRenderMap,
+        renderedMap,
+        () => {
+          renderDoor(renderable, camera, bufferCtx);
         }
       );
     }

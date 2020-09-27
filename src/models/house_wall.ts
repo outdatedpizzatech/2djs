@@ -2,8 +2,14 @@ import { GameObject, Layer } from "../types";
 import { Debuggable } from "../debug/grid_lines";
 import { positionableFactory } from "./helpers/positionable_factory";
 
+export enum HouseWallRole {
+  SIDE,
+  FRONT,
+}
+
 export interface HouseWall extends Debuggable, GameObject {
   objectType: "HouseWall";
+  role: HouseWallRole;
 }
 
 export const isHouseWall = (unknownObject: any): unknownObject is HouseWall => {
@@ -18,8 +24,9 @@ export const houseWallFactory = (attributes: Partial<HouseWall>): HouseWall => {
     debug: {
       color: attributes.debug?.color,
     },
-    layer: Layer.INTERACTION,
+    layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
+    role: attributes.role || HouseWallRole.SIDE,
   };
 
   return { ...positionableProperties, ...particularProperties };

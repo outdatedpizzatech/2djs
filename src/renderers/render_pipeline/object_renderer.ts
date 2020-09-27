@@ -1,8 +1,7 @@
 import { GameState } from "../../game_state";
 import { CoordinateMap, LayerMark } from "../../coordinate_map";
-import { Layer } from "../../types";
+import { GameObject, Layer } from "../../types";
 import { pipelineRender } from "./pipeline";
-import { partition } from "underscore";
 
 export const renderAllObjects = (
   bufferCtx: CanvasRenderingContext2D,
@@ -20,15 +19,25 @@ export const renderAllObjects = (
   let renderedMap = {} as CoordinateMap<LayerMark>;
   const renderables = fieldRenderables.concat([player, otherPlayer]);
 
-  const [groundRenderables, nonGroundRenderables] = partition(
-    renderables,
-    (renderable) => renderable.layer == Layer.GROUND
-  );
+  const groundRenderables = new Array<GameObject>();
+  const passiveRenderables = new Array<GameObject>();
+  const interactiveRenderables = new Array<GameObject>();
+  const overheadRenderables = new Array<GameObject>();
 
-  const [interactionRenderables, overheadRenderables] = partition(
-    nonGroundRenderables,
-    (renderable) => renderable.layer == Layer.INTERACTION
-  );
+  renderables.forEach((renderable) => {
+    if (renderable.layer == Layer.GROUND) {
+      groundRenderables.push(renderable);
+    }
+    if (renderable.layer == Layer.PASSIVE) {
+      passiveRenderables.push(renderable);
+    }
+    if (renderable.layer == Layer.INTERACTIVE) {
+      interactiveRenderables.push(renderable);
+    }
+    if (renderable.layer == Layer.OVERHEAD) {
+      overheadRenderables.push(renderable);
+    }
+  });
 
   groundRenderables.forEach((renderable) => {
     [doNotRenderMap, renderedMap] = pipelineRender(
@@ -41,7 +50,18 @@ export const renderAllObjects = (
     );
   });
 
-  interactionRenderables.forEach((renderable) => {
+  passiveRenderables.forEach((renderable) => {
+    [doNotRenderMap, renderedMap] = pipelineRender(
+      renderable,
+      camera,
+      layerMaps,
+      doNotRenderMap,
+      renderedMap,
+      bufferCtx
+    );
+  });
+
+  interactiveRenderables.forEach((renderable) => {
     [doNotRenderMap, renderedMap] = pipelineRender(
       renderable,
       camera,

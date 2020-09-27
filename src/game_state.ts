@@ -1,10 +1,10 @@
 import { Player } from "./models/player";
 import { Camera } from "./camera";
 import { Direction, getModsFromDirection } from "./direction";
-import { GameObject, Placeable } from "./types";
+import { GameObject } from "./types";
 import {
   addToCoordinateMap,
-  CoordinateMap,
+  LayerMaps,
   removeFromCoordinateMap,
 } from "./coordinate_map";
 
@@ -13,11 +13,7 @@ export interface GameState {
   otherPlayer: Player;
   camera: Camera;
   fieldRenderables: GameObject[];
-  layerMaps: {
-    interactableMap: CoordinateMap<Placeable>;
-    groundMap: CoordinateMap<Placeable>;
-    overheadMap: CoordinateMap<Placeable>;
-  };
+  layerMaps: LayerMaps;
 }
 
 export const updateCoordinateMap = (

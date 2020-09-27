@@ -2,23 +2,23 @@ import { GameObject, Layer } from "../types";
 import { Debuggable } from "../debug/grid_lines";
 import { positionableFactory } from "./helpers/positionable_factory";
 
-export interface Tree extends Debuggable, GameObject {
-  objectType: "Tree";
+export interface Empty extends Debuggable, GameObject {
+  objectType: "Empty";
 }
 
-export const isTree = (unknownObject: any): unknownObject is Tree => {
+export const isEmpty = (unknownObject: any): unknownObject is Empty => {
   if (!unknownObject) return false;
-  return (unknownObject as Tree).objectType === "Tree";
+  return (unknownObject as Empty).objectType === "Empty";
 };
 
-export const treeFactory = (attributes: Partial<Tree>): Tree => {
+export const emptyFactory = (attributes: Partial<Empty>): Empty => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
-    objectType: "Tree" as "Tree",
+    objectType: "Empty" as "Empty",
     debug: {
       color: attributes.debug?.color,
     },
-    layer: Layer.INTERACTIVE,
+    layer: Layer.OVERHEAD,
     groupId: attributes.groupId,
   };
 

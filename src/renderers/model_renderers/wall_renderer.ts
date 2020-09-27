@@ -20,7 +20,7 @@ export const renderWall = (
   }
 
   const layerMap =
-    layer === Layer.INTERACTION
+    layer === Layer.INTERACTIVE
       ? layerMaps.interactableMap
       : layer === Layer.OVERHEAD
       ? layerMaps.overheadMap

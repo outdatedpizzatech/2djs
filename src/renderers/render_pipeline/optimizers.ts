@@ -14,6 +14,36 @@ import {
   LayerMarkKey,
 } from "../../coordinate_map";
 
+const getLayerMap = (layer: Layer, layerMaps: LayerMaps) => {
+  const layerMap = {
+    [Layer.GROUND]: layerMaps.groundMap,
+    [Layer.INTERACTIVE]: layerMaps.interactableMap,
+    [Layer.PASSIVE]: layerMaps.passiveMap,
+    [Layer.OVERHEAD]: layerMaps.overheadMap,
+  };
+
+  return layerMap[layer];
+};
+
+const getLayerMarkKey = (layer: Layer): LayerMarkKey => {
+  const layerMarks = {
+    [Layer.GROUND]: "ground",
+    [Layer.INTERACTIVE]: "interaction",
+    [Layer.PASSIVE]: "passive",
+    [Layer.OVERHEAD]: "overhead",
+  };
+
+  return layerMarks[layer] as LayerMarkKey;
+};
+
+const getLayerMark = (
+  x: number,
+  y: number,
+  coordinateMap: CoordinateMap<LayerMark>
+) => {
+  return getFromCoordinateMap(x, y, coordinateMap) || ({} as LayerMark);
+};
+
 export function renderWithPatterning(
   renderable: Placeable,
   layerMaps: LayerMaps,
@@ -24,19 +54,8 @@ export function renderWithPatterning(
 ): [CoordinateMap<LayerMark>, CoordinateMap<LayerMark>] {
   const { x, y, layer } = renderable;
 
-  const layerMap =
-    layer === Layer.INTERACTION
-      ? layerMaps.interactableMap
-      : layer === Layer.OVERHEAD
-      ? layerMaps.overheadMap
-      : layerMaps.groundMap;
-
-  const layerMarkKey: LayerMarkKey =
-    layer === Layer.INTERACTION
-      ? "interaction"
-      : layer === Layer.OVERHEAD
-      ? "overhead"
-      : "ground";
+  const layerMap = getLayerMap(layer, layerMaps);
+  const layerMarkKey = getLayerMarkKey(layer);
 
   if (!getLayerMark(x, y, doNotRenderMap)[layerMarkKey]) {
     let neighborCount = 0;
@@ -82,13 +101,7 @@ export function renderWithoutPatterning(
 ): [CoordinateMap<LayerMark>, CoordinateMap<LayerMark>] {
   const { x, y, layer } = renderable;
 
-  const layerMarkKey: LayerMarkKey =
-    layer === Layer.INTERACTION
-      ? "interaction"
-      : layer === Layer.OVERHEAD
-      ? "overhead"
-      : "ground";
-
+  const layerMarkKey = getLayerMarkKey(layer);
   const onDoNotRenderList = getLayerMark(x, y, doNotRenderMap)[layerMarkKey];
 
   if (!onDoNotRenderList) {
@@ -100,11 +113,3 @@ export function renderWithoutPatterning(
 
   return [doNotRenderMap, renderedMap];
 }
-
-const getLayerMark = (
-  x: number,
-  y: number,
-  coordinateMap: CoordinateMap<LayerMark>
-) => {
-  return getFromCoordinateMap(x, y, coordinateMap) || ({} as LayerMark);
-};
