@@ -15,9 +15,11 @@ export const renderAllObjects = (
     layerMaps,
   } = gameState;
 
+  const players = [player, otherPlayer];
+
   let doNotRenderMap = {} as CoordinateMap<LayerMark>;
   let renderedMap = {} as CoordinateMap<LayerMark>;
-  const renderables = fieldRenderables.concat([player, otherPlayer]);
+  const renderables = fieldRenderables.concat(players);
 
   const groundRenderables = new Array<GameObject>();
   const passiveRenderables = new Array<GameObject>();
@@ -42,6 +44,7 @@ export const renderAllObjects = (
   groundRenderables.forEach((renderable) => {
     [doNotRenderMap, renderedMap] = pipelineRender(
       renderable,
+      players,
       camera,
       layerMaps,
       doNotRenderMap,
@@ -53,6 +56,7 @@ export const renderAllObjects = (
   passiveRenderables.forEach((renderable) => {
     [doNotRenderMap, renderedMap] = pipelineRender(
       renderable,
+      players,
       camera,
       layerMaps,
       doNotRenderMap,
@@ -64,6 +68,7 @@ export const renderAllObjects = (
   interactiveRenderables.forEach((renderable) => {
     [doNotRenderMap, renderedMap] = pipelineRender(
       renderable,
+      players,
       camera,
       layerMaps,
       doNotRenderMap,
@@ -88,6 +93,7 @@ export const renderAllObjects = (
     if (!renderable.groupId || !idsOverlappingPlayer[renderable.groupId]) {
       [doNotRenderMap, renderedMap] = pipelineRender(
         renderable,
+        players,
         camera,
         layerMaps,
         doNotRenderMap,

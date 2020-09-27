@@ -13,7 +13,7 @@ import { renderHouseWall } from "../model_renderers/house_wall_renderer";
 import { isHouseFloor } from "../../models/house_floor";
 import { renderHouseFloor } from "../model_renderers/house_floor_renderer";
 import { Camera } from "../../camera";
-import { isPlayer } from "../../models/player";
+import { isPlayer, Player } from "../../models/player";
 import { renderWithoutPatterning, renderWithPatterning } from "./optimizers";
 import { isRoof } from "../../models/roof";
 import { renderRoof } from "../model_renderers/roof_renderer";
@@ -22,6 +22,7 @@ import { renderDoor } from "../model_renderers/door_renderer";
 
 export const pipelineRender = (
   renderable: any,
+  players: Player[],
   camera: Camera,
   layerMaps: LayerMaps,
   doNotRenderMap: CoordinateMap<LayerMark>,
@@ -115,7 +116,7 @@ export const pipelineRender = (
         doNotRenderMap,
         renderedMap,
         () => {
-          renderDoor(renderable, camera, bufferCtx);
+          renderDoor(renderable, camera, bufferCtx, players);
         }
       );
     }
