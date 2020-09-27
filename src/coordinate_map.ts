@@ -1,9 +1,25 @@
+import { Placeable } from "./types";
+
 export interface CoordinateMap<T> {
   [key: number]:
     | {
         [key: number]: T | undefined;
       }
     | undefined;
+}
+
+export interface LayerMark {
+  interaction: boolean;
+  ground: boolean;
+  overhead: boolean;
+}
+
+export type LayerMarkKey = keyof LayerMark;
+
+export interface LayerMaps {
+  interactableMap: CoordinateMap<Placeable>;
+  groundMap: CoordinateMap<Placeable>;
+  overheadMap: CoordinateMap<Placeable>;
 }
 
 export function addToCoordinateMap<T>(

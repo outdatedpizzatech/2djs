@@ -18,6 +18,7 @@ import { renderGround } from "./renderers/ground_renderer";
 import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
+import { partition } from "underscore";
 
 function index() {
   const buffer = addView();
@@ -40,24 +41,59 @@ function index() {
 
   const mapPlaceables = generateMap();
 
-  const positionables = new Array<Placeable>()
+  const placeables = new Array<Placeable>()
     .concat([player, otherPlayer])
     .concat(mapPlaceables);
 
-  const interactableMap: CoordinateMap<Positionable> = positionables
-    .filter((positionable) => positionable.layer == Layer.INTERACTION)
-    .reduce((acc, positionable) => {
-      const xRow = acc[positionable.x] || {};
-      xRow[positionable.y] = positionable;
-      acc[positionable.x] = xRow;
+  const [groundPlaceables, nonGroundPlaceables] = partition(
+    placeables,
+    (placeable) => placeable.layer == Layer.GROUND
+  );
+
+  const [interactionPlaceables, overheadPlaceables] = partition(
+    nonGroundPlaceables,
+    (placeable) => placeable.layer == Layer.INTERACTION
+  );
+
+  const interactableMap: CoordinateMap<Placeable> = interactionPlaceables.reduce(
+    (acc, placeable) => {
+      const xRow = acc[placeable.x] || {};
+      xRow[placeable.y] = placeable;
+      acc[placeable.x] = xRow;
       return acc;
-    }, {} as CoordinateMap<Positionable>);
+    },
+    {} as CoordinateMap<Placeable>
+  );
+
+  const groundMap: CoordinateMap<Placeable> = groundPlaceables.reduce(
+    (acc, placeable) => {
+      const xRow = acc[placeable.x] || {};
+      xRow[placeable.y] = placeable;
+      acc[placeable.x] = xRow;
+      return acc;
+    },
+    {} as CoordinateMap<Placeable>
+  );
+
+  const overheadMap: CoordinateMap<Placeable> = overheadPlaceables.reduce(
+    (acc, placeable) => {
+      const xRow = acc[placeable.x] || {};
+      xRow[placeable.y] = placeable;
+      acc[placeable.x] = xRow;
+      return acc;
+    },
+    {} as CoordinateMap<Placeable>
+  );
 
   const initialGameState: GameState = {
     player,
     camera,
     otherPlayer,
-    collisionMap: interactableMap,
+    layerMaps: {
+      interactableMap,
+      groundMap,
+      overheadMap,
+    },
     fieldRenderables: mapPlaceables,
   };
 
@@ -76,7 +112,7 @@ function index() {
         return !getFromCoordinateMap(
           x + xMod,
           y + yMod,
-          gameState.collisionMap
+          gameState.layerMaps.interactableMap
         );
       }),
       map((params) => updateCoordinateMap(...params)),

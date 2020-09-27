@@ -11,6 +11,7 @@ import { isWater } from "../models/water";
 import { isStreet } from "../models/street";
 import { isHouseWall } from "../models/house_wall";
 import { isHouseFloor } from "../models/house_floor";
+import { isRoof } from "../models/roof";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -103,5 +104,6 @@ export const loadDebugger = (
     if (isStreet(renderable)) renderable.debug.color = "#226e71";
     if (isHouseWall(renderable)) renderable.debug.color = "#599e03";
     if (isHouseFloor(renderable)) renderable.debug.color = "#7417ed";
+    if (isRoof(renderable)) renderable.debug.color = "#022efb";
   });
 };

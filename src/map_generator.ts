@@ -6,6 +6,7 @@ import { streetFactory } from "./models/street";
 import { houseWallFactory } from "./models/house_wall";
 import { houseFloorFactory } from "./models/house_floor";
 import { Placeable } from "./types";
+import { roofFactory } from "./models/roof";
 
 export const generateMap = (): Placeable[] => {
   const placeables = new Array<Placeable>();
@@ -26,9 +27,11 @@ export const generateMap = (): Placeable[] => {
       }
       if (code == "u") {
         placeables.push(houseWallFactory({ x, y }));
+        placeables.push(roofFactory({ x, y }));
       }
       if (code == "r") {
         placeables.push(houseFloorFactory({ x, y }));
+        placeables.push(roofFactory({ x, y }));
       }
     });
   });

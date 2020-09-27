@@ -1,5 +1,5 @@
 import { GameState } from "../../game_state";
-import { CoordinateMap } from "../../coordinate_map";
+import { CoordinateMap, LayerMark } from "../../coordinate_map";
 import { Layer } from "../../types";
 import { pipelineRender } from "./pipeline";
 import { partition } from "underscore";
@@ -13,23 +13,28 @@ export const renderAllObjects = (
     otherPlayer,
     camera,
     fieldRenderables,
-    collisionMap,
+    layerMaps,
   } = gameState;
 
-  let doNotRenderMap = {} as CoordinateMap<boolean>;
-  let renderedMap = {} as CoordinateMap<boolean>;
+  let doNotRenderMap = {} as CoordinateMap<LayerMark>;
+  let renderedMap = {} as CoordinateMap<LayerMark>;
   const renderables = fieldRenderables.concat([player, otherPlayer]);
 
-  const [groundRenderables, interactionRenderables] = partition(
+  const [groundRenderables, nonGroundRenderables] = partition(
     renderables,
     (renderable) => renderable.layer == Layer.GROUND
+  );
+
+  const [interactionRenderables, overheadRenderables] = partition(
+    nonGroundRenderables,
+    (renderable) => renderable.layer == Layer.INTERACTION
   );
 
   groundRenderables.forEach((renderable) => {
     [doNotRenderMap, renderedMap] = pipelineRender(
       renderable,
       camera,
-      collisionMap,
+      layerMaps,
       doNotRenderMap,
       renderedMap,
       bufferCtx
@@ -40,7 +45,18 @@ export const renderAllObjects = (
     [doNotRenderMap, renderedMap] = pipelineRender(
       renderable,
       camera,
-      collisionMap,
+      layerMaps,
+      doNotRenderMap,
+      renderedMap,
+      bufferCtx
+    );
+  });
+
+  overheadRenderables.forEach((renderable) => {
+    [doNotRenderMap, renderedMap] = pipelineRender(
+      renderable,
+      camera,
+      layerMaps,
       doNotRenderMap,
       renderedMap,
       bufferCtx

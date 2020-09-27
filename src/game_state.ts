@@ -1,7 +1,7 @@
 import { Player } from "./models/player";
 import { Camera } from "./camera";
 import { Direction, getModsFromDirection } from "./direction";
-import { Positionable } from "./types";
+import { Placeable, Positionable } from "./types";
 import {
   addToCoordinateMap,
   CoordinateMap,
@@ -13,14 +13,18 @@ export interface GameState {
   otherPlayer: Player;
   camera: Camera;
   fieldRenderables: any[];
-  collisionMap: CoordinateMap<Positionable>;
+  layerMaps: {
+    interactableMap: CoordinateMap<Placeable>;
+    groundMap: CoordinateMap<Placeable>;
+    overheadMap: CoordinateMap<Placeable>;
+  };
 }
 
 export const updateCoordinateMap = (
   direction: Direction,
   gameState: GameState
 ): [Direction, GameState] => {
-  const { collisionMap, player } = gameState;
+  const { layerMaps, player } = gameState;
   const { x, y } = player;
 
   const [xMod, yMod] = getModsFromDirection(direction);
@@ -28,12 +32,12 @@ export const updateCoordinateMap = (
   let modifiedMap = addToCoordinateMap(
     x + xMod,
     y + yMod,
-    collisionMap,
+    layerMaps.interactableMap,
     player
   );
   modifiedMap = removeFromCoordinateMap(x, y, modifiedMap);
 
-  gameState.collisionMap = modifiedMap;
+  gameState.layerMaps.interactableMap = modifiedMap;
 
   return [direction, gameState];
 };
