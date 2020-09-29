@@ -20,7 +20,7 @@ import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
 
-function index() {
+async function index() {
   const buffer = addView();
   const bufferCtx = buffer.getContext("2d") as CanvasRenderingContext2D;
 
@@ -39,7 +39,7 @@ function index() {
     y: 0,
   });
 
-  const mapPlaceables = generateMap();
+  const mapPlaceables = await generateMap();
 
   const placeables = new Array<Placeable>()
     .concat([player, otherPlayer])
