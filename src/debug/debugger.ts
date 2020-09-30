@@ -50,8 +50,7 @@ const mountDebugArea = (body: HTMLBodyElement) => {
 export const loadDebugger = (
   body: HTMLBodyElement,
   gameArea: HTMLDivElement,
-  players: Player[],
-  fieldRenderables: any[]
+  players: Player[]
 ) => {
   const debug = mountDebugArea(body);
 
@@ -68,6 +67,15 @@ export const loadDebugger = (
       camera.withinLens(positionable)
     );
     debug.objects.innerText = `Rendered Objects: ${objectsInView.length}`;
+    fieldRenderables.forEach((renderable) => {
+      if (isTree(renderable)) renderable.debug.color = "#FFFFFF";
+      if (isWall(renderable)) renderable.debug.color = "#0b63bb";
+      if (isWater(renderable)) renderable.debug.color = "#acc896";
+      if (isStreet(renderable)) renderable.debug.color = "#226e71";
+      if (isHouseWall(renderable)) renderable.debug.color = "#599e03";
+      if (isHouseFloor(renderable)) renderable.debug.color = "#7417ed";
+      if (isRoof(renderable)) renderable.debug.color = "#022efb";
+    });
   });
 
   const $gridlineValue = fromEvent<InputEvent>(
@@ -97,13 +105,4 @@ export const loadDebugger = (
   });
   players[0].debug.color = "red";
   players[1].debug.color = "blue";
-  fieldRenderables.forEach((renderable) => {
-    if (isTree(renderable)) renderable.debug.color = "#FFFFFF";
-    if (isWall(renderable)) renderable.debug.color = "#0b63bb";
-    if (isWater(renderable)) renderable.debug.color = "#acc896";
-    if (isStreet(renderable)) renderable.debug.color = "#226e71";
-    if (isHouseWall(renderable)) renderable.debug.color = "#599e03";
-    if (isHouseFloor(renderable)) renderable.debug.color = "#7417ed";
-    if (isRoof(renderable)) renderable.debug.color = "#022efb";
-  });
 };

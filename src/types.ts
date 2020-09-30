@@ -12,6 +12,11 @@ export interface Positionable {
   worldY: number;
 }
 
+export interface CoordinateBounds {
+  min: { x: number; y: number };
+  max: { x: number; y: number };
+}
+
 export interface Layerable {
   layer: Layer;
 }

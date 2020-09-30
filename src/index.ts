@@ -11,7 +11,7 @@ import {
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
-import { Layer, Placeable } from "./types";
+import { GameObject, Layer, Placeable } from "./types";
 import { getModsFromDirection } from "./direction";
 import { addView } from "./renderers/canvas_renderer";
 import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
@@ -19,6 +19,9 @@ import { renderGround } from "./renderers/ground_renderer";
 import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
+import { BehaviorSubject, Subject } from "rxjs";
+import { updateFieldRenderables } from "./reducers/field_renderables_reducer";
+import { updateLayerMaps } from "./reducers/layer_reducer";
 
 async function index() {
   const buffer = addView();
@@ -39,83 +42,44 @@ async function index() {
     y: 0,
   });
 
-  const mapPlaceables = await generateMap();
+  const mapLoad$ = new Subject<GameObject[]>();
 
-  const placeables = new Array<Placeable>()
-    .concat([player, otherPlayer])
-    .concat(mapPlaceables);
-
-  const groundPlaceables = new Array<Placeable>();
-  const passivePlaceables = new Array<Placeable>();
-  const interactivePlaceables = new Array<Placeable>();
-  const overheadPlaceables = new Array<Placeable>();
-
-  placeables.forEach((placeable) => {
-    if (placeable.layer == Layer.GROUND) {
-      groundPlaceables.push(placeable);
-    }
-    if (placeable.layer == Layer.PASSIVE) {
-      passivePlaceables.push(placeable);
-    }
-    if (placeable.layer == Layer.INTERACTIVE) {
-      interactivePlaceables.push(placeable);
-    }
-    if (placeable.layer == Layer.OVERHEAD) {
-      overheadPlaceables.push(placeable);
-    }
-  });
-
-  const interactableMap: CoordinateMap<Placeable> = interactivePlaceables.reduce(
-    (acc, placeable) => {
-      const xRow = acc[placeable.x] || {};
-      xRow[placeable.y] = placeable;
-      acc[placeable.x] = xRow;
-      return acc;
+  const coordinateBounds = {
+    min: {
+      x: -100,
+      y: -100,
     },
-    {} as CoordinateMap<Placeable>
-  );
-
-  const groundMap: CoordinateMap<Placeable> = groundPlaceables.reduce(
-    (acc, placeable) => {
-      const xRow = acc[placeable.x] || {};
-      xRow[placeable.y] = placeable;
-      acc[placeable.x] = xRow;
-      return acc;
+    max: {
+      x: 100,
+      y: 100,
     },
-    {} as CoordinateMap<Placeable>
-  );
+  };
 
-  const passiveMap: CoordinateMap<Placeable> = passivePlaceables.reduce(
-    (acc, placeable) => {
-      const xRow = acc[placeable.x] || {};
-      xRow[placeable.y] = placeable;
-      acc[placeable.x] = xRow;
-      return acc;
-    },
-    {} as CoordinateMap<Placeable>
-  );
-
-  const overheadMap: CoordinateMap<Placeable> = overheadPlaceables.reduce(
-    (acc, placeable) => {
-      const xRow = acc[placeable.x] || {};
-      xRow[placeable.y] = placeable;
-      acc[placeable.x] = xRow;
-      return acc;
-    },
-    {} as CoordinateMap<Placeable>
-  );
+  mapLoad$
+    .pipe(
+      withLatestFrom(gameState$),
+      map(([gameObjects, gameState]) =>
+        updateFieldRenderables(gameObjects, gameState, coordinateBounds)
+      ),
+      map(([gameObjects, gameState]) =>
+        updateLayerMaps(gameObjects, gameState, coordinateBounds)
+      )
+    )
+    .subscribe(([_, gameState]) => {
+      gameState$.next(gameState);
+    });
 
   const initialGameState: GameState = {
     player,
     camera,
     otherPlayer,
     layerMaps: {
-      interactableMap,
-      groundMap,
-      overheadMap,
-      passiveMap,
+      interactableMap: {} as CoordinateMap<Placeable>,
+      groundMap: {} as CoordinateMap<Placeable>,
+      overheadMap: {} as CoordinateMap<Placeable>,
+      passiveMap: {} as CoordinateMap<Placeable>,
     },
-    fieldRenderables: mapPlaceables,
+    fieldRenderables: [],
   };
 
   const { visibleCanvas, gameArea, body } = renderGameSpace();
@@ -183,10 +147,13 @@ async function index() {
     });
 
   if (process.env.DEBUG) {
-    loadDebugger(body, gameArea, [player, otherPlayer], mapPlaceables);
+    loadDebugger(body, gameArea, [player, otherPlayer]);
   }
 
   gameState$.next(initialGameState);
+  mapLoad$.next([player, otherPlayer]);
+  const mapPlaceables = await generateMap(coordinateBounds);
+  mapLoad$.next(mapPlaceables);
 }
 
 index();
