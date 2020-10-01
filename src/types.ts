@@ -5,16 +5,19 @@ export enum Layer {
   OVERHEAD,
 }
 
-export interface Positionable {
+export interface Coordinate {
   x: number;
   y: number;
+}
+
+export interface Positionable extends Coordinate {
   worldX: number;
   worldY: number;
 }
 
 export interface CoordinateBounds {
-  min: { x: number; y: number };
-  max: { x: number; y: number };
+  min: Coordinate;
+  max: Coordinate;
 }
 
 export interface Layerable {

@@ -11,7 +11,13 @@ import {
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
-import { GameObject, Layer, Placeable } from "./types";
+import {
+  Coordinate,
+  CoordinateBounds,
+  GameObject,
+  Layer,
+  Placeable,
+} from "./types";
 import { getModsFromDirection } from "./direction";
 import { addView } from "./renderers/canvas_renderer";
 import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
@@ -19,9 +25,10 @@ import { renderGround } from "./renderers/ground_renderer";
 import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
-import { BehaviorSubject, Subject } from "rxjs";
+import { BehaviorSubject, pipe, Subject } from "rxjs";
 import { updateFieldRenderables } from "./reducers/field_renderables_reducer";
 import { updateLayerMaps } from "./reducers/layer_reducer";
+import { DRAW_DISTANCE } from "./common";
 
 async function index() {
   const buffer = addView();
@@ -42,26 +49,42 @@ async function index() {
     y: 0,
   });
 
-  const mapLoad$ = new Subject<GameObject[]>();
-
-  const coordinateBounds = {
-    min: {
-      x: -100,
-      y: -100,
-    },
-    max: {
-      x: 100,
-      y: 100,
-    },
+  const getLoadBoundsForCoordinate = (
+    coordinate: Coordinate
+  ): CoordinateBounds => {
+    return {
+      min: {
+        x: coordinate.x - DRAW_DISTANCE,
+        y: coordinate.y - DRAW_DISTANCE,
+      },
+      max: {
+        x: coordinate.x + DRAW_DISTANCE,
+        y: coordinate.y + DRAW_DISTANCE,
+      },
+    };
   };
+
+  const getDistance = (coordinate1: Coordinate, coordinate2: Coordinate) => {
+    const { x: x1, y: y1 } = coordinate1;
+    const { x: x2, y: y2 } = coordinate2;
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  };
+
+  const mapLoad$ = new Subject<GameObject[]>();
+  const loadCoordinate = new Subject<Coordinate>();
 
   mapLoad$
     .pipe(
+      withLatestFrom(loadCoordinate),
       withLatestFrom(gameState$),
-      map(([gameObjects, gameState]) =>
-        updateFieldRenderables(gameObjects, gameState, coordinateBounds)
+      map(([[gameObjects, coordinate], gameState]) =>
+        updateFieldRenderables(
+          gameObjects,
+          gameState,
+          getLoadBoundsForCoordinate(coordinate)
+        )
       ),
-      map(([gameObjects, gameState]) =>
+      map(([gameObjects, gameState, coordinateBounds]) =>
         updateLayerMaps(gameObjects, gameState, coordinateBounds)
       )
     )
@@ -146,14 +169,34 @@ async function index() {
       gameState$.next(gameState);
     });
 
+  frameWithGameState$
+    .pipe(
+      withLatestFrom(loadCoordinate),
+      filter(([[_, gameState], coordinate]) => {
+        const distance = getDistance(gameState.player, coordinate);
+        return distance > DRAW_DISTANCE;
+      })
+    )
+    .subscribe(([[_, gameState], _c]) => {
+      loadCoordinate.next({
+        x: gameState.player.x,
+        y: gameState.player.y,
+      });
+    });
+
+  loadCoordinate.subscribe(async (coordinate) => {
+    const coordinateBounds = getLoadBoundsForCoordinate(coordinate);
+    const mapPlaceables = await generateMap(coordinateBounds);
+    mapLoad$.next(mapPlaceables);
+  });
+
   if (process.env.DEBUG) {
     loadDebugger(body, gameArea, [player, otherPlayer]);
   }
 
   gameState$.next(initialGameState);
   mapLoad$.next([player, otherPlayer]);
-  const mapPlaceables = await generateMap(coordinateBounds);
-  mapLoad$.next(mapPlaceables);
+  loadCoordinate.next({ x: player.x, y: player.y });
 }
 
 index();
