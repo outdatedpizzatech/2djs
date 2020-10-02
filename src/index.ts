@@ -4,6 +4,7 @@ import { Player, playerFactory } from "./models/player";
 import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
 import { GameState, updateCoordinateMap } from "./game_state";
 import {
+  addPlayer,
   updatePlayerCoordinates,
   updatePlayerFacingDirection,
   updatePlayerMovement,
@@ -11,13 +12,7 @@ import {
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
-import {
-  Coordinate,
-  CoordinateBounds,
-  GameObject,
-  Layer,
-  Placeable,
-} from "./types";
+import { Coordinate, CoordinateBounds, GameObject, Placeable } from "./types";
 import { getModsFromDirection } from "./direction";
 import { addView } from "./renderers/canvas_renderer";
 import { CoordinateMap, getFromCoordinateMap } from "./coordinate_map";
@@ -25,7 +20,7 @@ import { renderGround } from "./renderers/ground_renderer";
 import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
-import { BehaviorSubject, pipe, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { updateFieldRenderables } from "./reducers/field_renderables_reducer";
 import { updateLayerMaps } from "./reducers/layer_reducer";
 import { DRAW_DISTANCE } from "./common";
@@ -33,16 +28,6 @@ import { DRAW_DISTANCE } from "./common";
 async function index() {
   const buffer = addView();
   const bufferCtx = buffer.getContext("2d") as CanvasRenderingContext2D;
-
-  const player: Player = playerFactory({
-    x: 10,
-    y: 30,
-  });
-
-  const otherPlayer: Player = playerFactory({
-    x: 20,
-    y: 30,
-  });
 
   const camera = cameraFactory({
     x: 0,
@@ -71,11 +56,11 @@ async function index() {
   };
 
   const mapLoad$ = new Subject<GameObject[]>();
-  const loadCoordinate = new Subject<Coordinate>();
+  const loadCoordinate$ = new Subject<Coordinate>();
 
   mapLoad$
     .pipe(
-      withLatestFrom(loadCoordinate),
+      withLatestFrom(loadCoordinate$),
       withLatestFrom(gameState$),
       map(([[gameObjects, coordinate], gameState]) =>
         updateFieldRenderables(
@@ -93,9 +78,8 @@ async function index() {
     });
 
   const initialGameState: GameState = {
-    player,
+    myPlayer: null,
     camera,
-    otherPlayer,
     layerMaps: {
       interactableMap: {} as CoordinateMap<Placeable>,
       groundMap: {} as CoordinateMap<Placeable>,
@@ -103,6 +87,7 @@ async function index() {
       passiveMap: {} as CoordinateMap<Placeable>,
     },
     fieldRenderables: [],
+    players: [],
   };
 
   const { visibleCanvas, gameArea, body } = renderGameSpace();
@@ -112,9 +97,13 @@ async function index() {
   directionForFrame$
     .pipe(
       withLatestFrom(gameState$),
-      filter(([_, gameState]) => !gameState.player.movementDirection),
+      filter(([_, { myPlayer }]) => !!myPlayer && !myPlayer.movementDirection),
       filter(([direction, gameState]) => {
-        const { x, y } = player;
+        if (!gameState.myPlayer) {
+          return false;
+        }
+
+        const { x, y } = gameState.myPlayer;
         const [xMod, yMod] = getModsFromDirection(direction);
 
         return !getFromCoordinateMap(
@@ -134,7 +123,7 @@ async function index() {
   directionForFrame$
     .pipe(
       withLatestFrom(gameState$),
-      filter(([_, gameState]) => !gameState.player.moving),
+      filter(([_, { myPlayer }]) => !!myPlayer && !myPlayer.moving),
       map((params) => updatePlayerFacingDirection(...params))
     )
     .subscribe(([_, gameState]) => {
@@ -160,7 +149,7 @@ async function index() {
 
   frameWithGameState$
     .pipe(
-      filter(([_, gameState]) => !!gameState.player.movementDirection),
+      filter(([_, { myPlayer }]) => !!myPlayer && !!myPlayer.movementDirection),
       map(([deltaTime, gameState]) =>
         updatePlayerMovement(deltaTime, gameState)
       )
@@ -171,32 +160,49 @@ async function index() {
 
   frameWithGameState$
     .pipe(
-      withLatestFrom(loadCoordinate),
-      filter(([[_, gameState], coordinate]) => {
-        const distance = getDistance(gameState.player, coordinate);
+      withLatestFrom(loadCoordinate$),
+      filter(([[_, { myPlayer }], coordinate]) => {
+        if (!myPlayer) {
+          return false;
+        }
+
+        const distance = getDistance(myPlayer, coordinate);
         return distance > DRAW_DISTANCE;
       })
     )
-    .subscribe(([[_, gameState], _c]) => {
-      loadCoordinate.next({
-        x: gameState.player.x,
-        y: gameState.player.y,
-      });
+    .subscribe(([[_, { myPlayer }], _c]) => {
+      if (myPlayer) {
+        loadCoordinate$.next({
+          x: myPlayer.x,
+          y: myPlayer.y,
+        });
+      }
     });
 
-  loadCoordinate.subscribe(async (coordinate) => {
+  frameWithGameState$
+    .pipe(
+      filter(([_, { myPlayer }]) => !myPlayer),
+      map(([_, gameState]) => addPlayer(gameState))
+    )
+    .subscribe((gameState) => {
+      gameState$.next(gameState);
+      const { myPlayer } = gameState;
+      if (myPlayer) {
+        loadCoordinate$.next({ x: myPlayer.x, y: myPlayer.y });
+      }
+    });
+
+  loadCoordinate$.subscribe(async (coordinate) => {
     const coordinateBounds = getLoadBoundsForCoordinate(coordinate);
     const mapPlaceables = await generateMap(coordinateBounds);
     mapLoad$.next(mapPlaceables);
   });
 
   if (process.env.DEBUG) {
-    loadDebugger(body, gameArea, [player, otherPlayer]);
+    loadDebugger(body, gameArea);
   }
 
   gameState$.next(initialGameState);
-  mapLoad$.next([player, otherPlayer]);
-  loadCoordinate.next({ x: player.x, y: player.y });
 }
 
 index();

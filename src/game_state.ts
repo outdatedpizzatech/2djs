@@ -9,19 +9,24 @@ import {
 } from "./coordinate_map";
 
 export interface GameState {
-  player: Player;
-  otherPlayer: Player;
   camera: Camera;
   fieldRenderables: GameObject[];
   layerMaps: LayerMaps;
+  myPlayer: Player | null;
+  players: Player[];
 }
 
 export const updateCoordinateMap = (
   direction: Direction,
   gameState: GameState
 ): [Direction, GameState] => {
-  const { layerMaps, player } = gameState;
-  const { x, y } = player;
+  const { layerMaps, myPlayer } = gameState;
+
+  if (!myPlayer) {
+    return [direction, gameState];
+  }
+
+  const { x, y } = myPlayer;
 
   const [xMod, yMod] = getModsFromDirection(direction);
 
@@ -29,7 +34,7 @@ export const updateCoordinateMap = (
     x + xMod,
     y + yMod,
     layerMaps.interactableMap,
-    player
+    myPlayer
   );
   modifiedMap = removeFromCoordinateMap(x, y, modifiedMap);
 

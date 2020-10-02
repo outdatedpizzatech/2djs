@@ -7,15 +7,7 @@ export const renderAllObjects = (
   bufferCtx: CanvasRenderingContext2D,
   gameState: GameState
 ) => {
-  const {
-    player,
-    otherPlayer,
-    camera,
-    fieldRenderables,
-    layerMaps,
-  } = gameState;
-
-  const players = [player, otherPlayer];
+  const { myPlayer, camera, fieldRenderables, layerMaps, players } = gameState;
 
   let doNotRenderMap = {} as CoordinateMap<LayerMark>;
   let renderedMap = {} as CoordinateMap<LayerMark>;
@@ -79,15 +71,17 @@ export const renderAllObjects = (
 
   const idsOverlappingPlayer: { [key: number]: boolean } = {};
 
-  overheadRenderables.forEach((renderable) => {
-    if (
-      renderable.groupId &&
-      renderable.x === player.x &&
-      renderable.y === player.y
-    ) {
-      idsOverlappingPlayer[renderable.groupId] = true;
-    }
-  });
+  if (myPlayer) {
+    overheadRenderables.forEach((renderable) => {
+      if (
+        renderable.groupId &&
+        renderable.x === myPlayer.x &&
+        renderable.y === myPlayer.y
+      ) {
+        idsOverlappingPlayer[renderable.groupId] = true;
+      }
+    });
+  }
 
   overheadRenderables.forEach((renderable) => {
     if (!renderable.groupId || !idsOverlappingPlayer[renderable.groupId]) {

@@ -49,8 +49,7 @@ const mountDebugArea = (body: HTMLBodyElement) => {
 
 export const loadDebugger = (
   body: HTMLBodyElement,
-  gameArea: HTMLDivElement,
-  players: Player[]
+  gameArea: HTMLDivElement
 ) => {
   const debug = mountDebugArea(body);
 
@@ -59,9 +58,9 @@ export const loadDebugger = (
   });
 
   frameWithGameState$.subscribe(([_, gameState]) => {
-    const { camera, player, otherPlayer, fieldRenderables } = gameState;
+    const { camera, myPlayer, fieldRenderables, players } = gameState;
     const positionables = new Array<Positionable>()
-      .concat([player, otherPlayer])
+      .concat(players)
       .concat(fieldRenderables);
     const objectsInView = positionables.filter((positionable) =>
       camera.withinLens(positionable)
@@ -103,6 +102,4 @@ export const loadDebugger = (
   gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
     console.log("gameState: ", gameState);
   });
-  players[0].debug.color = "red";
-  players[1].debug.color = "blue";
 };
