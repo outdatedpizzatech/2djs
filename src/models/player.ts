@@ -2,6 +2,7 @@ import { GameObject, Layer } from "../types";
 import { Debuggable } from "../debug/grid_lines";
 import { Direction } from "../direction";
 import { positionableFactory } from "./helpers/positionable_factory";
+import { v4 as uuidv4 } from "uuid";
 
 export interface Player extends Debuggable, GameObject {
   objectType: "Player";
@@ -9,6 +10,7 @@ export interface Player extends Debuggable, GameObject {
   moving: boolean;
   facingDirection: Direction;
   movementSpeed: number;
+  clientId: string;
 }
 
 export const isPlayer = (unknownObject: any): unknownObject is Player => {
@@ -35,6 +37,7 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
     moving: false,
+    clientId: uuidv4(),
   };
 
   return { ...positionableProperties, ...particularProperties };

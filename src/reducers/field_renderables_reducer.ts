@@ -1,12 +1,15 @@
 import { GameState } from "../game_state";
 import { CoordinateBounds, GameObject } from "../types";
+import { cloneDeep } from "lodash";
 
 export const updateFieldRenderables = (
   gameObjects: GameObject[],
   gameState: GameState,
   coordinateBounds: CoordinateBounds
 ): [GameObject[], GameState, CoordinateBounds] => {
-  const updatedFieldRenderables = gameState.fieldRenderables
+  const newGameState = cloneDeep(gameState);
+
+  const updatedFieldRenderables = newGameState.fieldRenderables
     .filter((fieldRenderable) => {
       return (
         fieldRenderable.x >= coordinateBounds.min.x &&
@@ -17,7 +20,7 @@ export const updateFieldRenderables = (
     })
     .concat(gameObjects);
 
-  gameState.fieldRenderables = updatedFieldRenderables;
+  newGameState.fieldRenderables = updatedFieldRenderables;
 
-  return [gameObjects, gameState, coordinateBounds];
+  return [gameObjects, newGameState, coordinateBounds];
 };

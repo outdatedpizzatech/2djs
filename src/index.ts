@@ -1,6 +1,5 @@
-import { filter, map, withLatestFrom } from "rxjs/operators";
+import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { cameraFactory } from "./camera";
-import { Player, playerFactory } from "./models/player";
 import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
 import { GameState, updateCoordinateMap } from "./game_state";
 import {
@@ -24,8 +23,16 @@ import { Subject } from "rxjs";
 import { updateFieldRenderables } from "./reducers/field_renderables_reducer";
 import { updateLayerMaps } from "./reducers/layer_reducer";
 import { DRAW_DISTANCE } from "./common";
+import io from "socket.io-client";
+import axios from "axios";
+
+const SPAWN_COORDINATE = {
+  x: 10,
+  y: 30,
+};
 
 async function index() {
+  const socket = io("http://localhost:9000");
   const buffer = addView();
   const bufferCtx = buffer.getContext("2d") as CanvasRenderingContext2D;
 
@@ -116,7 +123,13 @@ async function index() {
       map((params) => updatePlayerCoordinates(...params)),
       map((params) => updatePlayerMovementDirection(...params))
     )
-    .subscribe(([_, gameState]) => {
+    .subscribe(([direction, gameState]) => {
+      const [xMod, yMod] = getModsFromDirection(direction);
+      socket.emit("PLAYER_MOVE", {
+        x: xMod,
+        y: yMod,
+        clientId: gameState.myPlayer?.clientId,
+      });
       gameState$.next(gameState);
     });
 
@@ -181,14 +194,25 @@ async function index() {
 
   frameWithGameState$
     .pipe(
+      throttleTime(1000),
       filter(([_, { myPlayer }]) => !myPlayer),
-      map(([_, gameState]) => addPlayer(gameState))
+      map(([_, gameState]) =>
+        addPlayer(gameState, SPAWN_COORDINATE.x, SPAWN_COORDINATE.y)
+      )
     )
-    .subscribe((gameState) => {
-      gameState$.next(gameState);
-      const { myPlayer } = gameState;
-      if (myPlayer) {
-        loadCoordinate$.next({ x: myPlayer.x, y: myPlayer.y });
+    .subscribe(async (gameState) => {
+      const result = await axios.get("http://localhost:9000/players");
+      const occupyingPlayer = result.data.find(
+        (player: any) =>
+          SPAWN_COORDINATE.x == player.x && SPAWN_COORDINATE.y == player.y
+      );
+      if (!occupyingPlayer) {
+        gameState$.next(gameState);
+        const { myPlayer } = gameState;
+        if (myPlayer) {
+          socket.emit("PLAYER_JOIN", myPlayer);
+          loadCoordinate$.next({ x: myPlayer.x, y: myPlayer.y });
+        }
       }
     });
 

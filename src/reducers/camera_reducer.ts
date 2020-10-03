@@ -1,14 +1,17 @@
 import { GameState } from "../game_state";
+import { cloneDeep } from "lodash";
 
 export const updateCameraPosition = (gameState: GameState): GameState => {
-  if (!gameState.myPlayer) {
-    return gameState;
+  const newGameState = cloneDeep(gameState);
+
+  if (!newGameState.myPlayer) {
+    return newGameState;
   }
 
-  const { worldX, worldY } = gameState.myPlayer;
+  const { worldX, worldY } = newGameState.myPlayer;
 
-  gameState.camera.worldX = worldX;
-  gameState.camera.worldY = worldY;
+  newGameState.camera.worldX = worldX;
+  newGameState.camera.worldY = worldY;
 
-  return gameState;
+  return newGameState;
 };

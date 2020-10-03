@@ -2,15 +2,18 @@ import { GameState } from "../game_state";
 import { GRID_INTERVAL } from "../common";
 import { Direction, getModsFromDirection } from "../direction";
 import { Player, playerFactory } from "../models/player";
+import { cloneDeep } from "lodash";
 
-export const addPlayer = (gameState: GameState): GameState => {
-  gameState.myPlayer = playerFactory({
-    x: 10,
-    y: 30,
-  });
-  gameState.players.push(gameState.myPlayer);
+export const addPlayer = (
+  gameState: GameState,
+  x: number,
+  y: number
+): GameState => {
+  const newGameState = cloneDeep(gameState);
+  newGameState.myPlayer = playerFactory({ x, y });
+  newGameState.players.push(newGameState.myPlayer);
 
-  return gameState;
+  return newGameState;
 };
 
 export const updatePlayerMovementDirection = (
