@@ -5,13 +5,14 @@ import {
   gameState$,
   mapLoadWithState$,
   whenAPlayerJoins$,
-  whenAPlayerMoves$,
+  whenAPlayerStartsMoving$,
   whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$,
   whenInputtingDirectionWhileMyPlayerIsNotMoving$,
   whenMyPlayerExceedsDrawDistanceThreshold$,
   whenMyPlayerHasMovementDirection$,
   whenMyPlayerHasNotSpawned$,
   whenOtherPlayersHaveJoined$,
+  whenOtherPlayersStartMoving$,
   whenTheMapIsLoaded$,
 } from "./signals";
 import { GameState } from "./game_state";
@@ -78,6 +79,7 @@ async function index() {
       gameState$.next(updateMovementForPlayer(params));
 
       const [xMod, yMod] = getModsFromDirection(params.direction);
+
       socket.emit(PLAYER_MOVE, {
         x: xMod,
         y: yMod,
@@ -162,6 +164,29 @@ async function index() {
     }
   });
 
+  whenOtherPlayersStartMoving$.subscribe((events) => {
+    if (events.length > 0) {
+      let newGameState = events[0].gameState;
+
+      events.forEach((event) => {
+        const { message } = event;
+        const { direction } = message;
+        const player = newGameState.players[message.clientId];
+
+        if (player) {
+          newGameState =
+            updateMovementForPlayer({
+              direction,
+              player,
+              gameState: newGameState,
+            }) || newGameState;
+        }
+      });
+
+      gameState$.next(newGameState);
+    }
+  });
+
   if (process.env.DEBUG) {
     loadDebugger(body, gameArea);
   }
@@ -178,7 +203,7 @@ async function index() {
       clientId: string;
       direction: Direction;
     }) => {
-      whenAPlayerMoves$.next(message);
+      whenAPlayerStartsMoving$.next(message);
     }
   );
 

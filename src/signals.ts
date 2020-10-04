@@ -42,7 +42,7 @@ export const coordinatesToLoadForMyPlayer$ = new Subject<Coordinate>();
 
 // from socket
 export const whenAPlayerJoins$ = new Subject<Player>();
-export const whenAPlayerMoves$ = new Subject<{
+export const whenAPlayerStartsMoving$ = new Subject<{
   x: number;
   y: number;
   clientId: string;
@@ -156,12 +156,12 @@ export const whenOtherPlayersHaveJoined$ = whenAPlayerJoins$.pipe(
   buffer(frame$)
 );
 
-export const whenOtherPlayersHaveMoved$ = whenAPlayerMoves$.pipe(
+export const whenOtherPlayersStartMoving$ = whenAPlayerStartsMoving$.pipe(
   withLatestFrom(gameState$),
-  map(([player, gameState]) => ({
-    player,
+  map(([message, gameState]) => ({
+    message,
     gameState,
   })),
-  filter(({ player, gameState }) => player.clientId !== gameState.myClientId),
+  filter(({ message, gameState }) => message.clientId !== gameState.myClientId),
   buffer(frame$)
 );
