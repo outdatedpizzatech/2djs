@@ -1,7 +1,7 @@
 import { GRID_INTERVAL } from "../../common";
 import { Debuggable } from "../../debug/grid_lines";
-import { Positionable } from "../../types";
 import { Camera } from "../../camera";
+import { Positionable } from "../../positionable";
 
 interface Renderable extends Debuggable, Positionable {}
 

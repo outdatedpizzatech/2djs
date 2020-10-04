@@ -1,16 +1,18 @@
-import corneriaMap from "./maps/corneria.txt";
 import { wallFactory } from "./models/wall";
 import { treeFactory } from "./models/tree";
 import { waterFactory } from "./models/water";
 import { streetFactory } from "./models/street";
 import { houseWallFactory, HouseWallRole } from "./models/house_wall";
 import { houseFloorFactory } from "./models/house_floor";
-import { CoordinateBounds, GameObject, Layer } from "./types";
 import { roofFactory } from "./models/roof";
 import { emptyFactory } from "./models/empty";
 import { doorFactory } from "./models/door";
 import axios from "axios";
 import { playerFactory } from "./models/player";
+import { Layer } from "./types";
+import { CoordinateBounds } from "./coordinate";
+import { GameObject } from "./game_object";
+import { API_URI_BASE } from "./common";
 
 const stringToLayer = (layerName: string): Layer => {
   if (layerName == "overhead") return Layer.OVERHEAD;
@@ -26,7 +28,7 @@ export const generateMap = async (
   const { x: xMax, y: yMax } = coordinateBounds.max;
 
   const result = await axios.get(
-    `http://localhost:9000/map?xMin=${xMin}&xMax=${xMax}&yMin=${yMin}&yMax=${yMax}`
+    `${API_URI_BASE}/map?xMin=${xMin}&xMax=${xMax}&yMin=${yMin}&yMax=${yMax}`
   );
 
   const gameObjects = result.data.map(

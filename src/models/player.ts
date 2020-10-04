@@ -1,8 +1,11 @@
-import { GameObject, Layer } from "../types";
 import { Debuggable } from "../debug/grid_lines";
 import { Direction } from "../direction";
-import { positionableFactory } from "./helpers/positionable_factory";
 import { v4 as uuidv4 } from "uuid";
+import { GameObject } from "../game_object";
+import { positionableFactory } from "../positionable";
+import { Layer } from "../types";
+import axios from "axios";
+import { API_URI_BASE, SPAWN_COORDINATE } from "../common";
 
 export interface Player extends Debuggable, GameObject {
   objectType: "Player";
@@ -65,4 +68,14 @@ export const getAnimationFrames = (targetPlayer: Player): number[] | null => {
   }
 
   return animation;
+};
+
+export const playerOnSpawnPoint = async () => {
+  const result = await axios.get(`${API_URI_BASE}/players`);
+  return result.data.find(
+    (player: any) =>
+      isPlayer(player) &&
+      SPAWN_COORDINATE.x == player.x &&
+      SPAWN_COORDINATE.y == player.y
+  );
 };

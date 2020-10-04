@@ -4,7 +4,7 @@
 // and so this algorithm finds the maximum number of X (to the right) neighbors that could be replaced with a pattern.
 // This could be enhanced to find entire rectangles of patterning, but we'll save that for when we could really use it.
 
-import { Layer, Placeable } from "../../types";
+import { Layer } from "../../types";
 import {
   addToCoordinateMap,
   CoordinateMap,
@@ -13,6 +13,7 @@ import {
   LayerMark,
   LayerMarkKey,
 } from "../../coordinate_map";
+import { Placeable } from "../../game_object";
 
 const getLayerMap = (layer: Layer, layerMaps: LayerMaps) => {
   const layerMap = {

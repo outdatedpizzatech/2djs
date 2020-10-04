@@ -1,17 +1,20 @@
 import { GameState } from "../../game_state";
 import { CoordinateMap, LayerMark } from "../../coordinate_map";
-import { GameObject, Layer } from "../../types";
 import { pipelineRender } from "./pipeline";
+import { Player } from "../../models/player";
+import { GameObject } from "../../game_object";
+import { Layer } from "../../types";
 
 export const renderAllObjects = (
   bufferCtx: CanvasRenderingContext2D,
   gameState: GameState
 ) => {
-  const { myPlayer, camera, fieldRenderables, layerMaps, players } = gameState;
+  const { camera, fieldRenderables, layerMaps, players } = gameState;
 
   let doNotRenderMap = {} as CoordinateMap<LayerMark>;
   let renderedMap = {} as CoordinateMap<LayerMark>;
-  const renderables = fieldRenderables.concat(players);
+  const playersArray = Object.values(gameState.players) as Player[];
+  const renderables = fieldRenderables.concat(playersArray);
 
   const groundRenderables = new Array<GameObject>();
   const passiveRenderables = new Array<GameObject>();
@@ -36,7 +39,7 @@ export const renderAllObjects = (
   groundRenderables.forEach((renderable) => {
     [doNotRenderMap, renderedMap] = pipelineRender(
       renderable,
-      players,
+      playersArray,
       camera,
       layerMaps,
       doNotRenderMap,
@@ -48,7 +51,7 @@ export const renderAllObjects = (
   passiveRenderables.forEach((renderable) => {
     [doNotRenderMap, renderedMap] = pipelineRender(
       renderable,
-      players,
+      playersArray,
       camera,
       layerMaps,
       doNotRenderMap,
@@ -60,7 +63,7 @@ export const renderAllObjects = (
   interactiveRenderables.forEach((renderable) => {
     [doNotRenderMap, renderedMap] = pipelineRender(
       renderable,
-      players,
+      playersArray,
       camera,
       layerMaps,
       doNotRenderMap,
@@ -70,6 +73,8 @@ export const renderAllObjects = (
   });
 
   const idsOverlappingPlayer: { [key: number]: boolean } = {};
+
+  const myPlayer = players[gameState.myClientId];
 
   if (myPlayer) {
     overheadRenderables.forEach((renderable) => {
@@ -87,7 +92,7 @@ export const renderAllObjects = (
     if (!renderable.groupId || !idsOverlappingPlayer[renderable.groupId]) {
       [doNotRenderMap, renderedMap] = pipelineRender(
         renderable,
-        players,
+        playersArray,
         camera,
         layerMaps,
         doNotRenderMap,

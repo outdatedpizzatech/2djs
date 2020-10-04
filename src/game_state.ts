@@ -1,32 +1,32 @@
 import { Player } from "./models/player";
 import { Camera } from "./camera";
 import { Direction, getModsFromDirection } from "./direction";
-import { GameObject } from "./types";
 import {
   addToCoordinateMap,
   LayerMaps,
   removeFromCoordinateMap,
 } from "./coordinate_map";
+import { cloneDeep } from "lodash";
+import { GameObject } from "./game_object";
 
 export interface GameState {
   camera: Camera;
   fieldRenderables: GameObject[];
   layerMaps: LayerMaps;
-  myPlayer: Player | null;
-  players: Player[];
+  myClientId: string;
+  players: { [key: string]: Player | undefined };
 }
 
-export const updateCoordinateMap = (
-  direction: Direction,
-  gameState: GameState
-): [Direction, GameState] => {
-  const { layerMaps, myPlayer } = gameState;
+export const updateCoordinateMap = (params: {
+  direction: Direction;
+  gameState: GameState;
+  player: Player;
+}) => {
+  const { gameState, player, direction } = params;
 
-  if (!myPlayer) {
-    return [direction, gameState];
-  }
+  const { layerMaps } = gameState;
 
-  const { x, y } = myPlayer;
+  const { x, y } = player;
 
   const [xMod, yMod] = getModsFromDirection(direction);
 
@@ -34,11 +34,11 @@ export const updateCoordinateMap = (
     x + xMod,
     y + yMod,
     layerMaps.interactableMap,
-    myPlayer
+    player
   );
   modifiedMap = removeFromCoordinateMap(x, y, modifiedMap);
 
   gameState.layerMaps.interactableMap = modifiedMap;
 
-  return [direction, gameState];
+  return gameState;
 };

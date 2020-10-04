@@ -1,4 +1,4 @@
-import { Placeable } from "./types";
+import { Placeable } from "./game_object";
 
 export interface CoordinateMap<T> {
   [key: number]:

@@ -1,7 +1,6 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
 import { frame$, frameWithGameState$, gameState$ } from "../signals";
 import { map, throttleTime } from "rxjs/operators";
-import { Positionable } from "../types";
 import { fromEvent } from "rxjs";
 import { renderGridLines } from "./grid_lines";
 import { Player } from "../models/player";
@@ -12,6 +11,7 @@ import { isStreet } from "../models/street";
 import { isHouseWall } from "../models/house_wall";
 import { isHouseFloor } from "../models/house_floor";
 import { isRoof } from "../models/roof";
+import { Positionable } from "../positionable";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -57,10 +57,11 @@ export const loadDebugger = (
     debug.fps.innerText = `FPS: ${Math.round(1 / deltaTime)}`;
   });
 
-  frameWithGameState$.subscribe(([_, gameState]) => {
-    const { camera, myPlayer, fieldRenderables, players } = gameState;
+  frameWithGameState$.subscribe(({ gameState }) => {
+    const { camera, fieldRenderables } = gameState;
+    const playersArray = Object.values(gameState.players) as Player[];
     const positionables = new Array<Positionable>()
-      .concat(players)
+      .concat(playersArray)
       .concat(fieldRenderables);
     const objectsInView = positionables.filter((positionable) =>
       camera.withinLens(positionable)

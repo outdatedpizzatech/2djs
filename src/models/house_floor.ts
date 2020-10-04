@@ -1,6 +1,7 @@
-import { GameObject, Layer } from "../types";
 import { Debuggable } from "../debug/grid_lines";
-import { positionableFactory } from "./helpers/positionable_factory";
+import { GameObject } from "../game_object";
+import { positionableFactory } from "../positionable";
+import { Layer } from "../types";
 
 export interface HouseFloor extends Debuggable, GameObject {
   objectType: "HouseFloor";

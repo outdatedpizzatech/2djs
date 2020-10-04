@@ -1,5 +1,10 @@
-import { GRID_INTERVAL } from "../../common";
-import { Positionable } from "../../types";
+import { Coordinate } from "./coordinate";
+import { GRID_INTERVAL } from "./common";
+
+export interface Positionable extends Coordinate {
+  worldX: number;
+  worldY: number;
+}
 
 export const positionableFactory = (
   attributes: Partial<Positionable>

@@ -1,5 +1,5 @@
 import { GRID_INTERVAL } from "./common";
-import { Positionable } from "./types";
+import { Positionable } from "./positionable";
 
 export const CAMERA_WIDTH = 1152;
 export const CAMERA_HEIGHT = 648;
