@@ -10,6 +10,7 @@ import { roofFactory } from "./models/roof";
 import { emptyFactory } from "./models/empty";
 import { doorFactory } from "./models/door";
 import axios from "axios";
+import { playerFactory } from "./models/player";
 
 const stringToLayer = (layerName: string): Layer => {
   if (layerName == "overhead") return Layer.OVERHEAD;
@@ -60,6 +61,8 @@ export const generateMap = async (
         return treeFactory({ ...data, objectType, layer });
       } else if (objectType == "Wall") {
         return wallFactory({ ...data, objectType, layer });
+      } else if (objectType == "Player") {
+        return playerFactory({ ...data, objectType, layer });
       }
     }
   );

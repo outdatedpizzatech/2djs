@@ -37,7 +37,7 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
     moving: false,
-    clientId: uuidv4(),
+    clientId: attributes.clientId || uuidv4(),
   };
 
   return { ...positionableProperties, ...particularProperties };

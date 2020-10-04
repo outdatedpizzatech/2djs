@@ -1,6 +1,17 @@
-import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
+import {
+  buffer,
+  filter,
+  map,
+  throttleTime,
+  withLatestFrom,
+} from "rxjs/operators";
 import { cameraFactory } from "./camera";
-import { directionForFrame$, frameWithGameState$, gameState$ } from "./signals";
+import {
+  directionForFrame$,
+  frame$,
+  frameWithGameState$,
+  gameState$,
+} from "./signals";
 import { GameState, updateCoordinateMap } from "./game_state";
 import {
   addPlayer,
@@ -8,6 +19,7 @@ import {
   updatePlayerFacingDirection,
   updatePlayerMovement,
   updatePlayerMovementDirection,
+  updatePlayers,
 } from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
@@ -25,6 +37,7 @@ import { updateLayerMaps } from "./reducers/layer_reducer";
 import { DRAW_DISTANCE } from "./common";
 import io from "socket.io-client";
 import axios from "axios";
+import { Player } from "./models/player";
 
 const SPAWN_COORDINATE = {
   x: 10,
@@ -33,8 +46,8 @@ const SPAWN_COORDINATE = {
 
 async function index() {
   const socket = io("http://localhost:9000");
-  const buffer = addView();
-  const bufferCtx = buffer.getContext("2d") as CanvasRenderingContext2D;
+  const bufferCanvas = addView();
+  const bufferCtx = bufferCanvas.getContext("2d") as CanvasRenderingContext2D;
 
   const camera = cameraFactory({
     x: 0,
@@ -64,6 +77,7 @@ async function index() {
 
   const mapLoad$ = new Subject<GameObject[]>();
   const loadCoordinate$ = new Subject<Coordinate>();
+  const playerJoin$ = new Subject<Player>();
 
   mapLoad$
     .pipe(
@@ -75,6 +89,9 @@ async function index() {
           gameState,
           getLoadBoundsForCoordinate(coordinate)
         )
+      ),
+      map(([gameObjects, gameState, coordinateBounds]) =>
+        updatePlayers(gameObjects, gameState, coordinateBounds)
       ),
       map(([gameObjects, gameState, coordinateBounds]) =>
         updateLayerMaps(gameObjects, gameState, coordinateBounds)
@@ -150,14 +167,14 @@ async function index() {
     });
 
   frameWithGameState$.subscribe(([_, gameState]) => {
-    bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
+    bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
 
     renderGround(bufferCtx, camera);
     renderAllObjects(bufferCtx, gameState);
 
     visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
     visibleCtx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
-    visibleCtx.drawImage(buffer, 0, 0);
+    visibleCtx.drawImage(bufferCanvas, 0, 0);
   });
 
   frameWithGameState$
@@ -222,9 +239,34 @@ async function index() {
     mapLoad$.next(mapPlaceables);
   });
 
+  playerJoin$
+    .pipe(
+      withLatestFrom(gameState$),
+      filter(
+        ([player, gameState], _) =>
+          player.clientId !== gameState.myPlayer?.clientId
+      ),
+      buffer(frame$)
+    )
+    .subscribe((events) => {
+      if (events.length > 0) {
+        let gameState = events[0][1];
+
+        events.forEach((event) => {
+          gameState = addPlayer(event[1], event[0].x, event[0].y);
+        });
+
+        gameState$.next(gameState);
+      }
+    });
+
   if (process.env.DEBUG) {
     loadDebugger(body, gameArea);
   }
+
+  socket.on("PLAYER_JOIN", (player: Player) => {
+    playerJoin$.next(player);
+  });
 
   gameState$.next(initialGameState);
 }

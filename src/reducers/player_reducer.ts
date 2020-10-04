@@ -1,8 +1,9 @@
 import { GameState } from "../game_state";
 import { GRID_INTERVAL } from "../common";
 import { Direction, getModsFromDirection } from "../direction";
-import { Player, playerFactory } from "../models/player";
+import { isPlayer, Player, playerFactory } from "../models/player";
 import { cloneDeep } from "lodash";
+import { CoordinateBounds, GameObject } from "../types";
 
 export const addPlayer = (
   gameState: GameState,
@@ -10,8 +11,14 @@ export const addPlayer = (
   y: number
 ): GameState => {
   const newGameState = cloneDeep(gameState);
-  newGameState.myPlayer = playerFactory({ x, y });
-  newGameState.players.push(newGameState.myPlayer);
+
+  const newPlayer = playerFactory({ x, y });
+
+  if (!newGameState.myPlayer) {
+    newGameState.myPlayer = newPlayer;
+  }
+
+  newGameState.players.push(newPlayer);
 
   return newGameState;
 };
@@ -94,4 +101,29 @@ export const updatePlayerMovement = (
   }
 
   return gameState;
+};
+
+export const updatePlayers = (
+  gameObjects: GameObject[],
+  gameState: GameState,
+  coordinateBounds: CoordinateBounds
+): [GameObject[], GameState, CoordinateBounds] => {
+  const newGameState = cloneDeep(gameState);
+
+  const nonExistingPlayers = gameObjects.filter((gameObject) => {
+    return (
+      isPlayer(gameObject) &&
+      !newGameState.players.find(
+        (player) => gameObject.clientId == player.clientId
+      )
+    );
+  }) as Player[];
+
+  debugger;
+
+  const updatedPlayers = newGameState.players.concat(nonExistingPlayers);
+
+  newGameState.players = updatedPlayers;
+
+  return [gameObjects, newGameState, coordinateBounds];
 };
