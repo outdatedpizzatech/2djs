@@ -179,3 +179,13 @@ export const whenOtherPlayersAreFacingDirection$ = whenAPlayerFacesDirection$.pi
   filter(({ message, gameState }) => message.clientId !== gameState.myClientId),
   buffer(frame$)
 );
+
+export const whenOtherPlayersHaveMovementDirection$ = frameWithGameState$.pipe(
+  map(({ deltaTime, gameState }) => ({
+    deltaTime,
+    gameState,
+    players: Object.values(gameState.players).filter(
+      (player) => player?.clientId != gameState.myClientId
+    ),
+  }))
+);

@@ -14,6 +14,7 @@ import {
   whenMyPlayerHasNotSpawned$,
   whenOtherPlayersAreFacingDirection$,
   whenOtherPlayersHaveJoined$,
+  whenOtherPlayersHaveMovementDirection$,
   whenOtherPlayersStartMoving$,
   whenTheMapIsLoaded$,
 } from "./signals";
@@ -125,6 +126,24 @@ async function index() {
       newGameState,
       params.player
     );
+    gameState$.next(newGameState);
+  });
+
+  whenOtherPlayersHaveMovementDirection$.subscribe((params) => {
+    let newGameState = cloneDeep(params.gameState);
+
+    params.players
+      .filter((player) => !!player?.movementDirection)
+      .forEach((player) => {
+        if (player) {
+          newGameState = updatePlayerMovement(
+            params.deltaTime,
+            newGameState,
+            player
+          );
+        }
+      });
+
     gameState$.next(newGameState);
   });
 
