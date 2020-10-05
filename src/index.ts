@@ -4,6 +4,7 @@ import {
   frameWithGameState$,
   gameState$,
   mapLoadWithState$,
+  whenAPlayerFacesDirection$,
   whenAPlayerJoins$,
   whenAPlayerStartsMoving$,
   whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$,
@@ -11,6 +12,7 @@ import {
   whenMyPlayerExceedsDrawDistanceThreshold$,
   whenMyPlayerHasMovementDirection$,
   whenMyPlayerHasNotSpawned$,
+  whenOtherPlayersAreFacingDirection$,
   whenOtherPlayersHaveJoined$,
   whenOtherPlayersStartMoving$,
   whenTheMapIsLoaded$,
@@ -28,6 +30,7 @@ import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
 import {
   API_URI_BASE,
+  PLAYER_FACING_DIRECTION,
   PLAYER_JOIN,
   PLAYER_MOVE,
   SPAWN_COORDINATE,
@@ -91,6 +94,11 @@ async function index() {
 
   whenInputtingDirectionWhileMyPlayerIsNotMoving$.subscribe((params) => {
     gameState$.next(updateFacingDirectionForPlayer(params));
+
+    socket.emit(PLAYER_FACING_DIRECTION, {
+      clientId: params.player.clientId,
+      direction: params.direction,
+    });
   });
 
   frameWithGameState$.subscribe(({ gameState }) => {
@@ -133,11 +141,10 @@ async function index() {
     }
 
     let newGameState = cloneDeep(gameState);
-    newGameState = addPlayer(
-      newGameState,
-      SPAWN_COORDINATE.x,
-      SPAWN_COORDINATE.y
-    );
+    newGameState = addPlayer(newGameState, {
+      x: SPAWN_COORDINATE.x,
+      y: SPAWN_COORDINATE.y,
+    });
     const player = newGameState.players[newGameState.myClientId] as Player;
 
     socket.emit(PLAYER_JOIN, player);
@@ -157,7 +164,7 @@ async function index() {
       let newGameState = cloneDeep(events[0].gameState);
 
       events.forEach((event) => {
-        newGameState = addPlayer(newGameState, event.player.x, event.player.y);
+        newGameState = addPlayer(newGameState, event.player);
       });
 
       gameState$.next(newGameState);
@@ -187,6 +194,29 @@ async function index() {
     }
   });
 
+  whenOtherPlayersAreFacingDirection$.subscribe((events) => {
+    if (events.length > 0) {
+      let newGameState = events[0].gameState;
+
+      events.forEach((event) => {
+        const { message } = event;
+        const { direction } = message;
+        const player = newGameState.players[message.clientId];
+
+        if (player) {
+          newGameState =
+            updateFacingDirectionForPlayer({
+              direction,
+              player,
+              gameState: newGameState,
+            }) || newGameState;
+        }
+      });
+
+      gameState$.next(newGameState);
+    }
+  });
+
   if (process.env.DEBUG) {
     loadDebugger(body, gameArea);
   }
@@ -204,6 +234,13 @@ async function index() {
       direction: Direction;
     }) => {
       whenAPlayerStartsMoving$.next(message);
+    }
+  );
+
+  socket.on(
+    PLAYER_FACING_DIRECTION,
+    (message: { clientId: string; direction: Direction }) => {
+      whenAPlayerFacesDirection$.next(message);
     }
   );
 

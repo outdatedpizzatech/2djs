@@ -7,10 +7,9 @@ import { GameObject } from "../game_object";
 
 export const addPlayer = (
   gameState: GameState,
-  x: number,
-  y: number
+  player: Partial<Player>
 ): GameState => {
-  const newPlayer = playerFactory({ x, y });
+  const newPlayer = playerFactory(player);
 
   if (!gameState.myClientId) {
     gameState.myClientId = newPlayer.clientId;
