@@ -20,6 +20,15 @@ export const addPlayer = (
   return gameState;
 };
 
+export const removePlayer = (
+  gameState: GameState,
+  clientId: string
+): GameState => {
+  delete gameState.players[clientId];
+
+  return gameState;
+};
+
 export const updatePlayerMovementDirection = (params: {
   direction: Direction;
   gameState: GameState;

@@ -6,6 +6,7 @@ import {
   mapLoadWithState$,
   whenAPlayerFacesDirection$,
   whenAPlayerJoins$,
+  whenAPlayerLeaves$,
   whenAPlayerStartsMoving$,
   whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$,
   whenInputtingDirectionWhileMyPlayerIsNotMoving$,
@@ -14,12 +15,17 @@ import {
   whenMyPlayerHasNotSpawned$,
   whenOtherPlayersAreFacingDirection$,
   whenOtherPlayersHaveJoined$,
+  whenOtherPlayersHaveLeft$,
   whenOtherPlayersHaveMovementDirection$,
   whenOtherPlayersStartMoving$,
   whenTheMapIsLoaded$,
 } from "./signals";
 import { GameState } from "./game_state";
-import { addPlayer, updatePlayerMovement } from "./reducers/player_reducer";
+import {
+  addPlayer,
+  removePlayer,
+  updatePlayerMovement,
+} from "./reducers/player_reducer";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
 import { Direction, getModsFromDirection } from "./direction";
@@ -33,6 +39,7 @@ import {
   API_URI_BASE,
   PLAYER_FACING_DIRECTION,
   PLAYER_JOIN,
+  PLAYER_LEAVE,
   PLAYER_MOVE,
   SPAWN_COORDINATE,
 } from "./common";
@@ -190,6 +197,18 @@ async function index() {
     }
   });
 
+  whenOtherPlayersHaveLeft$.subscribe((events) => {
+    if (events.length > 0) {
+      let newGameState = cloneDeep(events[0].gameState);
+
+      events.forEach((event) => {
+        newGameState = removePlayer(newGameState, event.clientId);
+      });
+
+      gameState$.next(newGameState);
+    }
+  });
+
   whenOtherPlayersStartMoving$.subscribe((events) => {
     if (events.length > 0) {
       let newGameState = events[0].gameState;
@@ -262,6 +281,10 @@ async function index() {
       whenAPlayerFacesDirection$.next(message);
     }
   );
+
+  socket.on(PLAYER_LEAVE, (clientId: string) => {
+    whenAPlayerLeaves$.next(clientId);
+  });
 
   gameState$.next(initialGameState);
 }
