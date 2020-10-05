@@ -95,7 +95,7 @@ export const whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$ = inputDire
     gameState,
     player: gameState.players[gameState.myClientId] as Player,
   })),
-  filter(({ player }) => !!player && !player.movementDirection),
+  filter(({ player }) => !!player && player.movementQueue.length == 0),
   filter(({ gameState, player, direction }) => {
     if (!player) return false;
 
@@ -128,7 +128,7 @@ export const whenMyPlayerHasMovementDirection$ = frameWithGameState$.pipe(
     player: gameState.players[gameState.myClientId] as Player,
   })),
   filter(({ player }) => !!player),
-  filter(({ player }) => !!player.movementDirection)
+  filter(({ player }) => player.movementQueue.length > 0)
 );
 
 export const whenMyPlayerExceedsDrawDistanceThreshold$ = frameWithGameState$.pipe(

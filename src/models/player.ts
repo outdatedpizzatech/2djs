@@ -9,8 +9,8 @@ import { API_URI_BASE, SPAWN_COORDINATE } from "../common";
 
 export interface Player extends Debuggable, GameObject {
   objectType: "Player";
-  movementDirection: Direction;
   moving: boolean;
+  movementQueue: Direction[];
   facingDirection: Direction;
   movementSpeed: number;
   clientId: string;
@@ -31,7 +31,6 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
 
   const particularProperties = {
     objectType: "Player" as "Player",
-    movementDirection: attributes.movementDirection || Direction.NONE,
     facingDirection: attributes.facingDirection || Direction.DOWN,
     movementSpeed: attributes.movementSpeed || 80,
     debug: {
@@ -41,15 +40,16 @@ export const playerFactory = (attributes: Partial<Player>): Player => {
     groupId: attributes.groupId,
     moving: false,
     clientId: attributes.clientId || uuidv4(),
+    movementQueue: new Array<Direction>(),
   };
 
   return { ...positionableProperties, ...particularProperties };
 };
 
 export const getAnimationFrames = (targetPlayer: Player): number[] | null => {
-  const movementDirection = targetPlayer.movementDirection;
+  const movementDirection = targetPlayer.movementQueue[0];
 
-  if (movementDirection == Direction.NONE) {
+  if (movementDirection == null) {
     return null;
   }
 

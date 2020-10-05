@@ -140,7 +140,7 @@ async function index() {
     let newGameState = cloneDeep(params.gameState);
 
     params.players
-      .filter((player) => !!player?.movementDirection)
+      .filter((player) => (player?.movementQueue.length || 0) > 0)
       .forEach((player) => {
         if (player) {
           newGameState = updatePlayerMovement(

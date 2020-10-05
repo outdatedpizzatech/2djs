@@ -39,7 +39,7 @@ export const updatePlayerMovementDirection = (params: {
   const playerToUpdate = gameState.players[player.clientId];
 
   if (playerToUpdate) {
-    playerToUpdate.movementDirection = direction;
+    playerToUpdate.movementQueue.push(direction);
     gameState.players[player.clientId] = playerToUpdate;
   }
 
@@ -97,7 +97,9 @@ export const updatePlayerMovement = (
     return gameState;
   }
 
-  const { movementDirection, movementSpeed } = playerToUpdate;
+  const { movementQueue, movementSpeed } = playerToUpdate;
+
+  const movementDirection = movementQueue[0];
 
   const [xMod, yMod] = getModsFromDirection(movementDirection);
 
@@ -128,7 +130,7 @@ export const updatePlayerMovement = (
 
   if (haltMovement) {
     playerToUpdate.moving = false;
-    playerToUpdate.movementDirection = Direction.NONE;
+    playerToUpdate.movementQueue = playerToUpdate.movementQueue.slice(1);
   }
 
   gameState.players[player.clientId] = playerToUpdate;
