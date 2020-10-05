@@ -176,8 +176,7 @@ export const whenOtherPlayersStartMoving$ = whenAPlayerStartsMoving$.pipe(
     message,
     gameState,
   })),
-  filter(({ message, gameState }) => message.clientId !== gameState.myClientId),
-  buffer(frame$)
+  filter(({ message, gameState }) => message.clientId !== gameState.myClientId)
 );
 
 export const whenOtherPlayersAreFacingDirection$ = whenAPlayerFacesDirection$.pipe(

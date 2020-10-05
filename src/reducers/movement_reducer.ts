@@ -15,10 +15,6 @@ export const updateMovementForPlayer = (params: {
 }) => {
   const { direction, gameState, player } = params;
 
-  if (!player) {
-    return;
-  }
-
   return flow(
     () => cloneDeep(gameState),
     (newGameState) =>

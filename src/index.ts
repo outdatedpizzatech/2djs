@@ -209,26 +209,18 @@ async function index() {
     }
   });
 
-  whenOtherPlayersStartMoving$.subscribe((events) => {
-    if (events.length > 0) {
-      let newGameState = events[0].gameState;
+  whenOtherPlayersStartMoving$.subscribe(({ message, gameState }) => {
+    const { direction } = message;
+    const player = gameState.players[message.clientId];
 
-      events.forEach((event) => {
-        const { message } = event;
-        const { direction } = message;
-        const player = newGameState.players[message.clientId];
-
-        if (player) {
-          newGameState =
-            updateMovementForPlayer({
-              direction,
-              player,
-              gameState: newGameState,
-            }) || newGameState;
-        }
+    if (player) {
+      gameState = updateMovementForPlayer({
+        direction,
+        player,
+        gameState,
       });
 
-      gameState$.next(newGameState);
+      gameState$.next(gameState);
     }
   });
 
