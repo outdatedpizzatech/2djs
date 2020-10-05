@@ -10,6 +10,7 @@ interface RenderFixture {
 export function renderGameSpace(): RenderFixture {
   const body = document.getElementsByTagName("body")[0];
   body.style.backgroundColor = "black";
+  body.style.overflow = "hidden";
 
   const gameArea = document.createElement("div");
   gameArea.style.width = `${CAMERA_WIDTH}px`;
