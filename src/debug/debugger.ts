@@ -12,6 +12,8 @@ import { isHouseWall } from "../models/house_wall";
 import { isHouseFloor } from "../models/house_floor";
 import { isRoof } from "../models/roof";
 import { Positionable } from "../positionable";
+import { mousemove$ } from "../signals/input";
+import { GRID_INTERVAL } from "../common";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -98,6 +100,28 @@ export const loadDebugger = (
     } else {
       gridCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
     }
+  });
+
+  const mouseCanvas = document.createElement("canvas");
+  mouseCanvas.width = CAMERA_WIDTH;
+  mouseCanvas.height = CAMERA_HEIGHT;
+  mouseCanvas.style.zIndex = "10000";
+  mouseCanvas.style.position = "absolute";
+  gameArea.appendChild(mouseCanvas);
+
+  const mouseCtx = mouseCanvas.getContext("2d") as CanvasRenderingContext2D;
+
+  mousemove$.subscribe((event) => {
+    const boundingRect = gridCanvas.getBoundingClientRect();
+    mouseCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+    mouseCtx.fillStyle = "rgba(0, 0, 0, 0.25)";
+    const x = event.x - boundingRect.x;
+    const y = event.y - boundingRect.y;
+    const snapX = Math.floor(x / GRID_INTERVAL) * GRID_INTERVAL;
+    const snapY = Math.floor(y / GRID_INTERVAL) * GRID_INTERVAL;
+    mouseCtx.fillRect(snapX, snapY + 4, GRID_INTERVAL, GRID_INTERVAL);
+    console.log("x ", event.x - boundingRect.x);
+    console.log("y ", event.y - boundingRect.y);
   });
 
   gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {

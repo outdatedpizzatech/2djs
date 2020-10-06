@@ -11,6 +11,7 @@ export const renderGridLines = (ctx: CanvasRenderingContext2D) => {
   const yOffset = (CAMERA_HEIGHT % GRID_INTERVAL) / 2;
 
   ctx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+  ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
 
   for (let x = 0; x < CAMERA_WIDTH / GRID_INTERVAL; x++) {
     ctx.beginPath();

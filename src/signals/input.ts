@@ -8,6 +8,7 @@ import { getFromCoordinateMap } from "../coordinate_map";
 
 const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
 const keyup$ = fromEvent<KeyboardEvent>(document, "keyup");
+export const mousemove$ = fromEvent<MouseEvent>(document, "mousemove");
 const keyActions$ = merge(keydown$, keyup$);
 const keyMap$ = keyActions$.pipe(
   scan<KeyboardEvent, KeyMap>((acc, val) => {
