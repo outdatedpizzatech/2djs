@@ -1,6 +1,6 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
 import { frame$, frameWithGameState$, gameState$ } from "../signals";
-import { map, throttleTime } from "rxjs/operators";
+import { map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { fromEvent } from "rxjs";
 import { renderGridLines } from "./grid_lines";
 import { Player } from "../models/player";
@@ -18,28 +18,35 @@ import { GRID_INTERVAL } from "../common";
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
   debugArea.style.width = `${CAMERA_WIDTH}px`;
+  debugArea.style.fontFamily = `Helvetica`;
   debugArea.style.height = `100px`;
   debugArea.style.marginTop = `10px`;
   debugArea.style.marginLeft = "auto";
   debugArea.style.marginRight = "auto";
   debugArea.style.background = "gray";
+  debugArea.style.display = "grid";
+  debugArea.style.gridTemplateColumns = "10% 10% 10%";
   body.appendChild(debugArea);
 
   const gridLinesLabel = document.createElement("label");
   const gridLinesInput = document.createElement("input");
   gridLinesInput.type = "checkbox";
-  gridLinesLabel.innerText = "Show Gridlines";
+  gridLinesLabel.innerText = "Gridlines";
+  gridLinesLabel.style.color = "white";
+  gridLinesLabel.style.padding = "10%";
   debugArea.appendChild(gridLinesLabel);
   gridLinesLabel.prepend(gridLinesInput);
 
   const fpsDiv = document.createElement("div");
   fpsDiv.style.background = "green";
   fpsDiv.style.color = "white";
+  fpsDiv.style.padding = "10%";
   debugArea.appendChild(fpsDiv);
 
   const objectsDiv = document.createElement("div");
   objectsDiv.style.background = "blue";
   objectsDiv.style.color = "white";
+  objectsDiv.style.padding = "10%";
   debugArea.appendChild(objectsDiv);
 
   return {
@@ -111,18 +118,26 @@ export const loadDebugger = (
 
   const mouseCtx = mouseCanvas.getContext("2d") as CanvasRenderingContext2D;
 
-  mousemove$.subscribe((event) => {
-    const boundingRect = gridCanvas.getBoundingClientRect();
-    mouseCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-    mouseCtx.fillStyle = "rgba(0, 0, 0, 0.25)";
-    const x = event.x - boundingRect.x;
-    const y = event.y - boundingRect.y;
-    const snapX = Math.floor(x / GRID_INTERVAL) * GRID_INTERVAL;
-    const snapY = Math.floor(y / GRID_INTERVAL) * GRID_INTERVAL;
-    mouseCtx.fillRect(snapX, snapY + 4, GRID_INTERVAL, GRID_INTERVAL);
-    console.log("x ", event.x - boundingRect.x);
-    console.log("y ", event.y - boundingRect.y);
-  });
+  mousemove$
+    .pipe(withLatestFrom(gameState$))
+    .subscribe(([event, gameState]) => {
+      const boundingRect = gridCanvas.getBoundingClientRect();
+      mouseCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+      mouseCtx.fillStyle = "rgba(0, 0, 0, 0.25)";
+      const x = event.x - boundingRect.x;
+      const y = event.y - boundingRect.y;
+      const snapX = Math.floor(x / GRID_INTERVAL) * GRID_INTERVAL;
+      const magicYOffset = 4;
+      const snapY =
+        Math.floor(y / GRID_INTERVAL) * GRID_INTERVAL + magicYOffset;
+      mouseCtx.fillRect(snapX, snapY, GRID_INTERVAL, GRID_INTERVAL);
+      const { camera } = gameState;
+      const { worldX, worldY } = camera.offset();
+      const gameObjectCoordinate = {
+        x: (snapX - worldX) / GRID_INTERVAL,
+        y: (snapY - worldY) / GRID_INTERVAL,
+      };
+    });
 
   gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
     console.log("gameState: ", gameState);
