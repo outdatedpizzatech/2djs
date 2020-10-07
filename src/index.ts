@@ -65,7 +65,7 @@ async function index() {
   frameWithGameState$.subscribe(({ gameState }) => {
     bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
 
-    renderGround(bufferCtx, camera);
+    renderGround(bufferCtx, gameState.camera);
     renderAllObjects(bufferCtx, gameState);
 
     visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
