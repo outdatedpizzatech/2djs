@@ -14,18 +14,21 @@ import { isRoof } from "../models/roof";
 import { Positionable } from "../positionable";
 import { mousemove$ } from "../signals/input";
 import { GRID_INTERVAL } from "../common";
+import { GameObject, Placeable } from "../game_object";
+import { CoordinateMap } from "../coordinate_map";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
   debugArea.style.width = `${CAMERA_WIDTH}px`;
   debugArea.style.fontFamily = `Helvetica`;
-  debugArea.style.height = `100px`;
+  debugArea.style.fontSize = `12px`;
+  debugArea.style.height = `60px`;
   debugArea.style.marginTop = `10px`;
   debugArea.style.marginLeft = "auto";
   debugArea.style.marginRight = "auto";
   debugArea.style.background = "gray";
   debugArea.style.display = "grid";
-  debugArea.style.gridTemplateColumns = "10% 10% 10%";
+  debugArea.style.gridTemplateColumns = "10% 10% 10% 10% 10% 10% 10% 10%";
   body.appendChild(debugArea);
 
   const gridLinesLabel = document.createElement("label");
@@ -49,10 +52,24 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   objectsDiv.style.padding = "10%";
   debugArea.appendChild(objectsDiv);
 
+  const coordinatesDiv = document.createElement("div");
+  coordinatesDiv.style.background = "purple";
+  coordinatesDiv.style.color = "white";
+  coordinatesDiv.style.padding = "10%";
+  debugArea.appendChild(coordinatesDiv);
+
+  const layerInteractiveDiv = document.createElement("div");
+  layerInteractiveDiv.style.background = "brown";
+  layerInteractiveDiv.style.color = "white";
+  layerInteractiveDiv.style.padding = "10%";
+  debugArea.appendChild(layerInteractiveDiv);
+
   return {
     gridlines: gridLinesInput,
     fps: fpsDiv,
     objects: objectsDiv,
+    coordinates: coordinatesDiv,
+    layerInteractiveDiv,
   };
 };
 
@@ -118,6 +135,19 @@ export const loadDebugger = (
 
   const mouseCtx = mouseCanvas.getContext("2d") as CanvasRenderingContext2D;
 
+  const getAtPath = (
+    map: CoordinateMap<Placeable>,
+    x: number,
+    y: number
+  ): Partial<GameObject> => {
+    const xRow = map[x];
+    if (xRow) {
+      return xRow[y] || {};
+    }
+
+    return {};
+  };
+
   mousemove$
     .pipe(withLatestFrom(gameState$))
     .subscribe(([event, gameState]) => {
@@ -137,6 +167,16 @@ export const loadDebugger = (
         x: (snapX - worldX) / GRID_INTERVAL,
         y: (snapY - worldY) / GRID_INTERVAL,
       };
+      debug.coordinates.innerText = `Mouse:\r${gameObjectCoordinate.x},${gameObjectCoordinate.y}`;
+
+      const interactiveObject = getAtPath(
+        gameState.layerMaps.interactableMap,
+        gameObjectCoordinate.x,
+        gameObjectCoordinate.y
+      );
+      debug.layerInteractiveDiv.innerText = `Interactive Layer: ${
+        interactiveObject.objectType || ""
+      }`;
     });
 
   gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
