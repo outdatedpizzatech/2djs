@@ -12,10 +12,12 @@ import { isHouseWall } from "../models/house_wall";
 import { isHouseFloor } from "../models/house_floor";
 import { isRoof } from "../models/roof";
 import { Positionable } from "../positionable";
-import { mousemove$ } from "../signals/input";
-import { GRID_INTERVAL } from "../common";
+import { mousemove$, mouseup$ } from "../signals/input";
+import { API_URI_BASE, GRID_INTERVAL } from "../common";
 import { GameObject, Placeable } from "../game_object";
 import { CoordinateMap } from "../coordinate_map";
+import { GameState } from "../game_state";
+import axios from "axios";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -59,10 +61,28 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   debugArea.appendChild(coordinatesDiv);
 
   const layerInteractiveDiv = document.createElement("div");
-  layerInteractiveDiv.style.background = "brown";
+  layerInteractiveDiv.style.background = "#333333";
   layerInteractiveDiv.style.color = "white";
   layerInteractiveDiv.style.padding = "10%";
   debugArea.appendChild(layerInteractiveDiv);
+
+  const layerPassiveDiv = document.createElement("div");
+  layerPassiveDiv.style.background = "#444444";
+  layerPassiveDiv.style.color = "white";
+  layerPassiveDiv.style.padding = "10%";
+  debugArea.appendChild(layerPassiveDiv);
+
+  const layerGroundDiv = document.createElement("div");
+  layerGroundDiv.style.background = "#555555";
+  layerGroundDiv.style.color = "white";
+  layerGroundDiv.style.padding = "10%";
+  debugArea.appendChild(layerGroundDiv);
+
+  const layerOverheadDiv = document.createElement("div");
+  layerOverheadDiv.style.background = "#666666";
+  layerOverheadDiv.style.color = "white";
+  layerOverheadDiv.style.padding = "10%";
+  debugArea.appendChild(layerOverheadDiv);
 
   return {
     gridlines: gridLinesInput,
@@ -70,6 +90,9 @@ const mountDebugArea = (body: HTMLBodyElement) => {
     objects: objectsDiv,
     coordinates: coordinatesDiv,
     layerInteractiveDiv,
+    layerPassiveDiv,
+    layerOverheadDiv,
+    layerGroundDiv,
   };
 };
 
@@ -148,35 +171,82 @@ export const loadDebugger = (
     return {};
   };
 
-  mousemove$
-    .pipe(withLatestFrom(gameState$))
-    .subscribe(([event, gameState]) => {
-      const boundingRect = gridCanvas.getBoundingClientRect();
-      mouseCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-      mouseCtx.fillStyle = "rgba(0, 0, 0, 0.25)";
-      const x = event.x - boundingRect.x;
-      const y = event.y - boundingRect.y;
-      const snapX = Math.floor(x / GRID_INTERVAL) * GRID_INTERVAL;
-      const magicYOffset = 4;
-      const snapY =
-        Math.floor(y / GRID_INTERVAL) * GRID_INTERVAL + magicYOffset;
-      mouseCtx.fillRect(snapX, snapY, GRID_INTERVAL, GRID_INTERVAL);
+  const withSnapping = map((event: MouseEvent) => {
+    const boundingRect = gridCanvas.getBoundingClientRect();
+    const x = event.x - boundingRect.x;
+    const y = event.y - boundingRect.y;
+    const snapX = Math.floor(x / GRID_INTERVAL) * GRID_INTERVAL;
+    const magicYOffset = 4;
+    const snapY = Math.floor(y / GRID_INTERVAL) * GRID_INTERVAL + magicYOffset;
+    return { x: snapX, y: snapY };
+  });
+
+  const withNormalizedCoordinate = map(
+    (params: { gameState: GameState; x: number; y: number }) => {
+      const { gameState, x, y } = params;
       const { camera } = gameState;
       const { worldX, worldY } = camera.offset();
-      const gameObjectCoordinate = {
-        x: (snapX - worldX) / GRID_INTERVAL,
-        y: (snapY - worldY) / GRID_INTERVAL,
+      return {
+        x: (x - worldX) / GRID_INTERVAL,
+        y: (y - worldY) / GRID_INTERVAL,
       };
-      debug.coordinates.innerText = `Mouse:\r${gameObjectCoordinate.x},${gameObjectCoordinate.y}`;
+    }
+  );
+
+  const mouseMoveWithNormalizedCoordinate$ = mousemove$.pipe(
+    withSnapping,
+    withLatestFrom(gameState$),
+    map(([{ x, y }, gameState]) => ({ x, y, gameState })),
+    withNormalizedCoordinate
+  );
+
+  mousemove$.pipe(withSnapping).subscribe(({ x, y }) => {
+    mouseCtx.clearRect(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+    mouseCtx.fillStyle = "rgba(0, 0, 0, 0.25)";
+    mouseCtx.fillRect(x, y, GRID_INTERVAL, GRID_INTERVAL);
+  });
+
+  mouseMoveWithNormalizedCoordinate$
+    .pipe(withLatestFrom(gameState$))
+    .subscribe(([{ x, y }, gameState]) => {
+      debug.coordinates.innerText = `Mouse:\r${x},${y}`;
 
       const interactiveObject = getAtPath(
         gameState.layerMaps.interactableMap,
-        gameObjectCoordinate.x,
-        gameObjectCoordinate.y
+        x,
+        y
       );
       debug.layerInteractiveDiv.innerText = `Interactive Layer: ${
         interactiveObject.objectType || ""
       }`;
+
+      const overheadObject = getAtPath(gameState.layerMaps.overheadMap, x, y);
+      debug.layerOverheadDiv.innerText = `Overhead Layer: ${
+        overheadObject.objectType || ""
+      }`;
+
+      const passiveObject = getAtPath(gameState.layerMaps.passiveMap, x, y);
+      debug.layerPassiveDiv.innerText = `Passive Layer: ${
+        passiveObject.objectType || ""
+      }`;
+
+      const groundObject = getAtPath(gameState.layerMaps.groundMap, x, y);
+      debug.layerGroundDiv.innerText = `Ground Layer: ${
+        groundObject.objectType || ""
+      }`;
+    });
+
+  mouseup$
+    .pipe(withLatestFrom(mouseMoveWithNormalizedCoordinate$))
+    .subscribe(async ([event, { x, y }]) => {
+      if (event.button == 0) {
+        const result = await axios.post(`${API_URI_BASE}/game_objects`, {
+          objectType: "Tree",
+          layer: "interactive",
+          x,
+          y,
+        });
+      }
     });
 
   gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
