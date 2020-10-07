@@ -23,3 +23,12 @@ export const updateFieldRenderables = (
 
   return gameState;
 };
+
+export const addToFieldRenderables = (
+  gameObject: GameObject,
+  gameState: GameState
+) => {
+  gameState.fieldRenderables.push(gameObject);
+
+  return gameState;
+};

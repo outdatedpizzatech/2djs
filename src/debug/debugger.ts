@@ -1,10 +1,10 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
 import { frame$, frameWithGameState$, gameState$ } from "../signals";
-import { map, throttleTime, withLatestFrom } from "rxjs/operators";
+import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { fromEvent } from "rxjs";
 import { renderGridLines } from "./grid_lines";
 import { Player } from "../models/player";
-import { isTree } from "../models/tree";
+import { isTree, treeFactory } from "../models/tree";
 import { isWall } from "../models/wall";
 import { isWater } from "../models/water";
 import { isStreet } from "../models/street";
@@ -12,12 +12,13 @@ import { isHouseWall } from "../models/house_wall";
 import { isHouseFloor } from "../models/house_floor";
 import { isRoof } from "../models/roof";
 import { Positionable } from "../positionable";
-import { mousemove$, mouseup$ } from "../signals/input";
+import { mousedown$, mouseheld$, mousemove$, mouseup$ } from "../signals/input";
 import { API_URI_BASE, GRID_INTERVAL } from "../common";
 import { GameObject, Placeable } from "../game_object";
 import { CoordinateMap } from "../coordinate_map";
 import { GameState } from "../game_state";
 import axios from "axios";
+import { addObjectToMap } from "../reducers/map_reducer";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -162,13 +163,13 @@ export const loadDebugger = (
     map: CoordinateMap<Placeable>,
     x: number,
     y: number
-  ): Partial<GameObject> => {
+  ): Partial<GameObject> | null => {
     const xRow = map[x];
     if (xRow) {
-      return xRow[y] || {};
+      return xRow[y] || null;
     }
 
-    return {};
+    return null;
   };
 
   const withSnapping = map((event: MouseEvent) => {
@@ -217,35 +218,53 @@ export const loadDebugger = (
         y
       );
       debug.layerInteractiveDiv.innerText = `Interactive Layer: ${
-        interactiveObject.objectType || ""
+        interactiveObject?.objectType ?? ""
       }`;
 
       const overheadObject = getAtPath(gameState.layerMaps.overheadMap, x, y);
       debug.layerOverheadDiv.innerText = `Overhead Layer: ${
-        overheadObject.objectType || ""
+        overheadObject?.objectType ?? ""
       }`;
 
       const passiveObject = getAtPath(gameState.layerMaps.passiveMap, x, y);
       debug.layerPassiveDiv.innerText = `Passive Layer: ${
-        passiveObject.objectType || ""
+        passiveObject?.objectType ?? ""
       }`;
 
       const groundObject = getAtPath(gameState.layerMaps.groundMap, x, y);
       debug.layerGroundDiv.innerText = `Ground Layer: ${
-        groundObject.objectType || ""
+        groundObject?.objectType ?? ""
       }`;
     });
 
-  mouseup$
-    .pipe(withLatestFrom(mouseMoveWithNormalizedCoordinate$))
-    .subscribe(async ([event, { x, y }]) => {
-      if (event.button == 0) {
-        const result = await axios.post(`${API_URI_BASE}/game_objects`, {
-          objectType: "Tree",
-          layer: "interactive",
-          x,
-          y,
-        });
+  frame$
+    .pipe(
+      withLatestFrom(mouseheld$),
+      filter(([_, mouseHeld]) => mouseHeld),
+      withLatestFrom(mouseMoveWithNormalizedCoordinate$),
+      withLatestFrom(gameState$)
+    )
+    .subscribe(async ([[_, { x, y }], gameState]) => {
+      const retrieved = getAtPath(gameState.layerMaps.interactableMap, x, y);
+      if (retrieved) {
+        return;
+      }
+
+      const gameObject = treeFactory({
+        x,
+        y,
+      });
+      const result = await axios.post(
+        `${API_URI_BASE}/game_objects`,
+        gameObject
+      );
+      if (result.status == 201) {
+        gameState$.next(
+          addObjectToMap({
+            gameState,
+            gameObject,
+          })
+        );
       }
     });
 

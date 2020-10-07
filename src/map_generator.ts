@@ -9,17 +9,9 @@ import { emptyFactory } from "./models/empty";
 import { doorFactory } from "./models/door";
 import axios from "axios";
 import { playerFactory } from "./models/player";
-import { Layer } from "./types";
 import { CoordinateBounds } from "./coordinate";
 import { GameObject } from "./game_object";
 import { API_URI_BASE } from "./common";
-
-const stringToLayer = (layerName: string): Layer => {
-  if (layerName == "overhead") return Layer.OVERHEAD;
-  if (layerName == "passive") return Layer.PASSIVE;
-  if (layerName == "ground") return Layer.GROUND;
-  return Layer.INTERACTIVE;
-};
 
 export const generateMap = async (
   coordinateBounds: CoordinateBounds
@@ -34,37 +26,36 @@ export const generateMap = async (
   const gameObjects = result.data.map(
     (data: {
       objectType: string;
-      layer: string;
+      layer: number;
       x: number;
       y: number;
       groupId?: number;
       role?: string;
     }) => {
-      const layer = stringToLayer(data.layer);
       const { objectType } = data;
 
       if (objectType == "Empty") {
-        return emptyFactory({ ...data, objectType, layer });
+        return emptyFactory({ ...data, objectType });
       } else if (objectType == "Door") {
-        return doorFactory({ ...data, objectType, layer });
+        return doorFactory({ ...data, objectType });
       } else if (objectType == "HouseFloor") {
-        return houseFloorFactory({ ...data, objectType, layer });
+        return houseFloorFactory({ ...data, objectType });
       } else if (objectType == "HouseWall") {
         const role =
           data.role == "front" ? HouseWallRole.FRONT : HouseWallRole.SIDE;
-        return houseWallFactory({ ...data, objectType, layer, role });
+        return houseWallFactory({ ...data, objectType, role });
       } else if (objectType == "Roof") {
-        return roofFactory({ ...data, objectType, layer });
+        return roofFactory({ ...data, objectType });
       } else if (objectType == "Street") {
-        return streetFactory({ ...data, objectType, layer });
+        return streetFactory({ ...data, objectType });
       } else if (objectType == "Water") {
-        return waterFactory({ ...data, objectType, layer });
+        return waterFactory({ ...data, objectType });
       } else if (objectType == "Tree") {
-        return treeFactory({ ...data, objectType, layer });
+        return treeFactory({ ...data, objectType });
       } else if (objectType == "Wall") {
-        return wallFactory({ ...data, objectType, layer });
+        return wallFactory({ ...data, objectType });
       } else if (objectType == "Player") {
-        return playerFactory({ ...data, objectType, layer });
+        return playerFactory({ ...data, objectType });
       }
     }
   );

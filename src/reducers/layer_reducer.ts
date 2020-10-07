@@ -42,3 +42,31 @@ export const updateLayerMaps = (
 
   return gameState;
 };
+
+export const addToLayerMaps = (
+  gameObject: GameObject,
+  gameState: GameState
+) => {
+  if (gameObject.layer == Layer.GROUND) {
+    const xRow = gameState.layerMaps.groundMap[gameObject.x] || {};
+    xRow[gameObject.y] = gameObject;
+    gameState.layerMaps.groundMap[gameObject.x] = xRow;
+  }
+  if (gameObject.layer == Layer.OVERHEAD) {
+    const xRow = gameState.layerMaps.overheadMap[gameObject.x] || {};
+    xRow[gameObject.y] = gameObject;
+    gameState.layerMaps.overheadMap[gameObject.x] = xRow;
+  }
+  if (gameObject.layer == Layer.PASSIVE) {
+    const xRow = gameState.layerMaps.passiveMap[gameObject.x] || {};
+    xRow[gameObject.y] = gameObject;
+    gameState.layerMaps.passiveMap[gameObject.x] = xRow;
+  }
+  if (gameObject.layer == Layer.INTERACTIVE) {
+    const xRow = gameState.layerMaps.interactableMap[gameObject.x] || {};
+    xRow[gameObject.y] = gameObject;
+    gameState.layerMaps.interactableMap[gameObject.x] = xRow;
+  }
+
+  return gameState;
+};
