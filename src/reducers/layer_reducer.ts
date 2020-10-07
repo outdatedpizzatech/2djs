@@ -43,6 +43,15 @@ export const updateLayerMaps = (
   return gameState;
 };
 
+export const clearLayerMaps = (gameState: GameState) => {
+  gameState.layerMaps.groundMap = {};
+  gameState.layerMaps.overheadMap = {};
+  gameState.layerMaps.passiveMap = {};
+  gameState.layerMaps.interactableMap = {};
+
+  return gameState;
+};
+
 export const addToLayerMaps = (
   gameObject: GameObject,
   gameState: GameState

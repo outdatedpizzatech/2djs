@@ -1,10 +1,15 @@
 import { cloneDeep, flow } from "lodash";
 import {
   addToFieldRenderables,
+  clearFieldRenderables,
   updateFieldRenderables,
 } from "./field_renderables_reducer";
 import { updatePlayers } from "./player_reducer";
-import { addToLayerMaps, updateLayerMaps } from "./layer_reducer";
+import {
+  addToLayerMaps,
+  clearLayerMaps,
+  updateLayerMaps,
+} from "./layer_reducer";
 import { GameObject } from "../game_object";
 import { GameState } from "../game_state";
 import { CoordinateBounds } from "../coordinate";
@@ -23,6 +28,14 @@ export const updateMapWithObjects = (params: {
     (newGameState) => updatePlayers(gameObjects, newGameState),
     (newGameState) =>
       updateLayerMaps(gameObjects, newGameState, coordinateBounds)
+  )();
+};
+
+export const clearMapOfObjects = (gameState: GameState) => {
+  return flow(
+    () => cloneDeep(gameState),
+    (newGameState) => clearFieldRenderables(newGameState),
+    (newGameState) => clearLayerMaps(newGameState)
   )();
 };
 

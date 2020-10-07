@@ -24,6 +24,12 @@ export const updateFieldRenderables = (
   return gameState;
 };
 
+export const clearFieldRenderables = (gameState: GameState) => {
+  gameState.fieldRenderables = [];
+
+  return gameState;
+};
+
 export const addToFieldRenderables = (
   gameObject: GameObject,
   gameState: GameState

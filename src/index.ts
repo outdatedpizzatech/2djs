@@ -18,7 +18,10 @@ import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
 import { getLoadBoundsForCoordinate } from "./coordinate";
 import { Placeable } from "./game_object";
-import { updateMapWithObjects } from "./reducers/map_reducer";
+import {
+  clearMapOfObjects,
+  updateMapWithObjects,
+} from "./reducers/map_reducer";
 import { cloneDeep } from "lodash";
 import { addMovementSubscriptions } from "./movement";
 import { addSessionsSubscriptions } from "./sessions";
@@ -53,7 +56,12 @@ async function index() {
   addSessionsSubscriptions();
 
   mapLoadWithState$.subscribe((params) => {
-    gameState$.next(updateMapWithObjects(params));
+    gameState$.next(
+      updateMapWithObjects({
+        ...params,
+        gameState: clearMapOfObjects(params.gameState),
+      })
+    );
   });
 
   frameWithGameState$.subscribe(({ gameState }) => {

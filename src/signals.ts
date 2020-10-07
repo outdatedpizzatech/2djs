@@ -63,7 +63,7 @@ export const whenMyPlayerExceedsDrawDistanceThreshold$ = frameWithGameState$.pip
   filter(({ player }) => !!player),
   filter(({ player, coordinate }) => {
     const distance = getDistance(player, coordinate);
-    return distance > DRAW_DISTANCE;
+    return distance > DRAW_DISTANCE / 2;
   })
 );
 
