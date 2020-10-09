@@ -23,6 +23,7 @@ import { GameState } from "../game_state";
 import axios from "axios";
 import { addObjectToMap } from "../reducers/map_reducer";
 import { getLoadBoundsForCoordinate } from "../coordinate";
+import { GameObject } from "../game_object";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -65,39 +66,25 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   coordinatesDiv.style.padding = "10%";
   debugArea.appendChild(coordinatesDiv);
 
-  const layerInteractiveDiv = document.createElement("div");
-  layerInteractiveDiv.style.background = "#333333";
-  layerInteractiveDiv.style.color = "white";
-  layerInteractiveDiv.style.padding = "10%";
-  debugArea.appendChild(layerInteractiveDiv);
+  const layerInspectorDiv = document.createElement("div");
+  layerInspectorDiv.style.fontFamily = `Monospace`;
+  layerInspectorDiv.style.fontSize = `12px`;
+  layerInspectorDiv.style.background = "#333333";
+  layerInspectorDiv.style.color = "white";
+  layerInspectorDiv.style.position = "absolute";
+  layerInspectorDiv.style.top = "0";
+  layerInspectorDiv.style.left = "0";
+  layerInspectorDiv.style.zIndex = "9999999999999";
+  layerInspectorDiv.style.opacity = "0.95";
 
-  const layerPassiveDiv = document.createElement("div");
-  layerPassiveDiv.style.background = "#444444";
-  layerPassiveDiv.style.color = "white";
-  layerPassiveDiv.style.padding = "10%";
-  debugArea.appendChild(layerPassiveDiv);
-
-  const layerGroundDiv = document.createElement("div");
-  layerGroundDiv.style.background = "#555555";
-  layerGroundDiv.style.color = "white";
-  layerGroundDiv.style.padding = "10%";
-  debugArea.appendChild(layerGroundDiv);
-
-  const layerOverheadDiv = document.createElement("div");
-  layerOverheadDiv.style.background = "#666666";
-  layerOverheadDiv.style.color = "white";
-  layerOverheadDiv.style.padding = "10%";
-  debugArea.appendChild(layerOverheadDiv);
+  body.appendChild(layerInspectorDiv);
 
   return {
     gridlines: gridLinesInput,
     fps: fpsDiv,
     objects: objectsDiv,
     coordinates: coordinatesDiv,
-    layerInteractiveDiv,
-    layerPassiveDiv,
-    layerOverheadDiv,
-    layerGroundDiv,
+    layerInspectorDiv,
   };
 };
 
@@ -240,6 +227,10 @@ export const loadDebugger = (
     mouseCtx.fillRect(x, y, GRID_INTERVAL, GRID_INTERVAL);
   });
 
+  const objectDisplay = (gameObject: GameObject | null) => {
+    return `${gameObject?.objectType ?? ""} ${JSON.stringify(gameObject)}`;
+  };
+
   mouseMoveWithNormalizedCoordinate$
     .pipe(withLatestFrom(gameState$))
     .subscribe(([{ x, y }, gameState]) => {
@@ -250,24 +241,26 @@ export const loadDebugger = (
         x,
         y
       );
-      debug.layerInteractiveDiv.innerText = `Interactive Layer: ${
-        interactiveObject?.objectType ?? ""
-      }`;
-
       const overheadObject = getAtPath(gameState.layerMaps.overheadMap, x, y);
-      debug.layerOverheadDiv.innerText = `Overhead Layer: ${
-        overheadObject?.objectType ?? ""
-      }`;
-
       const passiveObject = getAtPath(gameState.layerMaps.passiveMap, x, y);
-      debug.layerPassiveDiv.innerText = `Passive Layer: ${
-        passiveObject?.objectType ?? ""
-      }`;
-
       const groundObject = getAtPath(gameState.layerMaps.groundMap, x, y);
-      debug.layerGroundDiv.innerText = `Ground Layer: ${
-        groundObject?.objectType ?? ""
-      }`;
+
+      let inspectorText = "";
+
+      if (interactiveObject)
+        inspectorText += `\r Interactive Layer: ${objectDisplay(
+          interactiveObject
+        )} \r`;
+      if (overheadObject)
+        inspectorText += `\r Overhead Layer: ${objectDisplay(
+          overheadObject
+        )} \r`;
+      if (passiveObject)
+        inspectorText += `\r Passive Layer: ${objectDisplay(passiveObject)} \r`;
+      if (groundObject)
+        inspectorText += `\r Ground Layer: ${objectDisplay(groundObject)} \r`;
+
+      debug.layerInspectorDiv.innerText = inspectorText;
     });
 
   frame$
