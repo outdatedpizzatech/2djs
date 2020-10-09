@@ -25,6 +25,7 @@ import {
 import { addMovementSubscriptions } from "./movement";
 import { addSessionsSubscriptions } from "./sessions";
 import { cloneDeep } from "./clone_deep";
+import { withLatestFrom } from "rxjs/operators";
 
 async function index() {
   const bufferCanvas = addView();
@@ -40,11 +41,10 @@ async function index() {
     camera,
     layerMaps: {
       interactableMap: {} as CoordinateMap<GameObject>,
-      groundMap: {} as CoordinateMap<Placeable>,
-      overheadMap: {} as CoordinateMap<Placeable>,
-      passiveMap: {} as CoordinateMap<Placeable>,
+      groundMap: {} as CoordinateMap<GameObject>,
+      overheadMap: {} as CoordinateMap<GameObject>,
+      passiveMap: {} as CoordinateMap<GameObject>,
     },
-    fieldRenderables: [],
     players: {},
   };
 
@@ -70,16 +70,18 @@ async function index() {
     gameState$.next(newGameState);
   });
 
-  frameWithGameState$.subscribe(({ gameState }) => {
-    bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
+  frameWithGameState$
+    .pipe(withLatestFrom(coordinatesToLoadForMyPlayer$))
+    .subscribe(([{ gameState }, coordinate]) => {
+      bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
 
-    renderGround(bufferCtx, gameState.camera);
-    renderAllObjects(bufferCtx, gameState);
+      renderGround(bufferCtx, gameState.camera);
+      renderAllObjects(bufferCtx, gameState, coordinate);
 
-    visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
-    visibleCtx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
-    visibleCtx.drawImage(bufferCanvas, 0, 0);
-  });
+      visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
+      visibleCtx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
+      visibleCtx.drawImage(bufferCanvas, 0, 0);
+    });
 
   whenMyPlayerExceedsDrawDistanceThreshold$.subscribe(({ player }) => {
     coordinatesToLoadForMyPlayer$.next({

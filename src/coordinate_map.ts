@@ -19,10 +19,34 @@ export type LayerMarkKey = keyof LayerMark;
 
 export interface LayerMaps {
   interactableMap: CoordinateMap<GameObject>;
-  groundMap: CoordinateMap<Placeable>;
-  passiveMap: CoordinateMap<Placeable>;
-  overheadMap: CoordinateMap<Placeable>;
+  groundMap: CoordinateMap<GameObject>;
+  passiveMap: CoordinateMap<GameObject>;
+  overheadMap: CoordinateMap<GameObject>;
 }
+
+export const getAtPath = <T>(
+  map: CoordinateMap<T>,
+  x: number,
+  y: number
+): T | null => {
+  const xRow = map[x];
+  if (xRow) {
+    return xRow[y] || null;
+  }
+
+  return null;
+};
+
+export const setAtPath = <T>(
+  map: CoordinateMap<T>,
+  x: number,
+  y: number,
+  value: T
+): void => {
+  const xRow = map[x] || {};
+  xRow[y] = value;
+  map[x] = xRow;
+};
 
 export function addToCoordinateMap<T>(
   x: number,

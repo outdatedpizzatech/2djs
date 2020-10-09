@@ -1,104 +1,91 @@
 import { GameState } from "../../game_state";
-import { CoordinateMap, LayerMark } from "../../coordinate_map";
-import { pipelineRender } from "./pipeline";
-import { Player } from "../../models/player";
+import { CoordinateMap, getAtPath, setAtPath } from "../../coordinate_map";
+import { matchesObject, pipelineRender } from "./pipeline";
+import { isPlayer, Player } from "../../models/player";
+import { Coordinate, getLoadBoundsForCoordinate } from "../../coordinate";
 import { GameObject } from "../../game_object";
-import { Layer } from "../../types";
 
 export const renderAllObjects = (
   bufferCtx: CanvasRenderingContext2D,
-  gameState: GameState
+  gameState: GameState,
+  coordinate: Coordinate
 ) => {
-  const { camera, fieldRenderables, layerMaps, players } = gameState;
+  const { layerMaps, players } = gameState;
+  const coordinateBounds = getLoadBoundsForCoordinate(coordinate);
 
-  let doNotRenderMap = {} as CoordinateMap<LayerMark>;
-  let renderedMap = {} as CoordinateMap<LayerMark>;
   const playersArray = Object.values(gameState.players) as Player[];
-  const renderables = fieldRenderables.concat(playersArray);
 
-  const groundRenderables = new Array<GameObject>();
-  const passiveRenderables = new Array<GameObject>();
-  const interactiveRenderables = new Array<GameObject>();
-  const overheadRenderables = new Array<GameObject>();
-
-  renderables.forEach((renderable) => {
-    if (renderable.layer == Layer.GROUND) {
-      groundRenderables.push(renderable);
-    }
-    if (renderable.layer == Layer.PASSIVE) {
-      passiveRenderables.push(renderable);
-    }
-    if (renderable.layer == Layer.INTERACTIVE) {
-      interactiveRenderables.push(renderable);
-    }
-    if (renderable.layer == Layer.OVERHEAD) {
-      overheadRenderables.push(renderable);
-    }
-  });
-
-  groundRenderables.forEach((renderable) => {
-    [doNotRenderMap, renderedMap] = pipelineRender(
-      renderable,
-      playersArray,
-      camera,
-      layerMaps,
-      doNotRenderMap,
-      renderedMap,
-      bufferCtx
-    );
-  });
-
-  passiveRenderables.forEach((renderable) => {
-    [doNotRenderMap, renderedMap] = pipelineRender(
-      renderable,
-      playersArray,
-      camera,
-      layerMaps,
-      doNotRenderMap,
-      renderedMap,
-      bufferCtx
-    );
-  });
-
-  interactiveRenderables.forEach((renderable) => {
-    [doNotRenderMap, renderedMap] = pipelineRender(
-      renderable,
-      playersArray,
-      camera,
-      layerMaps,
-      doNotRenderMap,
-      renderedMap,
-      bufferCtx
-    );
-  });
+  const { interactableMap, groundMap, passiveMap, overheadMap } = layerMaps;
 
   const idsOverlappingPlayer: { [key: number]: boolean } = {};
 
   const myPlayer = players[gameState.myClientId];
 
   if (myPlayer) {
-    overheadRenderables.forEach((renderable) => {
-      if (
-        renderable.groupId &&
-        renderable.x === myPlayer.x &&
-        renderable.y === myPlayer.y
-      ) {
-        idsOverlappingPlayer[renderable.groupId] = true;
+    for (let x = coordinateBounds.min.x; x <= coordinateBounds.max.x; x++) {
+      if (!overheadMap[x]) continue;
+
+      for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
+        const renderable = getAtPath(overheadMap, x, y);
+
+        if (
+          renderable &&
+          renderable.groupId &&
+          renderable.x === myPlayer.x &&
+          renderable.y === myPlayer.y
+        ) {
+          idsOverlappingPlayer[renderable.groupId] = true;
+        }
       }
-    });
+    }
   }
 
-  overheadRenderables.forEach((renderable) => {
-    if (!renderable.groupId || !idsOverlappingPlayer[renderable.groupId]) {
-      [doNotRenderMap, renderedMap] = pipelineRender(
-        renderable,
-        playersArray,
-        camera,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        bufferCtx
-      );
+  const renderForLayer = (layer: CoordinateMap<GameObject>) => {
+    const renderedMap: any = {};
+
+    for (let x = coordinateBounds.min.x; x <= coordinateBounds.max.x; x++) {
+      if (!layer[x]) continue;
+
+      for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
+        if (getAtPath(renderedMap, x, y)) {
+          continue;
+        }
+
+        const renderable = getAtPath(layer, x, y);
+
+        if (renderable) {
+          let renderCount = 1;
+
+          for (let xa = x + 1; xa <= coordinateBounds.max.x; xa++) {
+            const futureRenderable = getAtPath(layer, xa, y);
+            if (!matchesObject(renderable, futureRenderable)) {
+              break;
+            }
+
+            setAtPath(renderedMap, xa, y, true);
+            renderCount++;
+          }
+
+          if (!isPlayer(renderable)) {
+            if (
+              !renderable.groupId ||
+              !idsOverlappingPlayer[renderable.groupId]
+            ) {
+              pipelineRender(renderable, bufferCtx, renderCount, gameState);
+            }
+          }
+        }
+      }
     }
+  };
+
+  renderForLayer(groundMap);
+  renderForLayer(passiveMap);
+  renderForLayer(interactableMap);
+
+  playersArray.forEach((player) => {
+    pipelineRender(player, bufferCtx, 1, gameState);
   });
+
+  renderForLayer(overheadMap);
 };

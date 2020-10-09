@@ -1,8 +1,13 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH, offset, withinLens } from "../camera";
-import { frame$, frameWithGameState$, gameState$ } from "../signals";
+import {
+  coordinatesToLoadForMyPlayer$,
+  frame$,
+  frameWithGameState$,
+  gameState$,
+} from "../signals";
 import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { fromEvent } from "rxjs";
-import { renderGridLines } from "./grid_lines";
+import { Debuggable, renderGridLines } from "./grid_lines";
 import { Player } from "../models/player";
 import { isTree, treeFactory } from "../models/tree";
 import { isWall } from "../models/wall";
@@ -11,14 +16,13 @@ import { isStreet } from "../models/street";
 import { isHouseWall } from "../models/house_wall";
 import { isHouseFloor } from "../models/house_floor";
 import { isRoof } from "../models/roof";
-import { Positionable } from "../positionable";
-import { mousedown$, mouseheld$, mousemove$, mouseup$ } from "../signals/input";
+import { mouseheld$, mousemove$ } from "../signals/input";
 import { API_URI_BASE, GRID_INTERVAL } from "../common";
-import { GameObject, Placeable } from "../game_object";
-import { CoordinateMap } from "../coordinate_map";
+import { getAtPath } from "../coordinate_map";
 import { GameState } from "../game_state";
 import axios from "axios";
 import { addObjectToMap } from "../reducers/map_reducer";
+import { getLoadBoundsForCoordinate } from "../coordinate";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -103,30 +107,72 @@ export const loadDebugger = (
 ) => {
   const debug = mountDebugArea(body);
 
+  const renderDebugObject = (debuggable: Debuggable | null) => {
+    if (isTree(debuggable)) debuggable.debug.color = "#FFFFFF";
+    if (isWall(debuggable)) debuggable.debug.color = "#0b63bb";
+    if (isWater(debuggable)) debuggable.debug.color = "#acc896";
+    if (isStreet(debuggable)) debuggable.debug.color = "#226e71";
+    if (isHouseWall(debuggable)) debuggable.debug.color = "#599e03";
+    if (isHouseFloor(debuggable)) debuggable.debug.color = "#7417ed";
+    if (isRoof(debuggable)) debuggable.debug.color = "#022efb";
+  };
+
   frame$.pipe(throttleTime(1000)).subscribe((deltaTime) => {
     debug.fps.innerText = `FPS: ${Math.round(1 / deltaTime)}`;
   });
 
-  frameWithGameState$.subscribe(({ gameState }) => {
-    const { camera, fieldRenderables } = gameState;
-    const playersArray = Object.values(gameState.players) as Player[];
-    const positionables = new Array<Positionable>()
-      .concat(playersArray)
-      .concat(fieldRenderables);
-    const objectsInView = positionables.filter((positionable) =>
-      withinLens(camera, positionable)
-    );
-    debug.objects.innerText = `Rendered Objects: ${objectsInView.length}`;
-    fieldRenderables.forEach((renderable) => {
-      if (isTree(renderable)) renderable.debug.color = "#FFFFFF";
-      if (isWall(renderable)) renderable.debug.color = "#0b63bb";
-      if (isWater(renderable)) renderable.debug.color = "#acc896";
-      if (isStreet(renderable)) renderable.debug.color = "#226e71";
-      if (isHouseWall(renderable)) renderable.debug.color = "#599e03";
-      if (isHouseFloor(renderable)) renderable.debug.color = "#7417ed";
-      if (isRoof(renderable)) renderable.debug.color = "#022efb";
+  frameWithGameState$
+    .pipe(withLatestFrom(coordinatesToLoadForMyPlayer$))
+    .subscribe(([{ gameState }, coordinate]) => {
+      const { camera, layerMaps } = gameState;
+      const playersArray = Object.values(gameState.players) as Player[];
+      const coordinateBounds = getLoadBoundsForCoordinate(coordinate);
+      const { interactableMap, groundMap, passiveMap, overheadMap } = layerMaps;
+
+      let objectsInView = 0;
+
+      for (let x = coordinateBounds.min.x; x <= coordinateBounds.max.x; x++) {
+        for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
+          const renderable = getAtPath(groundMap, x, y);
+          if (renderable) {
+            renderDebugObject(renderable as any);
+            if (withinLens(camera, renderable)) objectsInView++;
+          }
+        }
+      }
+      for (let x = coordinateBounds.min.x; x <= coordinateBounds.max.x; x++) {
+        for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
+          const renderable = getAtPath(passiveMap, x, y);
+          if (renderable) {
+            renderDebugObject(renderable as any);
+            if (withinLens(camera, renderable)) objectsInView++;
+          }
+        }
+      }
+      for (let x = coordinateBounds.min.x; x <= coordinateBounds.max.x; x++) {
+        for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
+          const renderable = getAtPath(interactableMap, x, y);
+          if (renderable) {
+            renderDebugObject(renderable as any);
+            if (withinLens(camera, renderable)) objectsInView++;
+          }
+        }
+      }
+      for (let x = coordinateBounds.min.x; x <= coordinateBounds.max.x; x++) {
+        for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
+          const renderable = getAtPath(overheadMap, x, y);
+          if (renderable) {
+            renderDebugObject(renderable as any);
+            if (withinLens(camera, renderable)) objectsInView++;
+          }
+        }
+      }
+
+      objectsInView += playersArray.filter((player) =>
+        withinLens(camera, player)
+      ).length;
+      debug.objects.innerText = `Rendered Objects: ${objectsInView}`;
     });
-  });
 
   const $gridlineValue = fromEvent<InputEvent>(
     debug?.gridlines as HTMLInputElement,
@@ -158,19 +204,6 @@ export const loadDebugger = (
   gameArea.appendChild(mouseCanvas);
 
   const mouseCtx = mouseCanvas.getContext("2d") as CanvasRenderingContext2D;
-
-  const getAtPath = (
-    map: CoordinateMap<Placeable>,
-    x: number,
-    y: number
-  ): Partial<GameObject> | null => {
-    const xRow = map[x];
-    if (xRow) {
-      return xRow[y] || null;
-    }
-
-    return null;
-  };
 
   const withSnapping = map((event: MouseEvent) => {
     const boundingRect = gridCanvas.getBoundingClientRect();

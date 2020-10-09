@@ -10,7 +10,6 @@ import { GameObject } from "./game_object";
 
 export interface GameState {
   camera: Camera;
-  fieldRenderables: GameObject[];
   layerMaps: LayerMaps;
   myClientId: string;
   players: { [key: string]: Player | undefined };

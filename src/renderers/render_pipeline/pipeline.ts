@@ -1,5 +1,4 @@
 import { isTree } from "../../models/tree";
-import { CoordinateMap, LayerMaps, LayerMark } from "../../coordinate_map";
 import { renderPlayer } from "../model_renderers/player_renderer";
 import { renderTree } from "../model_renderers/tree_renderer";
 import { isWall } from "../../models/wall";
@@ -12,127 +11,64 @@ import { isHouseWall } from "../../models/house_wall";
 import { renderHouseWall } from "../model_renderers/house_wall_renderer";
 import { isHouseFloor } from "../../models/house_floor";
 import { renderHouseFloor } from "../model_renderers/house_floor_renderer";
-import { Camera, withinLens } from "../../camera";
 import { isPlayer, Player } from "../../models/player";
-import { renderWithoutPatterning, renderWithPatterning } from "./optimizers";
 import { isRoof } from "../../models/roof";
 import { renderRoof } from "../model_renderers/roof_renderer";
 import { isDoor } from "../../models/door";
 import { renderDoor } from "../model_renderers/door_renderer";
+import { GameState } from "../../game_state";
+
+export const matchesObject = (a: any, b: any): boolean => {
+  if (isTree(a)) {
+    return isTree(b);
+  }
+  if (isHouseWall(a)) {
+    return isHouseWall(b);
+  }
+  if (isRoof(a)) {
+    return isRoof(b);
+  }
+  return false;
+};
 
 export const pipelineRender = (
   renderable: any,
-  players: Player[],
-  camera: Camera,
-  layerMaps: LayerMaps,
-  doNotRenderMap: CoordinateMap<LayerMark>,
-  renderedMap: CoordinateMap<LayerMark>,
-  bufferCtx: CanvasRenderingContext2D
-): [CoordinateMap<LayerMark>, CoordinateMap<LayerMark>] => {
-  if (withinLens(camera, renderable)) {
-    if (isStreet(renderable)) {
-      [doNotRenderMap, renderedMap] = renderWithoutPatterning(
-        renderable,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        () => {
-          renderStreet(renderable, camera, bufferCtx);
-        }
-      );
-    }
-    if (isHouseFloor(renderable)) {
-      [doNotRenderMap, renderedMap] = renderWithoutPatterning(
-        renderable,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        () => {
-          renderHouseFloor(renderable, camera, bufferCtx);
-        }
-      );
-    }
-    if (isTree(renderable)) {
-      [doNotRenderMap, renderedMap] = renderWithPatterning(
-        renderable,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        (count: number) => {
-          renderTree(renderable, camera, bufferCtx, count);
-        },
-        isTree
-      );
-    }
-    if (isWall(renderable)) {
-      [doNotRenderMap, renderedMap] = renderWithoutPatterning(
-        renderable,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        () => {
-          renderWall(renderable, camera, bufferCtx, layerMaps);
-        }
-      );
-    }
-    if (isHouseWall(renderable)) {
-      [doNotRenderMap, renderedMap] = renderWithPatterning(
-        renderable,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        (count: number) => {
-          renderHouseWall(renderable, camera, bufferCtx, count);
-        },
-        isHouseWall
-      );
-    }
-    if (isWater(renderable)) {
-      [doNotRenderMap, renderedMap] = renderWithoutPatterning(
-        renderable,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        () => {
-          renderWater(renderable, camera, bufferCtx);
-        }
-      );
-    }
-    if (isPlayer(renderable)) {
-      [doNotRenderMap, renderedMap] = renderWithoutPatterning(
-        renderable,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        () => {
-          renderPlayer(renderable, camera, bufferCtx);
-        }
-      );
-    }
-    if (isDoor(renderable)) {
-      [doNotRenderMap, renderedMap] = renderWithoutPatterning(
-        renderable,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        () => {
-          renderDoor(renderable, camera, bufferCtx, players);
-        }
-      );
-    }
-    if (isRoof(renderable)) {
-      [doNotRenderMap, renderedMap] = renderWithPatterning(
-        renderable,
-        layerMaps,
-        doNotRenderMap,
-        renderedMap,
-        (count: number) => {
-          renderRoof(renderable, camera, bufferCtx, count);
-        },
-        isRoof
-      );
-    }
-  }
+  bufferCtx: CanvasRenderingContext2D,
+  count: number,
+  gameState: GameState
+): void => {
+  const { camera, layerMaps, players } = gameState;
 
-  return [doNotRenderMap, renderedMap];
+  if (isStreet(renderable)) {
+    renderStreet(renderable, camera, bufferCtx);
+  }
+  if (isHouseFloor(renderable)) {
+    renderHouseFloor(renderable, camera, bufferCtx);
+  }
+  if (isTree(renderable)) {
+    renderTree(renderable, camera, bufferCtx, count);
+  }
+  if (isWall(renderable)) {
+    renderWall(renderable, camera, bufferCtx, layerMaps);
+  }
+  if (isHouseWall(renderable)) {
+    renderHouseWall(renderable, camera, bufferCtx, count);
+  }
+  if (isWater(renderable)) {
+    renderWater(renderable, camera, bufferCtx);
+  }
+  if (isPlayer(renderable)) {
+    renderPlayer(renderable, camera, bufferCtx);
+  }
+  if (isDoor(renderable)) {
+    renderDoor(
+      renderable,
+      camera,
+      bufferCtx,
+      Object.values(players) as Player[]
+    );
+  }
+  if (isRoof(renderable)) {
+    renderRoof(renderable, camera, bufferCtx, count);
+  }
 };
