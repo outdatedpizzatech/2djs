@@ -1,4 +1,4 @@
-import { Camera } from "../../camera";
+import { Camera, project } from "../../camera";
 import { GRID_INTERVAL } from "../../common";
 import {
   getAnimationFrames,
@@ -15,7 +15,7 @@ export const renderPlayer = (
   ctx: CanvasRenderingContext2D
 ) => {
   const { debug, facingDirection } = model;
-  const { worldX, worldY } = camera.project(model);
+  const { worldX, worldY } = project(camera, model);
 
   if (debug.color) {
     ctx.fillStyle = debug.color;

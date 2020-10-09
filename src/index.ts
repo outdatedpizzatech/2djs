@@ -17,14 +17,14 @@ import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
 import { getLoadBoundsForCoordinate } from "./coordinate";
-import { Placeable } from "./game_object";
+import { GameObject, Placeable } from "./game_object";
 import {
   clearMapOfObjects,
   updateMapWithObjects,
 } from "./reducers/map_reducer";
-import { cloneDeep } from "lodash";
 import { addMovementSubscriptions } from "./movement";
 import { addSessionsSubscriptions } from "./sessions";
+import { cloneDeep } from "./clone_deep";
 
 async function index() {
   const bufferCanvas = addView();
@@ -39,7 +39,7 @@ async function index() {
     myClientId: "",
     camera,
     layerMaps: {
-      interactableMap: {} as CoordinateMap<Placeable>,
+      interactableMap: {} as CoordinateMap<GameObject>,
       groundMap: {} as CoordinateMap<Placeable>,
       overheadMap: {} as CoordinateMap<Placeable>,
       passiveMap: {} as CoordinateMap<Placeable>,

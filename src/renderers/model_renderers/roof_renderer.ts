@@ -1,4 +1,4 @@
-import { Camera } from "../../camera";
+import { Camera, project } from "../../camera";
 import sprites from "../../sprite_collections/roof_sprite_collection";
 import { Roof } from "../../models/roof";
 import { GRID_INTERVAL } from "../../common";
@@ -9,7 +9,7 @@ export const renderRoof = (
   ctx: CanvasRenderingContext2D,
   xCount: number
 ) => {
-  const { worldX, worldY } = camera.project(model);
+  const { worldX, worldY } = project(camera, model);
 
   if (model.debug.color) {
     ctx.fillStyle = model.debug.color;

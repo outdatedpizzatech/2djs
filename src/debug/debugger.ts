@@ -1,4 +1,4 @@
-import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
+import { CAMERA_HEIGHT, CAMERA_WIDTH, offset, withinLens } from "../camera";
 import { frame$, frameWithGameState$, gameState$ } from "../signals";
 import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { fromEvent } from "rxjs";
@@ -114,7 +114,7 @@ export const loadDebugger = (
       .concat(playersArray)
       .concat(fieldRenderables);
     const objectsInView = positionables.filter((positionable) =>
-      camera.withinLens(positionable)
+      withinLens(camera, positionable)
     );
     debug.objects.innerText = `Rendered Objects: ${objectsInView.length}`;
     fieldRenderables.forEach((renderable) => {
@@ -186,7 +186,7 @@ export const loadDebugger = (
     (params: { gameState: GameState; x: number; y: number }) => {
       const { gameState, x, y } = params;
       const { camera } = gameState;
-      const { worldX, worldY } = camera.offset();
+      const { worldX, worldY } = offset(camera);
       return {
         x: (x - worldX) / GRID_INTERVAL,
         y: (y - worldY) / GRID_INTERVAL,

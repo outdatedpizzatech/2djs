@@ -1,4 +1,4 @@
-import { cloneDeep, flow } from "lodash";
+import { flow } from "lodash";
 import {
   addToFieldRenderables,
   clearFieldRenderables,
@@ -13,6 +13,7 @@ import {
 import { GameObject } from "../game_object";
 import { GameState } from "../game_state";
 import { CoordinateBounds } from "../coordinate";
+import { cloneDeep } from "../clone_deep";
 
 export const updateMapWithObjects = (params: {
   gameState: GameState;

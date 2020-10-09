@@ -3,7 +3,7 @@ import { filter, map, scan, withLatestFrom } from "rxjs/operators";
 import { getDirectionFromKeyMap, KeyMap } from "../input";
 import { frame$, gameState$ } from "../signals";
 import { Direction, getModsFromDirection } from "../direction";
-import { Player } from "../models/player";
+import { isPlayer, Player } from "../models/player";
 import { getFromCoordinateMap } from "../coordinate_map";
 
 const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
@@ -47,11 +47,17 @@ export const whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$ = inputDire
     const { x, y } = player;
     const [xMod, yMod] = getModsFromDirection(direction);
 
-    return !getFromCoordinateMap(
+    const foundObject = getFromCoordinateMap(
       x + xMod,
       y + yMod,
       gameState.layerMaps.interactableMap
     );
+
+    if (!foundObject) {
+      return true;
+    }
+
+    return isPlayer(foundObject) && foundObject.clientId == player.clientId;
   })
 );
 export const whenInputtingDirectionWhileMyPlayerIsNotMoving$ = inputDirectionForFrame$.pipe(

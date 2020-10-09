@@ -4,14 +4,40 @@ import { Positionable } from "./positionable";
 export const CAMERA_WIDTH = 1152;
 export const CAMERA_HEIGHT = 648;
 
-export interface Camera extends Positionable {
-  offset: () => { worldX: number; worldY: number };
-  project: (renderable: {
-    worldX: number;
-    worldY: number;
-  }) => { worldX: number; worldY: number };
-  withinLens: (renderable: { worldX: number; worldY: number }) => boolean;
-}
+export interface Camera extends Positionable {}
+
+export const offset = (camera: Camera) => {
+  return {
+    worldX: CAMERA_WIDTH / 2 - camera.worldX,
+    worldY: CAMERA_HEIGHT / 2 - camera.worldY,
+  };
+};
+
+export const project = (
+  camera: Camera,
+  renderable: { worldX: number; worldY: number }
+) => {
+  const { worldX, worldY } = offset(camera);
+
+  return {
+    worldX: renderable.worldX + worldX,
+    worldY: renderable.worldY + worldY,
+  };
+};
+
+export const withinLens = (
+  camera: Camera,
+  renderable: { worldX: number; worldY: number }
+) => {
+  const { worldX, worldY } = project(camera, renderable);
+
+  return (
+    worldX >= -GRID_INTERVAL &&
+    worldX < CAMERA_WIDTH &&
+    worldY >= -GRID_INTERVAL &&
+    worldY < CAMERA_HEIGHT
+  );
+};
 
 export const cameraFactory = (attributes: Partial<Camera>): Camera => {
   return {
@@ -19,29 +45,5 @@ export const cameraFactory = (attributes: Partial<Camera>): Camera => {
     y: attributes.y || 0,
     worldX: (attributes.x || 0) * GRID_INTERVAL,
     worldY: (attributes.y || 0) * GRID_INTERVAL,
-    offset: function () {
-      return {
-        worldX: CAMERA_WIDTH / 2 - this.worldX,
-        worldY: CAMERA_HEIGHT / 2 - this.worldY,
-      };
-    },
-    project: function (renderable: { worldX: number; worldY: number }) {
-      const { worldX, worldY } = this.offset();
-
-      return {
-        worldX: renderable.worldX + worldX,
-        worldY: renderable.worldY + worldY,
-      };
-    },
-    withinLens: function (renderable: { worldX: number; worldY: number }) {
-      const { worldX, worldY } = this.project(renderable);
-
-      return (
-        worldX >= -GRID_INTERVAL &&
-        worldX < CAMERA_WIDTH &&
-        worldY >= -GRID_INTERVAL &&
-        worldY < CAMERA_HEIGHT
-      );
-    },
   };
 };

@@ -1,6 +1,6 @@
 import { GRID_INTERVAL } from "../../common";
 import { Debuggable } from "../../debug/grid_lines";
-import { Camera } from "../../camera";
+import { Camera, project } from "../../camera";
 import { Positionable } from "../../positionable";
 
 interface Renderable extends Debuggable, Positionable {}
@@ -12,7 +12,7 @@ export const renderModel = (
   sprite: HTMLImageElement
 ) => {
   const { debug } = model;
-  const { worldX, worldY } = camera.project(model);
+  const { worldX, worldY } = project(camera, model);
 
   if (debug.color) {
     ctx.fillStyle = debug.color;

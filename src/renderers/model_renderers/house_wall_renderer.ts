@@ -1,5 +1,5 @@
 import { GRID_INTERVAL } from "../../common";
-import { Camera } from "../../camera";
+import { Camera, project } from "../../camera";
 import sprites from "../../sprite_collections/wall_sprite_collection";
 import { HouseWall, HouseWallRole } from "../../models/house_wall";
 
@@ -10,7 +10,7 @@ export const renderHouseWall = (
   xCount: number
 ) => {
   const { debug } = model;
-  const { worldX, worldY } = camera.project(model);
+  const { worldX, worldY } = project(camera, model);
 
   if (debug.color) {
     ctx.fillStyle = debug.color;

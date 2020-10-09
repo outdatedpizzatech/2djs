@@ -1,11 +1,11 @@
-import { Camera, CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
+import { Camera, CAMERA_HEIGHT, CAMERA_WIDTH, offset } from "../camera";
 import sprites from "../sprite_collections/grass_sprite_collection";
 
 export const renderGround = (
   bufferCtx: CanvasRenderingContext2D,
   camera: Camera
 ) => {
-  let { worldX: cameraX, worldY: cameraY } = camera.offset();
+  let { worldX: cameraX, worldY: cameraY } = offset(camera);
 
   const groundOffsetX = cameraX - CAMERA_WIDTH / 2;
   const groundOffsetY = cameraY - CAMERA_HEIGHT / 2;

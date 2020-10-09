@@ -12,7 +12,7 @@ import { isHouseWall } from "../../models/house_wall";
 import { renderHouseWall } from "../model_renderers/house_wall_renderer";
 import { isHouseFloor } from "../../models/house_floor";
 import { renderHouseFloor } from "../model_renderers/house_floor_renderer";
-import { Camera } from "../../camera";
+import { Camera, withinLens } from "../../camera";
 import { isPlayer, Player } from "../../models/player";
 import { renderWithoutPatterning, renderWithPatterning } from "./optimizers";
 import { isRoof } from "../../models/roof";
@@ -29,7 +29,7 @@ export const pipelineRender = (
   renderedMap: CoordinateMap<LayerMark>,
   bufferCtx: CanvasRenderingContext2D
 ): [CoordinateMap<LayerMark>, CoordinateMap<LayerMark>] => {
-  if (camera.withinLens(renderable)) {
+  if (withinLens(camera, renderable)) {
     if (isStreet(renderable)) {
       [doNotRenderMap, renderedMap] = renderWithoutPatterning(
         renderable,

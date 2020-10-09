@@ -1,4 +1,4 @@
-import { cloneDeep, flow } from "lodash";
+import { flow } from "lodash";
 import { GameState, updateCoordinateMap } from "../game_state";
 import {
   updatePlayerCoordinates,
@@ -7,6 +7,7 @@ import {
 } from "./player_reducer";
 import { Player } from "../models/player";
 import { Direction } from "../direction";
+import { cloneDeep } from "../clone_deep";
 
 export const updateMovementForPlayer = (params: {
   direction: Direction;

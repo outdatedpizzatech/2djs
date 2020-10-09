@@ -1,5 +1,5 @@
 import { GRID_INTERVAL } from "../../common";
-import { Camera } from "../../camera";
+import { Camera, project } from "../../camera";
 import { isWall, Wall } from "../../models/wall";
 import sprites from "../../sprite_collections/wall_sprite_collection";
 import { getFromCoordinateMap, LayerMaps } from "../../coordinate_map";
@@ -12,7 +12,7 @@ export const renderWall = (
   layerMaps: LayerMaps
 ) => {
   const { debug, x, y, layer } = model;
-  const { worldX, worldY } = camera.project(model);
+  const { worldX, worldY } = project(camera, model);
 
   if (debug.color) {
     ctx.fillStyle = debug.color;

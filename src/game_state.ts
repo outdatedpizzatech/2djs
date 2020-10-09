@@ -6,7 +6,6 @@ import {
   LayerMaps,
   removeFromCoordinateMap,
 } from "./coordinate_map";
-import { cloneDeep } from "lodash";
 import { GameObject } from "./game_object";
 
 export interface GameState {

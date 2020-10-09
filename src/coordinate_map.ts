@@ -1,4 +1,4 @@
-import { Placeable } from "./game_object";
+import { GameObject, Placeable } from "./game_object";
 
 export interface CoordinateMap<T> {
   [key: number]:
@@ -18,7 +18,7 @@ export interface LayerMark {
 export type LayerMarkKey = keyof LayerMark;
 
 export interface LayerMaps {
-  interactableMap: CoordinateMap<Placeable>;
+  interactableMap: CoordinateMap<GameObject>;
   groundMap: CoordinateMap<Placeable>;
   passiveMap: CoordinateMap<Placeable>;
   overheadMap: CoordinateMap<Placeable>;

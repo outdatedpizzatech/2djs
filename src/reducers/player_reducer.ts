@@ -2,8 +2,8 @@ import { GameState } from "../game_state";
 import { GRID_INTERVAL } from "../common";
 import { Direction, getModsFromDirection } from "../direction";
 import { isPlayer, Player, playerFactory } from "../models/player";
-import { cloneDeep } from "lodash";
 import { GameObject } from "../game_object";
+import { cloneDeep } from "../clone_deep";
 
 export const addPlayer = (
   gameState: GameState,

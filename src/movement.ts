@@ -5,7 +5,6 @@ import {
 } from "./reducers/movement_reducer";
 import { getModsFromDirection } from "./direction";
 import { PLAYER_FACING_DIRECTION, PLAYER_MOVE } from "./common";
-import { cloneDeep } from "lodash";
 import { updatePlayerMovement } from "./reducers/player_reducer";
 import {
   whenOtherPlayersAreFacingDirection$,
@@ -17,6 +16,7 @@ import {
   whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$,
   whenInputtingDirectionWhileMyPlayerIsNotMoving$,
 } from "./signals/input";
+import { cloneDeep } from "./clone_deep";
 
 export const addMovementSubscriptions = () => {
   whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$.subscribe(
