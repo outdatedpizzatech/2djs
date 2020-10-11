@@ -1,4 +1,4 @@
-import { BehaviorSubject, fromEvent, merge, Subject } from "rxjs";
+import { fromEvent, merge } from "rxjs";
 import { filter, map, scan, withLatestFrom } from "rxjs/operators";
 import { getDirectionFromKeyMap, KeyMap } from "../input";
 import { frame$, gameState$ } from "../signals";

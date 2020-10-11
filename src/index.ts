@@ -17,7 +17,7 @@ import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
 import { Coordinate, getLoadBoundsForCoordinate } from "./coordinate";
-import { GameObject, Placeable } from "./game_object";
+import { GameObject } from "./game_object";
 import {
   clearMapOfObjects,
   updateMapWithObjects,
@@ -25,14 +25,7 @@ import {
 import { addMovementSubscriptions } from "./movement";
 import { addSessionsSubscriptions } from "./sessions";
 import { cloneDeep } from "./clone_deep";
-import {
-  distinctUntilChanged,
-  filter,
-  map,
-  pairwise,
-  withLatestFrom,
-} from "rxjs/operators";
-import md5 from "md5";
+import { distinctUntilChanged, map, withLatestFrom } from "rxjs/operators";
 import deepEqual from "fast-deep-equal";
 
 const drawEntireScene = (params: {
