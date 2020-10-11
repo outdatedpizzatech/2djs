@@ -25,7 +25,15 @@ import {
 import { addMovementSubscriptions } from "./movement";
 import { addSessionsSubscriptions } from "./sessions";
 import { cloneDeep } from "./clone_deep";
-import { withLatestFrom } from "rxjs/operators";
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  pairwise,
+  withLatestFrom,
+} from "rxjs/operators";
+import md5 from "md5";
+import deepEqual from "fast-deep-equal";
 
 const drawEntireScene = (params: {
   bufferCtx: CanvasRenderingContext2D;
@@ -36,7 +44,6 @@ const drawEntireScene = (params: {
   coordinate: Coordinate;
 }) => {
   const {
-    bufferCtx,
     bufferCanvas,
     gameState,
     coordinate,
@@ -44,7 +51,6 @@ const drawEntireScene = (params: {
     visibleCanvas,
   } = params;
 
-  bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
   visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
 
   renderGround(visibleCtx, gameState.camera);
@@ -97,8 +103,12 @@ async function index() {
   });
 
   frameWithGameState$
-    .pipe(withLatestFrom(coordinatesToLoadForMyPlayer$))
-    .subscribe(([{ gameState }, coordinate]) => {
+    .pipe(
+      map(({ gameState }) => gameState),
+      distinctUntilChanged((p, q) => deepEqual(p, q)),
+      withLatestFrom(coordinatesToLoadForMyPlayer$)
+    )
+    .subscribe(([gameState, coordinate]) => {
       drawEntireScene({
         gameState,
         coordinate,
