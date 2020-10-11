@@ -24,6 +24,10 @@ export const frame$ = interval(1000 / FRAMERATE, animationFrameScheduler).pipe(
 export const whenTheMapIsLoaded$ = new Subject<GameObject[]>();
 export const coordinatesToLoadForMyPlayer$ = new Subject<Coordinate>();
 export const gameState$: Subject<GameState> = new Subject();
+export const layerVisibility$: Subject<{
+  [key: number]: boolean;
+}> = new Subject();
+
 
 export const frameWithGameState$ = frame$.pipe(
   withLatestFrom(gameState$),

@@ -4,11 +4,13 @@ import { matchesObject, pipelineRender } from "./pipeline";
 import { isPlayer, Player } from "../../models/player";
 import { Coordinate, getLoadBoundsForCoordinate } from "../../coordinate";
 import { GameObject } from "../../game_object";
+import { Layer } from "../../types";
 
 export const renderAllObjects = (
   bufferCtx: CanvasRenderingContext2D,
   gameState: GameState,
-  coordinate: Coordinate
+  coordinate: Coordinate,
+  layerVisibility: { [key: number]: boolean }
 ) => {
   const { layerMaps, players } = gameState;
   const coordinateBounds = getLoadBoundsForCoordinate(coordinate);
@@ -79,13 +81,25 @@ export const renderAllObjects = (
     }
   };
 
-  renderForLayer(groundMap);
-  renderForLayer(passiveMap);
-  renderForLayer(interactableMap);
+  if (layerVisibility[Layer.GROUND]) {
+    renderForLayer(groundMap);
+  }
 
-  playersArray.forEach((player) => {
-    pipelineRender(player, bufferCtx, 1, gameState);
-  });
+  if (layerVisibility[Layer.PASSIVE]) {
+    renderForLayer(passiveMap);
+  }
 
-  renderForLayer(overheadMap);
+  if (layerVisibility[Layer.INTERACTIVE]) {
+    renderForLayer(interactableMap);
+  }
+
+  if (layerVisibility[Layer.INTERACTIVE]) {
+    playersArray.forEach((player) => {
+      pipelineRender(player, bufferCtx, 1, gameState);
+    });
+  }
+
+  if (layerVisibility[Layer.OVERHEAD]) {
+    renderForLayer(overheadMap);
+  }
 };

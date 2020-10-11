@@ -25,12 +25,7 @@ export const updateCoordinateMap = (params: {
 
   const [xMod, yMod] = getModsFromDirection(direction);
 
-  setAtPath(
-    gameState.layerMaps.interactableMap,
-    x + xMod,
-    y + yMod,
-    player
-  );
+  setAtPath(gameState.layerMaps.interactableMap, x + xMod, y + yMod, player);
   removeAtPath(interactableMap, x, y);
 
   return gameState;

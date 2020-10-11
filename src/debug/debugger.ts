@@ -4,6 +4,7 @@ import {
   frame$,
   frameWithGameState$,
   gameState$,
+  layerVisibility$,
 } from "../signals";
 import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { fromEvent } from "rxjs";
@@ -305,7 +306,6 @@ export const loadDebugger = (
       withLatestFrom(gameState$)
     )
     .subscribe(async ([[_, { x, y }], gameState]) => {
-      console.log("uh, held...");
       const retrieved = getAtPath(gameState.layerMaps.interactableMap, x, y);
       if (!retrieved) {
         return;
@@ -328,5 +328,12 @@ export const loadDebugger = (
 
   gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
     console.log("gameState: ", gameState);
+  });
+
+  layerVisibility$.next({
+    [Layer.INTERACTIVE]: true,
+    [Layer.PASSIVE]: true,
+    [Layer.GROUND]: true,
+    [Layer.OVERHEAD]: true,
   });
 };

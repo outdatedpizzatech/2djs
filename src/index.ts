@@ -3,6 +3,7 @@ import {
   coordinatesToLoadForMyPlayer$,
   frameWithGameState$,
   gameState$,
+  layerVisibility$,
   mapLoadWithState$,
   whenMyPlayerExceedsDrawDistanceThreshold$,
   whenTheMapIsLoaded$,
@@ -35,6 +36,7 @@ const drawEntireScene = (params: {
   visibleCanvas: HTMLCanvasElement;
   visibleCtx: CanvasRenderingContext2D;
   coordinate: Coordinate;
+  layerVisibility: { [key: number]: boolean };
 }) => {
   const {
     bufferCanvas,
@@ -42,12 +44,13 @@ const drawEntireScene = (params: {
     coordinate,
     visibleCtx,
     visibleCanvas,
+    layerVisibility,
   } = params;
 
   visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
 
   renderGround(visibleCtx, gameState.camera);
-  renderAllObjects(visibleCtx, gameState, coordinate);
+  renderAllObjects(visibleCtx, gameState, coordinate, layerVisibility);
 
   visibleCtx.drawImage(bufferCanvas, 0, 0);
 };
@@ -99,9 +102,10 @@ async function index() {
     .pipe(
       map(({ gameState }) => gameState),
       distinctUntilChanged((p, q) => deepEqual(p, q)),
-      withLatestFrom(coordinatesToLoadForMyPlayer$)
+      withLatestFrom(coordinatesToLoadForMyPlayer$),
+      withLatestFrom(layerVisibility$)
     )
-    .subscribe(([gameState, coordinate]) => {
+    .subscribe(([[gameState, coordinate], layerVisibility]) => {
       drawEntireScene({
         gameState,
         coordinate,
@@ -109,6 +113,7 @@ async function index() {
         bufferCanvas,
         visibleCanvas,
         visibleCtx,
+        layerVisibility,
       });
     });
 
