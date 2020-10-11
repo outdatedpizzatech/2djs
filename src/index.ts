@@ -16,7 +16,7 @@ import { renderGround } from "./renderers/ground_renderer";
 import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
-import { getLoadBoundsForCoordinate } from "./coordinate";
+import { Coordinate, getLoadBoundsForCoordinate } from "./coordinate";
 import { GameObject, Placeable } from "./game_object";
 import {
   clearMapOfObjects,
@@ -26,6 +26,32 @@ import { addMovementSubscriptions } from "./movement";
 import { addSessionsSubscriptions } from "./sessions";
 import { cloneDeep } from "./clone_deep";
 import { withLatestFrom } from "rxjs/operators";
+
+const drawEntireScene = (params: {
+  bufferCtx: CanvasRenderingContext2D;
+  bufferCanvas: HTMLCanvasElement;
+  gameState: GameState;
+  visibleCanvas: HTMLCanvasElement;
+  visibleCtx: CanvasRenderingContext2D;
+  coordinate: Coordinate;
+}) => {
+  const {
+    bufferCtx,
+    bufferCanvas,
+    gameState,
+    coordinate,
+    visibleCtx,
+    visibleCanvas,
+  } = params;
+
+  bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
+  visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
+
+  renderGround(visibleCtx, gameState.camera);
+  renderAllObjects(visibleCtx, gameState, coordinate);
+
+  visibleCtx.drawImage(bufferCanvas, 0, 0);
+};
 
 async function index() {
   const bufferCanvas = addView();
@@ -73,14 +99,14 @@ async function index() {
   frameWithGameState$
     .pipe(withLatestFrom(coordinatesToLoadForMyPlayer$))
     .subscribe(([{ gameState }, coordinate]) => {
-      bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
-
-      renderGround(bufferCtx, gameState.camera);
-      renderAllObjects(bufferCtx, gameState, coordinate);
-
-      visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
-      visibleCtx.fillRect(0, 0, visibleCanvas.width, visibleCanvas.height);
-      visibleCtx.drawImage(bufferCanvas, 0, 0);
+      drawEntireScene({
+        gameState,
+        coordinate,
+        bufferCtx,
+        bufferCanvas,
+        visibleCanvas,
+        visibleCtx,
+      });
     });
 
   whenMyPlayerExceedsDrawDistanceThreshold$.subscribe(({ player }) => {
