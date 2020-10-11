@@ -26,10 +26,13 @@ export const walkingUpAnimation = [2, 3];
 export const walkingLeftAnimation = [4, 5];
 export const walkingRightAnimation = [6, 7];
 
-export const playerFactory = (attributes: Partial<Player>): Player => {
+export const playerFactory = (
+  attributes: Partial<Player> & { _id: string }
+): Player => {
   const positionableProperties = positionableFactory(attributes);
 
   const particularProperties = {
+    _id: attributes._id,
     objectType: "Player" as "Player",
     facingDirection: attributes.facingDirection || Direction.DOWN,
     movementSpeed: attributes.movementSpeed || 80,

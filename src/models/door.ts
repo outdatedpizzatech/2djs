@@ -12,9 +12,12 @@ export const isDoor = (unknownObject: any): unknownObject is Door => {
   return (unknownObject as Door).objectType === "Door";
 };
 
-export const doorFactory = (attributes: Partial<Door>): Door => {
+export const doorFactory = (
+  attributes: Partial<Door> & { _id: string }
+): Door => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
+    _id: attributes._id,
     objectType: "Door" as "Door",
     debug: {
       color: attributes.debug?.color,

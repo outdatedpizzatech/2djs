@@ -17,6 +17,7 @@ export function renderGameSpace(): RenderFixture {
   gameArea.style.height = `${CAMERA_HEIGHT}px`;
   gameArea.style.marginLeft = "auto";
   gameArea.style.marginRight = "auto";
+  gameArea.addEventListener("contextmenu", (e) => e.preventDefault());
   body.appendChild(gameArea);
 
   const visibleCanvas = document.createElement("canvas");

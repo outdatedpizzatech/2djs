@@ -4,20 +4,30 @@ import { getDirectionFromKeyMap, KeyMap } from "../input";
 import { frame$, gameState$ } from "../signals";
 import { Direction, getModsFromDirection } from "../direction";
 import { isPlayer, Player } from "../models/player";
-import { getFromCoordinateMap } from "../coordinate_map";
+import { getAtPath } from "../coordinate_map";
 
 const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
 const keyup$ = fromEvent<KeyboardEvent>(document, "keyup");
 export const mousemove$ = fromEvent<MouseEvent>(document, "mousemove");
 export const mouseup$ = fromEvent<MouseEvent>(document, "mouseup");
 export const mousedown$ = fromEvent<MouseEvent>(document, "mousedown");
-export const mouseheld$ = merge(
+export const mouse0held$ = merge(
   mousedown$.pipe(
     filter((event) => event.button == 0),
     map(() => true)
   ),
   mouseup$.pipe(
     filter((event) => event.button == 0),
+    map(() => false)
+  )
+);
+export const mouse2held$ = merge(
+  mousedown$.pipe(
+    filter((event) => event.button == 2),
+    map(() => true)
+  ),
+  mouseup$.pipe(
+    filter((event) => event.button == 2),
     map(() => false)
   )
 );
@@ -47,10 +57,10 @@ export const whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$ = inputDire
     const { x, y } = player;
     const [xMod, yMod] = getModsFromDirection(direction);
 
-    const foundObject = getFromCoordinateMap(
+    const foundObject = getAtPath(
+      gameState.layerMaps.interactableMap,
       x + xMod,
-      y + yMod,
-      gameState.layerMaps.interactableMap
+      y + yMod
     );
 
     if (!foundObject) {

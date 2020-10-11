@@ -7,7 +7,7 @@ import { cloneDeep } from "../clone_deep";
 
 export const addPlayer = (
   gameState: GameState,
-  player: Partial<Player>
+  player: Partial<Player> & { _id: string }
 ): GameState => {
   const newPlayer = playerFactory(player);
 

@@ -18,9 +18,12 @@ export const isHouseWall = (unknownObject: any): unknownObject is HouseWall => {
   return (unknownObject as HouseWall).objectType === "HouseWall";
 };
 
-export const houseWallFactory = (attributes: Partial<HouseWall>): HouseWall => {
+export const houseWallFactory = (
+  attributes: Partial<HouseWall> & { _id: string }
+): HouseWall => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
+    _id: attributes._id,
     objectType: "HouseWall" as "HouseWall",
     debug: {
       color: attributes.debug?.color,

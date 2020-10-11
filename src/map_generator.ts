@@ -25,6 +25,7 @@ export const generateMap = async (
 
   const gameObjects = result.data.map(
     (data: {
+      _id: string;
       objectType: string;
       layer: number;
       x: number;

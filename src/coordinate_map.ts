@@ -48,34 +48,13 @@ export const setAtPath = <T>(
   map[x] = xRow;
 };
 
-export function addToCoordinateMap<T>(
-  x: number,
-  y: number,
+export function removeAtPath<T>(
   coordinateMap: CoordinateMap<T>,
-  newObject: T
-): CoordinateMap<T> {
-  const xRowAdd = coordinateMap[x] || {};
-  xRowAdd[y] = newObject;
-  coordinateMap[x] = xRowAdd;
-  return coordinateMap;
-}
-
-export function removeFromCoordinateMap<T>(
   x: number,
-  y: number,
-  coordinateMap: CoordinateMap<T>
+  y: number
 ): CoordinateMap<T> {
   const xRowRemove = coordinateMap[x] || {};
   delete xRowRemove[y];
   coordinateMap[x] = xRowRemove;
   return coordinateMap;
-}
-
-export function getFromCoordinateMap<T>(
-  x: number,
-  y: number,
-  coordinateMap: CoordinateMap<T>
-): T | undefined {
-  const xRow = coordinateMap[x] || {};
-  return xRow[y];
 }

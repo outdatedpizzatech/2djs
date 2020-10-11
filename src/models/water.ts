@@ -12,9 +12,12 @@ export const isWater = (unknownObject: any): unknownObject is Water => {
   return (unknownObject as Water).objectType === "Water";
 };
 
-export const waterFactory = (attributes: Partial<Water>): Water => {
+export const waterFactory = (
+  attributes: Partial<Water> & { _id: string }
+): Water => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
+    _id: attributes._id,
     objectType: "Water" as "Water",
     debug: {
       color: attributes.debug?.color,

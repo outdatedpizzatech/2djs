@@ -35,6 +35,7 @@ export const addSessionsSubscriptions = () => {
     newGameState = addPlayer(newGameState, {
       x: SPAWN_COORDINATE.x,
       y: SPAWN_COORDINATE.y,
+      _id: "",
     });
     const player = newGameState.players[newGameState.myClientId] as Player;
 

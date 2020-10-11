@@ -12,9 +12,12 @@ export const isStreet = (unknownObject: any): unknownObject is Street => {
   return (unknownObject as Street).objectType === "Street";
 };
 
-export const streetFactory = (attributes: Partial<Street>): Street => {
+export const streetFactory = (
+  attributes: Partial<Street> & { _id: string }
+): Street => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
+    _id: attributes._id,
     objectType: "Street" as "Street",
     debug: {
       color: attributes.debug?.color,

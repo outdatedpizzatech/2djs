@@ -16,14 +16,15 @@ import { isStreet } from "../models/street";
 import { isHouseWall } from "../models/house_wall";
 import { isHouseFloor } from "../models/house_floor";
 import { isRoof } from "../models/roof";
-import { mouseheld$, mousemove$ } from "../signals/input";
+import { mouse0held$, mouse2held$, mousemove$ } from "../signals/input";
 import { API_URI_BASE, GRID_INTERVAL } from "../common";
 import { getAtPath } from "../coordinate_map";
 import { GameState } from "../game_state";
 import axios from "axios";
-import { addObjectToMap } from "../reducers/map_reducer";
+import { addObjectToMap, removeObjectFromMap } from "../reducers/map_reducer";
 import { getLoadBoundsForCoordinate } from "../coordinate";
 import { GameObject } from "../game_object";
+import { Layer } from "../types";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -265,7 +266,7 @@ export const loadDebugger = (
 
   frame$
     .pipe(
-      withLatestFrom(mouseheld$),
+      withLatestFrom(mouse0held$),
       filter(([_, mouseHeld]) => mouseHeld),
       withLatestFrom(mouseMoveWithNormalizedCoordinate$),
       withLatestFrom(gameState$)
@@ -275,7 +276,6 @@ export const loadDebugger = (
       if (retrieved) {
         return;
       }
-
       const gameObject = treeFactory({
         x,
         y,
@@ -284,11 +284,43 @@ export const loadDebugger = (
         `${API_URI_BASE}/game_objects`,
         gameObject
       );
+
+      const savedObject: GameObject = { ...gameObject, _id: result.data._id };
+
       if (result.status == 201) {
         gameState$.next(
           addObjectToMap({
             gameState,
-            gameObject,
+            gameObject: savedObject,
+          })
+        );
+      }
+    });
+
+  frame$
+    .pipe(
+      withLatestFrom(mouse2held$),
+      filter(([_, mouseHeld]) => mouseHeld),
+      withLatestFrom(mouseMoveWithNormalizedCoordinate$),
+      withLatestFrom(gameState$)
+    )
+    .subscribe(async ([[_, { x, y }], gameState]) => {
+      console.log("uh, held...");
+      const retrieved = getAtPath(gameState.layerMaps.interactableMap, x, y);
+      if (!retrieved) {
+        return;
+      }
+      const result = await axios.delete(
+        `${API_URI_BASE}/game_objects/${retrieved._id}`
+      );
+
+      if (result.status == 204) {
+        gameState$.next(
+          removeObjectFromMap({
+            gameState,
+            x,
+            y,
+            layer: Layer.INTERACTIVE,
           })
         );
       }

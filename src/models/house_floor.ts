@@ -15,10 +15,11 @@ export const isHouseFloor = (
 };
 
 export const houseFloorFactory = (
-  attributes: Partial<HouseFloor>
+  attributes: Partial<HouseFloor> & { _id: string }
 ): HouseFloor => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
+    _id: attributes._id,
     objectType: "HouseFloor" as "HouseFloor",
     debug: {
       color: attributes.debug?.color,

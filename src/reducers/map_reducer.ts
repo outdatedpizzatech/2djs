@@ -3,12 +3,14 @@ import { updatePlayers } from "./player_reducer";
 import {
   addToLayerMaps,
   clearLayerMaps,
+  removeFromLayerMaps,
   updateLayerMaps,
 } from "./layer_reducer";
 import { GameObject } from "../game_object";
 import { GameState } from "../game_state";
 import { CoordinateBounds } from "../coordinate";
 import { cloneDeep } from "../clone_deep";
+import { Layer } from "../types";
 
 export const updateMapWithObjects = (params: {
   gameState: GameState;
@@ -41,5 +43,19 @@ export const addObjectToMap = (params: {
   return flow(
     () => cloneDeep(gameState),
     (newGameState) => addToLayerMaps(gameObject, newGameState)
+  )();
+};
+
+export const removeObjectFromMap = (params: {
+  gameState: GameState;
+  layer: Layer;
+  x: number;
+  y: number;
+}) => {
+  const { gameState, x, y, layer } = params;
+
+  return flow(
+    () => cloneDeep(gameState),
+    (newGameState) => removeFromLayerMaps(x, y, layer, newGameState)
   )();
 };

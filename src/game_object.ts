@@ -10,6 +10,7 @@ export interface Placeable extends Positionable, Layerable {}
 export interface Identifiable {
   objectType: string;
   groupId?: number;
+  _id: string;
 }
 
 export interface GameObject extends Placeable, Identifiable {}

@@ -2,7 +2,7 @@ import { GRID_INTERVAL } from "../../common";
 import { Camera, project } from "../../camera";
 import { isWall, Wall } from "../../models/wall";
 import sprites from "../../sprite_collections/wall_sprite_collection";
-import { getFromCoordinateMap, LayerMaps } from "../../coordinate_map";
+import { getAtPath, LayerMaps } from "../../coordinate_map";
 import { Layer } from "../../types";
 
 export const renderWall = (
@@ -27,8 +27,8 @@ export const renderWall = (
       : layerMaps.groundMap;
 
   const hasVerticalWallNeighbors =
-    isWall(getFromCoordinateMap(x, y + 1, layerMap)) ||
-    isWall(getFromCoordinateMap(x, y + 1, layerMap));
+    isWall(getAtPath(layerMap, x, y + 1)) ||
+    isWall(getAtPath(layerMap, x, y + 1));
   const spriteIndex = hasVerticalWallNeighbors ? 1 : 0;
   ctx.drawImage(sprites[spriteIndex], worldX, worldY);
 };

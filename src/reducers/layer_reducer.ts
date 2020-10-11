@@ -2,6 +2,7 @@ import { GameState } from "../game_state";
 import { GameObject } from "../game_object";
 import { CoordinateBounds } from "../coordinate";
 import { Layer } from "../types";
+import { removeAtPath } from "../coordinate_map";
 
 export const updateLayerMaps = (
   gameObjects: GameObject[],
@@ -75,6 +76,28 @@ export const addToLayerMaps = (
     const xRow = gameState.layerMaps.interactableMap[gameObject.x] || {};
     xRow[gameObject.y] = gameObject;
     gameState.layerMaps.interactableMap[gameObject.x] = xRow;
+  }
+
+  return gameState;
+};
+
+export const removeFromLayerMaps = (
+  x: number,
+  y: number,
+  layer: Layer,
+  gameState: GameState
+) => {
+  if (layer == Layer.GROUND) {
+    removeAtPath(gameState.layerMaps.groundMap, x, y);
+  }
+  if (layer == Layer.OVERHEAD) {
+    removeAtPath(gameState.layerMaps.overheadMap, x, y);
+  }
+  if (layer == Layer.PASSIVE) {
+    removeAtPath(gameState.layerMaps.passiveMap, x, y);
+  }
+  if (layer == Layer.INTERACTIVE) {
+    removeAtPath(gameState.layerMaps.interactableMap, x, y);
   }
 
   return gameState;

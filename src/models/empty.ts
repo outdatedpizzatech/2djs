@@ -12,9 +12,12 @@ export const isEmpty = (unknownObject: any): unknownObject is Empty => {
   return (unknownObject as Empty).objectType === "Empty";
 };
 
-export const emptyFactory = (attributes: Partial<Empty>): Empty => {
+export const emptyFactory = (
+  attributes: Partial<Empty> & { _id: string }
+): Empty => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
+    _id: attributes._id,
     objectType: "Empty" as "Empty",
     debug: {
       color: attributes.debug?.color,
