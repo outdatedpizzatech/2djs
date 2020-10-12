@@ -26,7 +26,6 @@ import { addObjectToMap, removeObjectFromMap } from "../reducers/map_reducer";
 import { getLoadBoundsForCoordinate } from "../coordinate";
 import { GameObject } from "../game_object";
 import { Layer } from "../types";
-import { cloneDeep } from "../clone_deep";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
