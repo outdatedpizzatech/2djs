@@ -3,10 +3,10 @@ import {
   coordinatesToLoadForMyPlayer$,
   frameWithGameState$,
   gameState$,
-  layerVisibility$,
   mapLoadWithState$,
   whenMyPlayerExceedsDrawDistanceThreshold$,
   whenTheMapIsLoaded$,
+  layerVisibility$,
 } from "./signals";
 import { GameState } from "./game_state";
 import { updateCameraPosition } from "./reducers/camera_reducer";
@@ -28,6 +28,7 @@ import { addSessionsSubscriptions } from "./sessions";
 import { cloneDeep } from "./clone_deep";
 import { distinctUntilChanged, map, withLatestFrom } from "rxjs/operators";
 import deepEqual from "fast-deep-equal";
+import { Layer } from "./types";
 
 const drawEntireScene = (params: {
   bufferCtx: CanvasRenderingContext2D;
@@ -36,7 +37,6 @@ const drawEntireScene = (params: {
   visibleCanvas: HTMLCanvasElement;
   visibleCtx: CanvasRenderingContext2D;
   coordinate: Coordinate;
-  layerVisibility: { [key: number]: boolean };
 }) => {
   const {
     bufferCanvas,
@@ -44,13 +44,12 @@ const drawEntireScene = (params: {
     coordinate,
     visibleCtx,
     visibleCanvas,
-    layerVisibility,
   } = params;
 
   visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
 
   renderGround(visibleCtx, gameState.camera);
-  renderAllObjects(visibleCtx, gameState, coordinate, layerVisibility);
+  renderAllObjects(visibleCtx, gameState, coordinate);
 
   visibleCtx.drawImage(bufferCanvas, 0, 0);
 };
@@ -68,12 +67,20 @@ async function index() {
     myClientId: "",
     camera,
     layerMaps: {
-      interactableMap: {} as CoordinateMap<GameObject>,
+      interactiveMap: {} as CoordinateMap<GameObject>,
       groundMap: {} as CoordinateMap<GameObject>,
       overheadMap: {} as CoordinateMap<GameObject>,
       passiveMap: {} as CoordinateMap<GameObject>,
     },
     players: {},
+    debug: {
+      layerVisibility: {
+        [Layer.INTERACTIVE]: true,
+        [Layer.PASSIVE]: true,
+        [Layer.GROUND]: true,
+        [Layer.OVERHEAD]: true,
+      },
+    },
   };
 
   const { visibleCanvas, gameArea, body } = renderGameSpace();
@@ -102,10 +109,9 @@ async function index() {
     .pipe(
       map(({ gameState }) => gameState),
       distinctUntilChanged((p, q) => deepEqual(p, q)),
-      withLatestFrom(coordinatesToLoadForMyPlayer$),
-      withLatestFrom(layerVisibility$)
+      withLatestFrom(coordinatesToLoadForMyPlayer$)
     )
-    .subscribe(([[gameState, coordinate], layerVisibility]) => {
+    .subscribe(([gameState, coordinate]) => {
       drawEntireScene({
         gameState,
         coordinate,
@@ -113,7 +119,6 @@ async function index() {
         bufferCanvas,
         visibleCanvas,
         visibleCtx,
-        layerVisibility,
       });
     });
 

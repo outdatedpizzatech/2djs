@@ -9,15 +9,17 @@ import { Layer } from "../../types";
 export const renderAllObjects = (
   bufferCtx: CanvasRenderingContext2D,
   gameState: GameState,
-  coordinate: Coordinate,
-  layerVisibility: { [key: number]: boolean }
+  coordinate: Coordinate
 ) => {
   const { layerMaps, players } = gameState;
+  const {
+    debug: { layerVisibility },
+  } = gameState;
   const coordinateBounds = getLoadBoundsForCoordinate(coordinate);
 
   const playersArray = Object.values(gameState.players) as Player[];
 
-  const { interactableMap, groundMap, passiveMap, overheadMap } = layerMaps;
+  const { interactiveMap, groundMap, passiveMap, overheadMap } = layerMaps;
 
   const idsOverlappingPlayer: { [key: number]: boolean } = {};
 
@@ -90,7 +92,7 @@ export const renderAllObjects = (
   }
 
   if (layerVisibility[Layer.INTERACTIVE]) {
-    renderForLayer(interactableMap);
+    renderForLayer(interactiveMap);
   }
 
   if (layerVisibility[Layer.INTERACTIVE]) {

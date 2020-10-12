@@ -26,6 +26,7 @@ import { addObjectToMap, removeObjectFromMap } from "../reducers/map_reducer";
 import { getLoadBoundsForCoordinate } from "../coordinate";
 import { GameObject } from "../game_object";
 import { Layer } from "../types";
+import { cloneDeep } from "../clone_deep";
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -38,7 +39,7 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   debugArea.style.marginRight = "auto";
   debugArea.style.background = "gray";
   debugArea.style.display = "grid";
-  debugArea.style.gridTemplateColumns = "10% 10% 10% 10% 10% 10% 10% 10%";
+  debugArea.style.gridTemplateColumns = "10% 10% 10% 10% 10%";
   body.appendChild(debugArea);
 
   const gridLinesLabel = document.createElement("label");
@@ -67,6 +68,31 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   coordinatesDiv.style.color = "white";
   coordinatesDiv.style.padding = "10%";
   debugArea.appendChild(coordinatesDiv);
+
+  const layerDiv = document.createElement("div");
+  layerDiv.style.background = "red";
+  layerDiv.style.color = "white";
+  layerDiv.style.padding = "10%";
+  debugArea.appendChild(layerDiv);
+
+  const addLayerCheckbox = (layer: Layer, name: string) => {
+    const layerLabel = document.createElement("label");
+    layerLabel.style.display = "block";
+    const layerCheckbox = document.createElement("input");
+    layerCheckbox.type = "checkbox";
+    layerCheckbox.checked = true;
+    layerCheckbox.addEventListener("click", function () {
+      layerVisibility$.next({ layer, visible: this.checked });
+    });
+    layerLabel.innerText = name;
+    layerLabel.prepend(layerCheckbox);
+    layerDiv.appendChild(layerLabel);
+  };
+
+  addLayerCheckbox(Layer.GROUND, "Ground");
+  addLayerCheckbox(Layer.PASSIVE, "Passive");
+  addLayerCheckbox(Layer.INTERACTIVE, "Interactive");
+  addLayerCheckbox(Layer.OVERHEAD, "Overhead");
 
   const layerInspectorDiv = document.createElement("div");
   layerInspectorDiv.style.fontFamily = `Monospace`;
@@ -116,7 +142,7 @@ export const loadDebugger = (
       const { camera, layerMaps } = gameState;
       const playersArray = Object.values(gameState.players) as Player[];
       const coordinateBounds = getLoadBoundsForCoordinate(coordinate);
-      const { interactableMap, groundMap, passiveMap, overheadMap } = layerMaps;
+      const { interactiveMap, groundMap, passiveMap, overheadMap } = layerMaps;
 
       let objectsInView = 0;
 
@@ -140,7 +166,7 @@ export const loadDebugger = (
       }
       for (let x = coordinateBounds.min.x; x <= coordinateBounds.max.x; x++) {
         for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
-          const renderable = getAtPath(interactableMap, x, y);
+          const renderable = getAtPath(interactiveMap, x, y);
           if (renderable) {
             renderDebugObject(renderable as any);
             if (withinLens(camera, renderable)) objectsInView++;
@@ -239,7 +265,7 @@ export const loadDebugger = (
       debug.coordinates.innerText = `Mouse:\r${x},${y}`;
 
       const interactiveObject = getAtPath(
-        gameState.layerMaps.interactableMap,
+        gameState.layerMaps.interactiveMap,
         x,
         y
       );
@@ -273,7 +299,7 @@ export const loadDebugger = (
       withLatestFrom(gameState$)
     )
     .subscribe(async ([[_, { x, y }], gameState]) => {
-      const retrieved = getAtPath(gameState.layerMaps.interactableMap, x, y);
+      const retrieved = getAtPath(gameState.layerMaps.interactiveMap, x, y);
       if (retrieved) {
         return;
       }
@@ -306,7 +332,7 @@ export const loadDebugger = (
       withLatestFrom(gameState$)
     )
     .subscribe(async ([[_, { x, y }], gameState]) => {
-      const retrieved = getAtPath(gameState.layerMaps.interactableMap, x, y);
+      const retrieved = getAtPath(gameState.layerMaps.interactiveMap, x, y);
       if (!retrieved) {
         return;
       }
@@ -330,10 +356,9 @@ export const loadDebugger = (
     console.log("gameState: ", gameState);
   });
 
-  layerVisibility$.next({
-    [Layer.INTERACTIVE]: true,
-    [Layer.PASSIVE]: true,
-    [Layer.GROUND]: true,
-    [Layer.OVERHEAD]: true,
-  });
+  layerVisibility$
+    .pipe(withLatestFrom(gameState$))
+    .subscribe(([{ layer, visible }, gameState]) => {
+      gameState.debug.layerVisibility[layer] = visible;
+    });
 };

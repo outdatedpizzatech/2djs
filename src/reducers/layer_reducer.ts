@@ -14,7 +14,7 @@ export const updateLayerMaps = (
       delete (gameState.layerMaps.passiveMap[x] || {})[y];
       delete (gameState.layerMaps.overheadMap[x] || {})[y];
       delete (gameState.layerMaps.groundMap[x] || {})[y];
-      delete (gameState.layerMaps.interactableMap[x] || {})[y];
+      delete (gameState.layerMaps.interactiveMap[x] || {})[y];
     }
   }
 
@@ -35,9 +35,9 @@ export const updateLayerMaps = (
       gameState.layerMaps.passiveMap[placeable.x] = xRow;
     }
     if (placeable.layer == Layer.INTERACTIVE) {
-      const xRow = gameState.layerMaps.interactableMap[placeable.x] || {};
+      const xRow = gameState.layerMaps.interactiveMap[placeable.x] || {};
       xRow[placeable.y] = placeable;
-      gameState.layerMaps.interactableMap[placeable.x] = xRow;
+      gameState.layerMaps.interactiveMap[placeable.x] = xRow;
     }
   });
 
@@ -48,7 +48,7 @@ export const clearLayerMaps = (gameState: GameState) => {
   gameState.layerMaps.groundMap = {};
   gameState.layerMaps.overheadMap = {};
   gameState.layerMaps.passiveMap = {};
-  gameState.layerMaps.interactableMap = {};
+  gameState.layerMaps.interactiveMap = {};
 
   return gameState;
 };
@@ -73,9 +73,9 @@ export const addToLayerMaps = (
     gameState.layerMaps.passiveMap[gameObject.x] = xRow;
   }
   if (gameObject.layer == Layer.INTERACTIVE) {
-    const xRow = gameState.layerMaps.interactableMap[gameObject.x] || {};
+    const xRow = gameState.layerMaps.interactiveMap[gameObject.x] || {};
     xRow[gameObject.y] = gameObject;
-    gameState.layerMaps.interactableMap[gameObject.x] = xRow;
+    gameState.layerMaps.interactiveMap[gameObject.x] = xRow;
   }
 
   return gameState;
@@ -97,7 +97,7 @@ export const removeFromLayerMaps = (
     removeAtPath(gameState.layerMaps.passiveMap, x, y);
   }
   if (layer == Layer.INTERACTIVE) {
-    removeAtPath(gameState.layerMaps.interactableMap, x, y);
+    removeAtPath(gameState.layerMaps.interactiveMap, x, y);
   }
 
   return gameState;

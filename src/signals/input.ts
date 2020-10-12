@@ -58,7 +58,7 @@ export const whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$ = inputDire
     const [xMod, yMod] = getModsFromDirection(direction);
 
     const foundObject = getAtPath(
-      gameState.layerMaps.interactableMap,
+      gameState.layerMaps.interactiveMap,
       x + xMod,
       y + yMod
     );

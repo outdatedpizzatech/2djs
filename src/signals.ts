@@ -1,9 +1,16 @@
-import { animationFrameScheduler, interval, Subject } from "rxjs";
+import {
+  animationFrameScheduler,
+  combineLatest,
+  interval,
+  merge,
+  Subject,
+} from "rxjs";
 import { DRAW_DISTANCE, FRAMERATE } from "./common";
 import {
   filter,
   map,
   pairwise,
+  scan,
   throttleTime,
   withLatestFrom,
 } from "rxjs/operators";
@@ -15,6 +22,7 @@ import {
   getLoadBoundsForCoordinate,
 } from "./coordinate";
 import { GameObject } from "./game_object";
+import { Layer } from "./types";
 
 export const frame$ = interval(1000 / FRAMERATE, animationFrameScheduler).pipe(
   map(() => performance.now()),
@@ -25,9 +33,9 @@ export const whenTheMapIsLoaded$ = new Subject<GameObject[]>();
 export const coordinatesToLoadForMyPlayer$ = new Subject<Coordinate>();
 export const gameState$: Subject<GameState> = new Subject();
 export const layerVisibility$: Subject<{
-  [key: number]: boolean;
+  layer: Layer;
+  visible: boolean;
 }> = new Subject();
-
 
 export const frameWithGameState$ = frame$.pipe(
   withLatestFrom(gameState$),

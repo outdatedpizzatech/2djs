@@ -9,6 +9,9 @@ export interface GameState {
   layerMaps: LayerMaps;
   myClientId: string;
   players: { [key: string]: Player | undefined };
+  debug: {
+    layerVisibility: { [string: number]: boolean };
+  };
 }
 
 export const updateCoordinateMap = (params: {
@@ -18,15 +21,15 @@ export const updateCoordinateMap = (params: {
 }) => {
   const { gameState, player, direction } = params;
   const {
-    layerMaps: { interactableMap },
+    layerMaps: { interactiveMap },
   } = gameState;
 
   const { x, y } = player;
 
   const [xMod, yMod] = getModsFromDirection(direction);
 
-  setAtPath(gameState.layerMaps.interactableMap, x + xMod, y + yMod, player);
-  removeAtPath(interactableMap, x, y);
+  setAtPath(gameState.layerMaps.interactiveMap, x + xMod, y + yMod, player);
+  removeAtPath(interactiveMap, x, y);
 
   return gameState;
 };

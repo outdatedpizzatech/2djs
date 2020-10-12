@@ -18,7 +18,7 @@ export interface LayerMark {
 export type LayerMarkKey = keyof LayerMark;
 
 export interface LayerMaps {
-  interactableMap: CoordinateMap<GameObject>;
+  interactiveMap: CoordinateMap<GameObject>;
   groundMap: CoordinateMap<GameObject>;
   passiveMap: CoordinateMap<GameObject>;
   overheadMap: CoordinateMap<GameObject>;
