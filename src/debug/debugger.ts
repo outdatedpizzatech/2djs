@@ -1,9 +1,11 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH, offset, withinLens } from "../camera";
 import {
   coordinatesToLoadForMyPlayer$,
+  debugLayersSubject$,
   frame$,
   frameWithGameState$,
   gameState$,
+  gameStateSubject$,
   layerVisibility$,
 } from "../signals";
 import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
@@ -314,7 +316,7 @@ export const loadDebugger = (
       const savedObject: GameObject = { ...gameObject, _id: result.data._id };
 
       if (result.status == 201) {
-        gameState$.next(
+        gameStateSubject$.next(
           addObjectToMap({
             gameState,
             gameObject: savedObject,
@@ -340,7 +342,7 @@ export const loadDebugger = (
       );
 
       if (result.status == 204) {
-        gameState$.next(
+        gameStateSubject$.next(
           removeObjectFromMap({
             gameState,
             x,
@@ -358,6 +360,6 @@ export const loadDebugger = (
   layerVisibility$
     .pipe(withLatestFrom(gameState$))
     .subscribe(([{ layer, visible }, gameState]) => {
-      gameState.debug.layerVisibility[layer] = visible;
+      debugLayersSubject$.next({ [layer]: visible });
     });
 };

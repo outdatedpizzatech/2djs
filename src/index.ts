@@ -7,6 +7,7 @@ import {
   whenMyPlayerExceedsDrawDistanceThreshold$,
   whenTheMapIsLoaded$,
   layerVisibility$,
+  gameStateSubject$,
 } from "./signals";
 import { GameState } from "./game_state";
 import { updateCameraPosition } from "./reducers/camera_reducer";
@@ -58,31 +59,6 @@ async function index() {
   const bufferCanvas = addView();
   const bufferCtx = bufferCanvas.getContext("2d") as CanvasRenderingContext2D;
 
-  const camera = cameraFactory({
-    x: 0,
-    y: 0,
-  });
-
-  const initialGameState: GameState = {
-    myClientId: "",
-    camera,
-    layerMaps: {
-      interactiveMap: {} as CoordinateMap<GameObject>,
-      groundMap: {} as CoordinateMap<GameObject>,
-      overheadMap: {} as CoordinateMap<GameObject>,
-      passiveMap: {} as CoordinateMap<GameObject>,
-    },
-    players: {},
-    debug: {
-      layerVisibility: {
-        [Layer.INTERACTIVE]: true,
-        [Layer.PASSIVE]: true,
-        [Layer.GROUND]: true,
-        [Layer.OVERHEAD]: true,
-      },
-    },
-  };
-
   const { visibleCanvas, gameArea, body } = renderGameSpace();
 
   const visibleCtx = visibleCanvas.getContext("2d") as CanvasRenderingContext2D;
@@ -91,7 +67,7 @@ async function index() {
   addSessionsSubscriptions();
 
   mapLoadWithState$.subscribe((params) => {
-    gameState$.next(
+    gameStateSubject$.next(
       updateMapWithObjects({
         ...params,
         gameState: clearMapOfObjects(params.gameState),
@@ -102,7 +78,7 @@ async function index() {
   frameWithGameState$.subscribe(({ gameState }) => {
     let newGameState = cloneDeep(gameState);
     newGameState = updateCameraPosition(newGameState);
-    gameState$.next(newGameState);
+    gameStateSubject$.next(newGameState);
   });
 
   frameWithGameState$
@@ -138,8 +114,6 @@ async function index() {
   if (process.env.DEBUG) {
     loadDebugger(body, gameArea);
   }
-
-  gameState$.next(initialGameState);
 }
 
 index();

@@ -1,4 +1,8 @@
-import { gameState$, whenMyPlayerHasMovementDirection$ } from "./signals";
+import {
+  gameState$,
+  gameStateSubject$,
+  whenMyPlayerHasMovementDirection$,
+} from "./signals";
 import {
   updateFacingDirectionForPlayer,
   updateMovementForPlayer,
@@ -21,7 +25,7 @@ import { cloneDeep } from "./clone_deep";
 export const addMovementSubscriptions = () => {
   whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$.subscribe(
     (params) => {
-      gameState$.next(updateMovementForPlayer(params));
+      gameStateSubject$.next(updateMovementForPlayer(params));
 
       const [xMod, yMod] = getModsFromDirection(params.direction);
 
@@ -35,7 +39,7 @@ export const addMovementSubscriptions = () => {
   );
 
   whenInputtingDirectionWhileMyPlayerIsNotMoving$.subscribe((params) => {
-    gameState$.next(updateFacingDirectionForPlayer(params));
+    gameStateSubject$.next(updateFacingDirectionForPlayer(params));
 
     socket.emit(PLAYER_FACING_DIRECTION, {
       clientId: params.player.clientId,
@@ -50,7 +54,7 @@ export const addMovementSubscriptions = () => {
       newGameState,
       params.player
     );
-    gameState$.next(newGameState);
+    gameStateSubject$.next(newGameState);
   });
 
   whenOtherPlayersHaveMovementDirection$.subscribe((params) => {
@@ -68,7 +72,7 @@ export const addMovementSubscriptions = () => {
         }
       });
 
-    gameState$.next(newGameState);
+    gameStateSubject$.next(newGameState);
   });
 
   whenOtherPlayersStartMoving$.subscribe(({ message, gameState }) => {
@@ -82,7 +86,7 @@ export const addMovementSubscriptions = () => {
         gameState,
       });
 
-      gameState$.next(gameState);
+      gameStateSubject$.next(gameState);
     }
   });
 
@@ -97,7 +101,7 @@ export const addMovementSubscriptions = () => {
         gameState,
       });
 
-      gameState$.next(newGameState);
+      gameStateSubject$.next(newGameState);
     }
   });
 };

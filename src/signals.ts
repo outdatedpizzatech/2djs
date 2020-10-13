@@ -3,6 +3,7 @@ import {
   combineLatest,
   interval,
   merge,
+  Observable,
   Subject,
 } from "rxjs";
 import { DRAW_DISTANCE, FRAMERATE } from "./common";
@@ -11,6 +12,7 @@ import {
   map,
   pairwise,
   scan,
+  startWith,
   throttleTime,
   withLatestFrom,
 } from "rxjs/operators";
@@ -23,6 +25,8 @@ import {
 } from "./coordinate";
 import { GameObject } from "./game_object";
 import { Layer } from "./types";
+import { cameraFactory } from "./camera";
+import { CoordinateMap } from "./coordinate_map";
 
 export const frame$ = interval(1000 / FRAMERATE, animationFrameScheduler).pipe(
   map(() => performance.now()),
@@ -31,7 +35,46 @@ export const frame$ = interval(1000 / FRAMERATE, animationFrameScheduler).pipe(
 );
 export const whenTheMapIsLoaded$ = new Subject<GameObject[]>();
 export const coordinatesToLoadForMyPlayer$ = new Subject<Coordinate>();
-export const gameState$: Subject<GameState> = new Subject();
+export const debugLayersSubject$: Subject<{
+  [key: string]: boolean;
+}> = new Subject();
+export const gameStateSubject$: Subject<GameState> = new Subject();
+const camera = cameraFactory({
+  x: 0,
+  y: 0,
+});
+
+const initialGameState: GameState = {
+  myClientId: "",
+  camera,
+  layerMaps: {
+    interactiveMap: {} as CoordinateMap<GameObject>,
+    groundMap: {} as CoordinateMap<GameObject>,
+    overheadMap: {} as CoordinateMap<GameObject>,
+    passiveMap: {} as CoordinateMap<GameObject>,
+  },
+  players: {},
+  debug: {
+    layerVisibility: {
+      [Layer.INTERACTIVE]: true,
+      [Layer.PASSIVE]: true,
+      [Layer.GROUND]: true,
+      [Layer.OVERHEAD]: true,
+    },
+  },
+};
+
+export const gameState$ = combineLatest([
+  gameStateSubject$,
+  debugLayersSubject$.pipe(startWith(initialGameState.debug.layerVisibility)),
+]).pipe(
+  scan((acc: GameState, [gameState, debugLayer]) => {
+    Object.assign(gameState.debug.layerVisibility, debugLayer);
+    return gameState;
+  }, initialGameState),
+  startWith(initialGameState)
+);
+
 export const layerVisibility$: Subject<{
   layer: Layer;
   visible: boolean;

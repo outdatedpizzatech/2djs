@@ -6,6 +6,7 @@ import { addPlayer, removePlayer } from "./reducers/player_reducer";
 import {
   coordinatesToLoadForMyPlayer$,
   gameState$,
+  gameStateSubject$,
   whenMyPlayerHasNotSpawned$,
 } from "./signals";
 import { Player, playerOnSpawnPoint } from "./models/player";
@@ -17,13 +18,13 @@ export const addSessionsSubscriptions = () => {
   whenOtherPlayersHaveJoined$.subscribe(({ player, gameState }) => {
     const newGameState = addPlayer(cloneDeep(gameState), player);
 
-    gameState$.next(newGameState);
+    gameStateSubject$.next(newGameState);
   });
 
   whenOtherPlayersHaveLeft$.subscribe(({ clientId, gameState }) => {
     const newGameState = removePlayer(cloneDeep(gameState), clientId);
 
-    gameState$.next(newGameState);
+    gameStateSubject$.next(newGameState);
   });
 
   whenMyPlayerHasNotSpawned$.subscribe(async ({ gameState }) => {
@@ -41,7 +42,7 @@ export const addSessionsSubscriptions = () => {
 
     socket.emit(PLAYER_JOIN, player);
 
-    gameState$.next(newGameState);
+    gameStateSubject$.next(newGameState);
     coordinatesToLoadForMyPlayer$.next({ x: player.x, y: player.y });
   });
 };
