@@ -35,9 +35,6 @@ export const frame$ = interval(1000 / FRAMERATE, animationFrameScheduler).pipe(
 );
 export const whenTheMapIsLoaded$ = new Subject<GameObject[]>();
 export const coordinatesToLoadForMyPlayer$ = new Subject<Coordinate>();
-export const debugLayersSubject$: Subject<{
-  [key: string]: boolean;
-}> = new Subject();
 export const gameStateSubject$: Subject<GameState> = new Subject();
 const camera = cameraFactory({
   x: 0,
@@ -64,9 +61,17 @@ const initialGameState: GameState = {
   },
 };
 
+export const layerVisibility$: Subject<{
+  layer: Layer;
+  visible: boolean;
+}> = new Subject();
+
 export const gameState$ = combineLatest([
   gameStateSubject$,
-  debugLayersSubject$.pipe(startWith(initialGameState.debug.layerVisibility)),
+  layerVisibility$.pipe(
+    map(({ layer, visible }) => ({ [layer]: visible })),
+    startWith(initialGameState.debug.layerVisibility)
+  ),
 ]).pipe(
   scan((acc: GameState, [gameState, debugLayer]) => {
     Object.assign(gameState.debug.layerVisibility, debugLayer);
@@ -74,11 +79,6 @@ export const gameState$ = combineLatest([
   }, initialGameState),
   startWith(initialGameState)
 );
-
-export const layerVisibility$: Subject<{
-  layer: Layer;
-  visible: boolean;
-}> = new Subject();
 
 export const frameWithGameState$ = frame$.pipe(
   withLatestFrom(gameState$),

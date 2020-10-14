@@ -1,7 +1,7 @@
 import { Debuggable } from "../debug/grid_lines";
 import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
-import { Layer } from "../types";
+import { Layer, Unsaved } from "../types";
 
 export interface Tree extends Debuggable, GameObject {
   objectType: "Tree";
@@ -12,7 +12,7 @@ export const isTree = (unknownObject: any): unknownObject is Tree => {
   return (unknownObject as Tree).objectType === "Tree";
 };
 
-export const treeFactory = (attributes: Partial<Tree>): Omit<Tree, "_id"> => {
+export const treeFactory = (attributes: Partial<Tree>): Unsaved<Tree> => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
     _id: attributes._id,

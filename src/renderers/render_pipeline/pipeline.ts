@@ -17,6 +17,8 @@ import { renderRoof } from "../model_renderers/roof_renderer";
 import { isDoor } from "../../models/door";
 import { renderDoor } from "../model_renderers/door_renderer";
 import { GameState } from "../../game_state";
+import { isEmpty } from "../../models/empty";
+import { renderEmpty } from "../model_renderers/empty_renderer";
 
 export const matchesObject = (a: any, b: any): boolean => {
   if (isTree(a)) {
@@ -70,5 +72,8 @@ export const pipelineRender = (
   }
   if (isRoof(renderable)) {
     renderRoof(renderable, camera, bufferCtx, count);
+  }
+  if (isEmpty(renderable)) {
+    renderEmpty(renderable, camera, bufferCtx);
   }
 };

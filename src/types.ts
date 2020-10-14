@@ -4,3 +4,5 @@ export enum Layer {
   INTERACTIVE,
   OVERHEAD,
 }
+
+export type Unsaved<T> = Omit<T, "_id">;

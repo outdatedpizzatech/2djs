@@ -1,18 +1,22 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH, offset, withinLens } from "../camera";
 import {
   coordinatesToLoadForMyPlayer$,
-  debugLayersSubject$,
   frame$,
   frameWithGameState$,
   gameState$,
-  gameStateSubject$,
   layerVisibility$,
 } from "../signals";
-import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
-import { fromEvent } from "rxjs";
+import {
+  filter,
+  map,
+  startWith,
+  throttleTime,
+  withLatestFrom,
+} from "rxjs/operators";
+import { fromEvent, Subject } from "rxjs";
 import { Debuggable, renderGridLines } from "./grid_lines";
 import { Player } from "../models/player";
-import { isTree, treeFactory } from "../models/tree";
+import { isTree } from "../models/tree";
 import { isWall } from "../models/wall";
 import { isWater } from "../models/water";
 import { isStreet } from "../models/street";
@@ -20,21 +24,28 @@ import { isHouseWall } from "../models/house_wall";
 import { isHouseFloor } from "../models/house_floor";
 import { isRoof } from "../models/roof";
 import { mouse0held$, mouse2held$, mousemove$ } from "../signals/input";
-import { API_URI_BASE, GRID_INTERVAL } from "../common";
+import { GRID_INTERVAL } from "../common";
 import { getAtPath } from "../coordinate_map";
 import { GameState } from "../game_state";
-import axios from "axios";
-import { addObjectToMap, removeObjectFromMap } from "../reducers/map_reducer";
 import { getLoadBoundsForCoordinate } from "../coordinate";
 import { GameObject } from "../game_object";
 import { Layer } from "../types";
+import treeSprites from "../sprite_collections/tree_sprite_collection";
+import wallSprites from "../sprite_collections/wall_sprite_collection";
+import streetSprites from "../sprite_collections/street_sprite_collection";
+import { isEmpty } from "../models/empty";
+import { addObject, removeObject } from "./editor";
+
+const selectedEditorObjectSubject$: Subject<string> = new Subject();
+const selectedEditorObject$ = selectedEditorObjectSubject$
+  .asObservable()
+  .pipe(startWith(""));
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
   debugArea.style.width = `${CAMERA_WIDTH}px`;
   debugArea.style.fontFamily = `Helvetica`;
   debugArea.style.fontSize = `12px`;
-  debugArea.style.height = `60px`;
   debugArea.style.marginTop = `10px`;
   debugArea.style.marginLeft = "auto";
   debugArea.style.marginRight = "auto";
@@ -108,6 +119,56 @@ const mountDebugArea = (body: HTMLBodyElement) => {
 
   body.appendChild(layerInspectorDiv);
 
+  const editorArea = document.createElement("div");
+  editorArea.style.width = `${CAMERA_WIDTH}px`;
+  editorArea.style.fontFamily = `Helvetica`;
+  editorArea.style.fontSize = `12px`;
+  editorArea.style.marginTop = `10px`;
+  editorArea.style.marginLeft = "auto";
+  editorArea.style.marginRight = "auto";
+  editorArea.style.background = "gray";
+  editorArea.style.display = "grid";
+  editorArea.style.gridTemplateColumns = "repeat(40, auto)";
+  body.appendChild(editorArea);
+
+  const treeDiv = document.createElement("div");
+  treeDiv.style.color = "white";
+  treeDiv.style.padding = "10%";
+  treeDiv.style.textAlign = "center";
+  editorArea.appendChild(treeDiv);
+  treeDiv.appendChild(treeSprites[0]);
+
+  const wallDiv = document.createElement("div");
+  wallDiv.style.color = "white";
+  wallDiv.style.padding = "10%";
+  wallDiv.style.textAlign = "center";
+  editorArea.appendChild(wallDiv);
+  wallDiv.appendChild(wallSprites[0]);
+
+  const streetDiv = document.createElement("div");
+  streetDiv.style.color = "white";
+  streetDiv.style.padding = "10%";
+  streetDiv.style.textAlign = "center";
+  editorArea.appendChild(streetDiv);
+  streetDiv.appendChild(streetSprites[0]);
+
+  selectedEditorObject$.subscribe((value) => {
+    treeDiv.onclick = () => {
+      selectedEditorObjectSubject$.next(value == "tree" ? "" : "tree");
+    };
+    treeDiv.style.background = value == "tree" ? "yellow" : "purple";
+
+    wallDiv.onclick = () => {
+      selectedEditorObjectSubject$.next(value == "wall" ? "" : "wall");
+    };
+    wallDiv.style.background = value == "wall" ? "yellow" : "purple";
+
+    streetDiv.onclick = () => {
+      selectedEditorObjectSubject$.next(value == "street" ? "" : "street");
+    };
+    streetDiv.style.background = value == "street" ? "yellow" : "purple";
+  });
+
   return {
     gridlines: gridLinesInput,
     fps: fpsDiv,
@@ -131,6 +192,7 @@ export const loadDebugger = (
     if (isHouseWall(debuggable)) debuggable.debug.color = "#599e03";
     if (isHouseFloor(debuggable)) debuggable.debug.color = "#7417ed";
     if (isRoof(debuggable)) debuggable.debug.color = "#022efb";
+    if (isEmpty(debuggable)) debuggable.debug.color = "rgba(255, 0, 255, 0.5)";
   };
 
   frame$.pipe(throttleTime(1000)).subscribe((deltaTime) => {
@@ -297,69 +359,28 @@ export const loadDebugger = (
       withLatestFrom(mouse0held$),
       filter(([_, mouseHeld]) => mouseHeld),
       withLatestFrom(mouseMoveWithNormalizedCoordinate$),
-      withLatestFrom(gameState$)
-    )
-    .subscribe(async ([[_, { x, y }], gameState]) => {
-      const retrieved = getAtPath(gameState.layerMaps.interactiveMap, x, y);
-      if (retrieved) {
-        return;
-      }
-      const gameObject = treeFactory({
+      withLatestFrom(gameState$),
+      withLatestFrom(selectedEditorObject$),
+      map(([[[[_], { x, y }], gameState], selectedObject]) => ({
         x,
         y,
-      });
-      const result = await axios.post(
-        `${API_URI_BASE}/game_objects`,
-        gameObject
-      );
-
-      const savedObject: GameObject = { ...gameObject, _id: result.data._id };
-
-      if (result.status == 201) {
-        gameStateSubject$.next(
-          addObjectToMap({
-            gameState,
-            gameObject: savedObject,
-          })
-        );
-      }
-    });
+        gameState,
+        selectedObject,
+      }))
+    )
+    .subscribe(addObject);
 
   frame$
     .pipe(
       withLatestFrom(mouse2held$),
       filter(([_, mouseHeld]) => mouseHeld),
       withLatestFrom(mouseMoveWithNormalizedCoordinate$),
-      withLatestFrom(gameState$)
+      withLatestFrom(gameState$),
+      map(([[_, { x, y }], gameState]) => ({ x, y, gameState }))
     )
-    .subscribe(async ([[_, { x, y }], gameState]) => {
-      const retrieved = getAtPath(gameState.layerMaps.interactiveMap, x, y);
-      if (!retrieved) {
-        return;
-      }
-      const result = await axios.delete(
-        `${API_URI_BASE}/game_objects/${retrieved._id}`
-      );
-
-      if (result.status == 204) {
-        gameStateSubject$.next(
-          removeObjectFromMap({
-            gameState,
-            x,
-            y,
-            layer: Layer.INTERACTIVE,
-          })
-        );
-      }
-    });
+    .subscribe(removeObject);
 
   gameState$.pipe(throttleTime(5000)).subscribe((gameState) => {
     console.log("gameState: ", gameState);
   });
-
-  layerVisibility$
-    .pipe(withLatestFrom(gameState$))
-    .subscribe(([{ layer, visible }, gameState]) => {
-      debugLayersSubject$.next({ [layer]: visible });
-    });
 };
