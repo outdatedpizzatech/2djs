@@ -6,9 +6,16 @@ import { wallFactory } from "../models/wall";
 import axios from "axios";
 import { API_URI_BASE } from "../common";
 import { addObjectToMap, removeObjectFromMap } from "../reducers/map_reducer";
-import { Layer } from "../types";
+import { Layer, Unsaved } from "../types";
 import { GameState } from "../game_state";
 import { streetFactory } from "../models/street";
+import { GameObjectType } from "./debugger";
+import { doorFactory } from "../models/door";
+import { emptyFactory } from "../models/empty";
+import { houseFloorFactory } from "../models/house_floor";
+import { houseWallFactory, HouseWallRole } from "../models/house_wall";
+import { roofFactory } from "../models/roof";
+import { waterFactory } from "../models/water";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {
@@ -28,28 +35,24 @@ export const addObject = async (params: {
   x: number;
   y: number;
   gameState: GameState;
-  selectedObject: string;
+  selectedObject: GameObjectType;
 }) => {
   const { gameState, x, y, selectedObject } = params;
 
-  let gameObject: Omit<GameObject, "_id"> | null = null;
+  const objectToFactoryMap: { [K in GameObjectType]: Unsaved<GameObject> } = {
+    tree: treeFactory({ x, y }),
+    wall: wallFactory({ x, y }),
+    street: streetFactory({ x, y }),
+    door: doorFactory({ x, y }),
+    empty: emptyFactory({ x, y }),
+    house_floor: houseFloorFactory({ x, y }),
+    house_wall_front: houseWallFactory({ x, y, role: HouseWallRole.FRONT }),
+    house_wall_side: houseWallFactory({ x, y, role: HouseWallRole.SIDE }),
+    roof: roofFactory({ x, y }),
+    water: waterFactory({ x, y }),
+  };
 
-  if (selectedObject == "tree") {
-    gameObject = treeFactory({
-      x,
-      y,
-    });
-  } else if (selectedObject == "wall") {
-    gameObject = wallFactory({
-      x,
-      y,
-    });
-  } else if (selectedObject == "street") {
-    gameObject = streetFactory({
-      x,
-      y,
-    });
-  }
+  const gameObject = objectToFactoryMap[selectedObject];
 
   if (!gameObject) {
     return;
@@ -112,11 +115,6 @@ export const removeObject = async (params: {
     retrieved = getAtPath(layerMap, x, y);
   }
 
-  console.log("wut");
-  console.log(retrieved);
-  console.log(layer);
-  console.log(layerMap);
-
   if (!layerMap || layer == null) {
     return;
   }
@@ -128,8 +126,6 @@ export const removeObject = async (params: {
   const result = await axios.delete(
     `${API_URI_BASE}/game_objects/${retrieved._id}`
   );
-
-  console.log("removing object from ", layer);
 
   if (result.status == 204) {
     gameStateSubject$.next(

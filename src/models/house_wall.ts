@@ -1,7 +1,7 @@
 import { Debuggable } from "../debug/grid_lines";
 import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
-import { Layer } from "../types";
+import { Layer, Unsaved } from "../types";
 
 export enum HouseWallRole {
   SIDE,
@@ -19,8 +19,8 @@ export const isHouseWall = (unknownObject: any): unknownObject is HouseWall => {
 };
 
 export const houseWallFactory = (
-  attributes: Partial<HouseWall> & { _id: string }
-): HouseWall => {
+  attributes: Partial<HouseWall>
+): Unsaved<HouseWall> => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
     _id: attributes._id,

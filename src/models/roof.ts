@@ -1,7 +1,7 @@
 import { Debuggable } from "../debug/grid_lines";
 import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
-import { Layer } from "../types";
+import { Layer, Unsaved } from "../types";
 
 export interface Roof extends Debuggable, GameObject {
   objectType: "Roof";
@@ -12,9 +12,7 @@ export const isRoof = (unknownObject: any): unknownObject is Roof => {
   return (unknownObject as Roof).objectType === "Roof";
 };
 
-export const roofFactory = (
-  attributes: Partial<Roof> & { _id: string }
-): Roof => {
+export const roofFactory = (attributes: Partial<Roof>): Unsaved<Roof> => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
     _id: attributes._id,

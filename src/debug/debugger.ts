@@ -10,6 +10,7 @@ import {
   filter,
   map,
   startWith,
+  tap,
   throttleTime,
   withLatestFrom,
 } from "rxjs/operators";
@@ -33,6 +34,11 @@ import { Layer } from "../types";
 import treeSprites from "../sprite_collections/tree_sprite_collection";
 import wallSprites from "../sprite_collections/wall_sprite_collection";
 import streetSprites from "../sprite_collections/street_sprite_collection";
+import doorSprites from "../sprite_collections/door_sprite_collection";
+import houseFloorSprites from "../sprite_collections/street_sprite_collection";
+import houseWallSprites from "../sprite_collections/wall_sprite_collection";
+import roofSprites from "../sprite_collections/roof_sprite_collection";
+import waterSprites from "../sprite_collections/water_sprite_collection";
 import { isEmpty } from "../models/empty";
 import { addObject, removeObject } from "./editor";
 
@@ -40,6 +46,31 @@ const selectedEditorObjectSubject$: Subject<string> = new Subject();
 const selectedEditorObject$ = selectedEditorObjectSubject$
   .asObservable()
   .pipe(startWith(""));
+
+export type GameObjectType =
+  | "tree"
+  | "wall"
+  | "street"
+  | "door"
+  | "empty"
+  | "house_floor"
+  | "house_wall_front"
+  | "house_wall_side"
+  | "roof"
+  | "water";
+
+const objectToSpriteMap: { [K in GameObjectType]: HTMLImageElement } = {
+  tree: treeSprites[0],
+  wall: wallSprites[0],
+  street: streetSprites[0],
+  door: doorSprites[0],
+  empty: document.createElement("img"),
+  house_floor: houseFloorSprites[1],
+  house_wall_side: houseWallSprites[2],
+  house_wall_front: houseWallSprites[3],
+  roof: roofSprites[0],
+  water: waterSprites[0],
+};
 
 const mountDebugArea = (body: HTMLBodyElement) => {
   const debugArea = document.createElement("div");
@@ -128,45 +159,38 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   editorArea.style.marginRight = "auto";
   editorArea.style.background = "gray";
   editorArea.style.display = "grid";
-  editorArea.style.gridTemplateColumns = "repeat(40, auto)";
+  editorArea.style.gridTemplateColumns = "repeat(20, auto)";
   body.appendChild(editorArea);
 
-  const treeDiv = document.createElement("div");
-  treeDiv.style.color = "white";
-  treeDiv.style.padding = "10%";
-  treeDiv.style.textAlign = "center";
-  editorArea.appendChild(treeDiv);
-  treeDiv.appendChild(treeSprites[0]);
+  Object.keys(objectToSpriteMap).forEach((key: GameObjectType) => {
+    const objectDiv = document.createElement("div");
+    objectDiv.style.color = "white";
+    objectDiv.style.padding = "10%";
+    objectDiv.style.textAlign = "center";
+    objectDiv.id = `object-${key}`;
+    editorArea.appendChild(objectDiv);
 
-  const wallDiv = document.createElement("div");
-  wallDiv.style.color = "white";
-  wallDiv.style.padding = "10%";
-  wallDiv.style.textAlign = "center";
-  editorArea.appendChild(wallDiv);
-  wallDiv.appendChild(wallSprites[0]);
-
-  const streetDiv = document.createElement("div");
-  streetDiv.style.color = "white";
-  streetDiv.style.padding = "10%";
-  streetDiv.style.textAlign = "center";
-  editorArea.appendChild(streetDiv);
-  streetDiv.appendChild(streetSprites[0]);
+    const labelDiv = document.createElement("div");
+    labelDiv.innerText = key;
+    labelDiv.style.fontSize = "10px";
+    const sprite = objectToSpriteMap[key];
+    sprite.width = 16;
+    sprite.height = 16;
+    objectDiv.appendChild(sprite);
+    objectDiv.appendChild(labelDiv);
+  });
 
   selectedEditorObject$.subscribe((value) => {
-    treeDiv.onclick = () => {
-      selectedEditorObjectSubject$.next(value == "tree" ? "" : "tree");
-    };
-    treeDiv.style.background = value == "tree" ? "yellow" : "purple";
+    Object.keys(objectToSpriteMap).forEach((key: GameObjectType) => {
+      const objectDiv = document.getElementById(
+        `object-${key}`
+      ) as HTMLDivElement;
 
-    wallDiv.onclick = () => {
-      selectedEditorObjectSubject$.next(value == "wall" ? "" : "wall");
-    };
-    wallDiv.style.background = value == "wall" ? "yellow" : "purple";
-
-    streetDiv.onclick = () => {
-      selectedEditorObjectSubject$.next(value == "street" ? "" : "street");
-    };
-    streetDiv.style.background = value == "street" ? "yellow" : "purple";
+      objectDiv.onclick = () => {
+        selectedEditorObjectSubject$.next(value == key ? "" : key);
+      };
+      objectDiv.style.background = value == key ? "yellow" : "none";
+    });
   });
 
   return {

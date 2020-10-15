@@ -1,4 +1,4 @@
-import { Layer } from "../types";
+import { Layer, Unsaved } from "../types";
 import { Debuggable } from "../debug/grid_lines";
 import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
@@ -12,9 +12,7 @@ export const isEmpty = (unknownObject: any): unknownObject is Empty => {
   return (unknownObject as Empty).objectType === "Empty";
 };
 
-export const emptyFactory = (
-  attributes: Partial<Empty> & { _id: string }
-): Empty => {
+export const emptyFactory = (attributes: Partial<Empty>): Unsaved<Empty> => {
   const positionableProperties = positionableFactory(attributes);
   const particularProperties = {
     _id: attributes._id,
