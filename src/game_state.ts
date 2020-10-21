@@ -11,6 +11,7 @@ export interface GameState {
   players: { [key: string]: Player | undefined };
   debug: {
     layerVisibility: { [string: number]: boolean };
+    selectedGroupId: string | null;
   };
 }
 

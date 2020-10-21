@@ -2,7 +2,12 @@ import { GameState } from "../game_state";
 import { GameObject } from "../game_object";
 import { CoordinateBounds } from "../coordinate";
 import { Layer } from "../types";
-import { removeAtPath } from "../coordinate_map";
+import {
+  CoordinateMap,
+  getAtPath,
+  removeAtPath,
+  setAtPath,
+} from "../coordinate_map";
 
 export const updateLayerMaps = (
   gameObjects: GameObject[],
@@ -99,6 +104,51 @@ export const removeFromLayerMaps = (
   if (layer == Layer.INTERACTIVE) {
     removeAtPath(gameState.layerMaps.interactiveMap, x, y);
   }
+
+  return gameState;
+};
+
+export const updateInLayerMaps = (
+  params: {
+    x: number;
+    y: number;
+    layer: Layer;
+    gameState: GameState;
+  },
+  attrs: {
+    groupId: string;
+  }
+) => {
+  const { layer, gameState, x, y } = params;
+
+  let map: CoordinateMap<GameObject> | null = null;
+
+  if (layer == Layer.GROUND) {
+    map = gameState.layerMaps.groundMap;
+  }
+  if (layer == Layer.OVERHEAD) {
+    map = gameState.layerMaps.overheadMap;
+  }
+  if (layer == Layer.PASSIVE) {
+    map = gameState.layerMaps.passiveMap;
+  }
+  if (layer == Layer.INTERACTIVE) {
+    map = gameState.layerMaps.interactiveMap;
+  }
+
+  if (!map) {
+    return;
+  }
+
+  const retrieved = getAtPath(map, x, y);
+
+  if (!retrieved) {
+    return;
+  }
+
+  retrieved.groupId = attrs.groupId;
+
+  setAtPath(map, x, y, retrieved);
 
   return gameState;
 };

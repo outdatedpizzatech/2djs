@@ -39,41 +39,45 @@ export const pipelineRender = (
   count: number,
   gameState: GameState
 ): void => {
-  const { camera, layerMaps, players } = gameState;
+  const { camera, layerMaps, players, debug } = gameState;
+
+  const options = { debug };
 
   if (isStreet(renderable)) {
-    renderStreet(renderable, camera, bufferCtx);
+    renderStreet(renderable, camera, bufferCtx, count, options);
   }
   if (isHouseFloor(renderable)) {
-    renderHouseFloor(renderable, camera, bufferCtx);
+    renderHouseFloor(renderable, camera, bufferCtx, count, options);
   }
   if (isTree(renderable)) {
-    renderTree(renderable, camera, bufferCtx, count);
+    renderTree(renderable, camera, bufferCtx, count, options);
   }
   if (isWall(renderable)) {
-    renderWall(renderable, camera, bufferCtx, layerMaps);
+    renderWall(renderable, camera, bufferCtx, layerMaps, count, options);
   }
   if (isHouseWall(renderable)) {
-    renderHouseWall(renderable, camera, bufferCtx, count);
+    renderHouseWall(renderable, camera, bufferCtx, count, options);
   }
   if (isWater(renderable)) {
-    renderWater(renderable, camera, bufferCtx);
+    renderWater(renderable, camera, bufferCtx, count, options);
   }
   if (isPlayer(renderable)) {
-    renderPlayer(renderable, camera, bufferCtx);
+    renderPlayer(renderable, camera, bufferCtx, count, options);
   }
   if (isDoor(renderable)) {
     renderDoor(
       renderable,
       camera,
       bufferCtx,
-      Object.values(players) as Player[]
+      Object.values(players) as Player[],
+      count,
+      options
     );
   }
   if (isRoof(renderable)) {
-    renderRoof(renderable, camera, bufferCtx, count);
+    renderRoof(renderable, camera, bufferCtx, count, options);
   }
   if (isEmpty(renderable)) {
-    renderEmpty(renderable, camera, bufferCtx);
+    renderEmpty(renderable, camera, bufferCtx, options);
   }
 };

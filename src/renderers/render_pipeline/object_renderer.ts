@@ -21,7 +21,7 @@ export const renderAllObjects = (
 
   const { interactiveMap, groundMap, passiveMap, overheadMap } = layerMaps;
 
-  const idsOverlappingPlayer: { [key: number]: boolean } = {};
+  const idsOverlappingPlayer: { [key: string]: boolean } = {};
 
   const myPlayer = players[gameState.myClientId];
 
@@ -51,11 +51,12 @@ export const renderAllObjects = (
       if (!layer[x]) continue;
 
       for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
+        const renderable = getAtPath(layer, x, y);
+
         if (getAtPath(renderedMap, x, y)) {
+          pipelineRender(renderable, bufferCtx, 0, gameState);
           continue;
         }
-
-        const renderable = getAtPath(layer, x, y);
 
         if (renderable) {
           let renderCount = 1;

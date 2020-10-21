@@ -30,8 +30,8 @@ export const generateMap = async (
       layer: number;
       x: number;
       y: number;
-      groupId?: number;
-      role?: string;
+      groupId?: string;
+      role?: HouseWallRole;
     }) => {
       const { objectType } = data;
 
@@ -42,9 +42,7 @@ export const generateMap = async (
       } else if (objectType == "HouseFloor") {
         return houseFloorFactory({ ...data, objectType });
       } else if (objectType == "HouseWall") {
-        const role =
-          data.role == "front" ? HouseWallRole.FRONT : HouseWallRole.SIDE;
-        return houseWallFactory({ ...data, objectType, role });
+        return houseWallFactory({ ...data, objectType });
       } else if (objectType == "Roof") {
         return roofFactory({ ...data, objectType });
       } else if (objectType == "Street") {

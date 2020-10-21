@@ -8,11 +8,15 @@ import {
 } from "../../models/player";
 import { Direction } from "../../direction";
 import sprites from "../../sprite_collections/player_sprite_collection";
+import { LayerMaps } from "../../coordinate_map";
+import { RenderOptions } from "./types";
 
 export const renderPlayer = (
   model: Player,
   camera: Camera,
-  ctx: CanvasRenderingContext2D
+  ctx: CanvasRenderingContext2D,
+  count: number,
+  options: RenderOptions
 ) => {
   const { debug, facingDirection } = model;
   const { worldX, worldY } = project(camera, model);
@@ -22,15 +26,25 @@ export const renderPlayer = (
     ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 
-  const currentAnimation = getAnimationFrames(model);
-  const animationIndex = _getAnimationIndex(currentAnimation, model);
-  const frameIndex = _getSpriteFrame(
-    facingDirection,
-    currentAnimation,
-    animationIndex
-  );
+  if (count > 0) {
+    const currentAnimation = getAnimationFrames(model);
+    const animationIndex = _getAnimationIndex(currentAnimation, model);
+    const frameIndex = _getSpriteFrame(
+      facingDirection,
+      currentAnimation,
+      animationIndex
+    );
 
-  ctx.drawImage(sprites[frameIndex], worldX, worldY);
+    ctx.drawImage(sprites[frameIndex], worldX, worldY);
+  }
+
+  if (
+    options.debug.selectedGroupId &&
+    options.debug.selectedGroupId == model.groupId
+  ) {
+    ctx.fillStyle = "rgba(255, 255, 0, 0.75)";
+    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
+  }
 };
 
 function _getSpriteFrame(

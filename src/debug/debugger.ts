@@ -5,12 +5,13 @@ import {
   frameWithGameState$,
   gameState$,
   layerVisibility$,
+  selectedGroupUuid$,
+  selectedGroupUuidSubject$,
 } from "../signals";
 import {
   filter,
   map,
   startWith,
-  tap,
   throttleTime,
   withLatestFrom,
 } from "rxjs/operators";
@@ -33,14 +34,15 @@ import { GameObject } from "../game_object";
 import { Layer } from "../types";
 import treeSprites from "../sprite_collections/tree_sprite_collection";
 import wallSprites from "../sprite_collections/wall_sprite_collection";
-import streetSprites from "../sprite_collections/street_sprite_collection";
-import doorSprites from "../sprite_collections/door_sprite_collection";
-import houseFloorSprites from "../sprite_collections/street_sprite_collection";
 import houseWallSprites from "../sprite_collections/wall_sprite_collection";
+import streetSprites from "../sprite_collections/street_sprite_collection";
+import houseFloorSprites from "../sprite_collections/street_sprite_collection";
+import doorSprites from "../sprite_collections/door_sprite_collection";
 import roofSprites from "../sprite_collections/roof_sprite_collection";
 import waterSprites from "../sprite_collections/water_sprite_collection";
 import { isEmpty } from "../models/empty";
-import { addObject, removeObject } from "./editor";
+import { addObject, getGroup, removeObject, setGroup } from "./editor";
+import { v4 as uuidv4 } from "uuid";
 
 const selectedEditorObjectSubject$: Subject<string> = new Subject();
 const selectedEditorObject$ = selectedEditorObjectSubject$
@@ -82,7 +84,7 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   debugArea.style.marginRight = "auto";
   debugArea.style.background = "gray";
   debugArea.style.display = "grid";
-  debugArea.style.gridTemplateColumns = "10% 10% 10% 10% 10%";
+  debugArea.style.gridTemplateColumns = "10% 10% 10% 10% 10% 20%";
   body.appendChild(debugArea);
 
   const gridLinesLabel = document.createElement("label");
@@ -117,6 +119,40 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   layerDiv.style.color = "white";
   layerDiv.style.padding = "10%";
   debugArea.appendChild(layerDiv);
+
+  const groupDiv = document.createElement("div");
+  groupDiv.style.background = "brown";
+  groupDiv.style.color = "white";
+  groupDiv.style.padding = "10%";
+  debugArea.appendChild(groupDiv);
+
+  const groupLabel = document.createElement("label");
+  groupDiv.appendChild(groupLabel);
+
+  const shuffleButton = document.createElement("button");
+  shuffleButton.innerText = "Shuffle ID";
+  shuffleButton.style.display = "block";
+  shuffleButton.addEventListener("click", () => {
+    const uuid = uuidv4();
+    selectedGroupUuidSubject$.next(uuid);
+  });
+  groupDiv.appendChild(shuffleButton);
+
+  const pickGroupButton = document.createElement("button");
+  pickGroupButton.innerText = "Pick";
+  pickGroupButton.style.display = "block";
+  pickGroupButton.addEventListener("click", () => {
+    selectedEditorObjectSubject$.next("pickGroup");
+  });
+  groupDiv.appendChild(pickGroupButton);
+
+  const setGroupButton = document.createElement("button");
+  setGroupButton.innerText = "Set";
+  setGroupButton.style.display = "block";
+  setGroupButton.addEventListener("click", () => {
+    selectedEditorObjectSubject$.next("setGroup");
+  });
+  groupDiv.appendChild(setGroupButton);
 
   const addLayerCheckbox = (layer: Layer, name: string) => {
     const layerLabel = document.createElement("label");
@@ -191,6 +227,22 @@ const mountDebugArea = (body: HTMLBodyElement) => {
       };
       objectDiv.style.background = value == key ? "yellow" : "none";
     });
+
+    if (value == "pickGroup") {
+      pickGroupButton.style.background = "yellow";
+    } else {
+      pickGroupButton.style.background = "rgb(239, 239, 239)";
+    }
+
+    if (value == "setGroup") {
+      setGroupButton.style.background = "yellow";
+    } else {
+      setGroupButton.style.background = "rgb(239, 239, 239)";
+    }
+  });
+
+  selectedGroupUuid$.subscribe((groupUuid) => {
+    groupLabel.innerText = `Group ID:\r${groupUuid}`;
   });
 
   return {
@@ -213,7 +265,7 @@ export const loadDebugger = (
     if (isWall(debuggable)) debuggable.debug.color = "#0b63bb";
     if (isWater(debuggable)) debuggable.debug.color = "#acc896";
     if (isStreet(debuggable)) debuggable.debug.color = "#226e71";
-    if (isHouseWall(debuggable)) debuggable.debug.color = "#599e03";
+    if (isHouseWall(debuggable)) debuggable.debug.color = "#590e03";
     if (isHouseFloor(debuggable)) debuggable.debug.color = "#7417ed";
     if (isRoof(debuggable)) debuggable.debug.color = "#022efb";
     if (isEmpty(debuggable)) debuggable.debug.color = "rgba(255, 0, 255, 0.5)";
@@ -390,9 +442,49 @@ export const loadDebugger = (
         y,
         gameState,
         selectedObject,
-      }))
+      })),
+      filter(
+        ({ selectedObject }) =>
+          !!objectToSpriteMap[selectedObject as GameObjectType]
+      )
     )
     .subscribe(addObject);
+
+  frame$
+    .pipe(
+      withLatestFrom(mouse0held$),
+      filter(([_, mouseHeld]) => mouseHeld),
+      withLatestFrom(mouseMoveWithNormalizedCoordinate$),
+      withLatestFrom(gameState$),
+      withLatestFrom(selectedEditorObject$),
+      map(([[[[_], { x, y }], gameState], selectedObject]) => ({
+        x,
+        y,
+        gameState,
+        selectedObject,
+      })),
+      filter(({ selectedObject }) => selectedObject == "pickGroup")
+    )
+    .subscribe(getGroup);
+
+  frame$
+    .pipe(
+      withLatestFrom(mouse0held$),
+      filter(([_, mouseHeld]) => mouseHeld),
+      withLatestFrom(mouseMoveWithNormalizedCoordinate$),
+      withLatestFrom(gameState$),
+      withLatestFrom(selectedEditorObject$),
+      withLatestFrom(selectedGroupUuid$),
+      map(([[[[[_], { x, y }], gameState], selectedObject], groupId]) => ({
+        x,
+        y,
+        gameState,
+        selectedObject,
+        groupId,
+      })),
+      filter(({ selectedObject }) => selectedObject == "setGroup")
+    )
+    .subscribe(setGroup);
 
   frame$
     .pipe(

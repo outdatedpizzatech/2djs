@@ -27,6 +27,12 @@ import { GameObject } from "./game_object";
 import { Layer } from "./types";
 import { cameraFactory } from "./camera";
 import { CoordinateMap } from "./coordinate_map";
+import { v4 as uuidv4 } from "uuid";
+
+export const selectedGroupUuidSubject$: Subject<string> = new Subject();
+export const selectedGroupUuid$ = selectedGroupUuidSubject$
+  .asObservable()
+  .pipe(startWith(uuidv4()));
 
 export const frame$ = interval(1000 / FRAMERATE, animationFrameScheduler).pipe(
   map(() => performance.now()),
@@ -58,6 +64,7 @@ const initialGameState: GameState = {
       [Layer.GROUND]: true,
       [Layer.OVERHEAD]: true,
     },
+    selectedGroupId: null,
   },
 };
 
@@ -72,9 +79,11 @@ export const gameState$ = combineLatest([
     map(({ layer, visible }) => ({ [layer]: visible })),
     startWith(initialGameState.debug.layerVisibility)
   ),
+  selectedGroupUuid$,
 ]).pipe(
-  scan((acc: GameState, [gameState, debugLayer]) => {
+  scan((acc: GameState, [gameState, debugLayer, selectedGroupUuid]) => {
     Object.assign(gameState.debug.layerVisibility, debugLayer);
+    gameState.debug.selectedGroupId = selectedGroupUuid;
     return gameState;
   }, initialGameState),
   startWith(initialGameState)

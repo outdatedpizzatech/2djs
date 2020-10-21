@@ -4,6 +4,7 @@ import {
   addToLayerMaps,
   clearLayerMaps,
   removeFromLayerMaps,
+  updateInLayerMaps,
   updateLayerMaps,
 } from "./layer_reducer";
 import { GameObject } from "../game_object";
@@ -57,5 +58,24 @@ export const removeObjectFromMap = (params: {
   return flow(
     () => cloneDeep(gameState),
     (newGameState) => removeFromLayerMaps(x, y, layer, newGameState)
+  )();
+};
+
+export const updateObjectInMap = (
+  params: {
+    gameState: GameState;
+    layer: Layer;
+    x: number;
+    y: number;
+  },
+  attrs: {
+    groupId: string;
+  }
+) => {
+  const { gameState, x, y, layer } = params;
+
+  return flow(
+    () => cloneDeep(gameState),
+    (gameState) => updateInLayerMaps({ x, y, layer, gameState }, attrs)
   )();
 };
