@@ -1,6 +1,6 @@
 export const FRAMERATE = 30;
 export const GRID_INTERVAL = 16;
-export const DRAW_DISTANCE = 50;
+export const DRAW_DISTANCE = 75;
 export const SPAWN_COORDINATE = {
   x: 10,
   y: 30,
