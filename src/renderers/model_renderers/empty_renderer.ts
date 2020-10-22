@@ -1,7 +1,7 @@
-import { Camera, project } from "../../camera";
+import { Camera } from "../../camera";
 import { Empty } from "../../models/empty";
-import { GRID_INTERVAL } from "../../common";
 import { RenderOptions } from "./types";
+import { renderModel } from "../helpers/render_model";
 
 export const renderEmpty = (
   model: Empty,
@@ -9,13 +9,5 @@ export const renderEmpty = (
   ctx: CanvasRenderingContext2D,
   options: RenderOptions
 ) => {
-  const { worldX, worldY } = project(camera, model);
-
-  if (
-    options.debug.selectedGroupId &&
-    options.debug.selectedGroupId == model.groupId
-  ) {
-    ctx.fillStyle = "rgba(255, 255, 0, 0.75)";
-    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
-  }
+  renderModel(model, camera, ctx, document.createElement("img"), 0, options);
 };

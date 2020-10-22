@@ -10,6 +10,7 @@ import { Direction } from "../../direction";
 import sprites from "../../sprite_collections/player_sprite_collection";
 import { LayerMaps } from "../../coordinate_map";
 import { RenderOptions } from "./types";
+import { renderModel } from "../helpers/render_model";
 
 export const renderPlayer = (
   model: Player,
@@ -19,7 +20,6 @@ export const renderPlayer = (
   options: RenderOptions
 ) => {
   const { facingDirection } = model;
-  const { worldX, worldY } = project(camera, model);
 
   if (count > 0) {
     const currentAnimation = getAnimationFrames(model);
@@ -30,15 +30,7 @@ export const renderPlayer = (
       animationIndex
     );
 
-    ctx.drawImage(sprites[frameIndex], worldX, worldY);
-  }
-
-  if (
-    options.debug.selectedGroupId &&
-    options.debug.selectedGroupId == model.groupId
-  ) {
-    ctx.fillStyle = "rgba(255, 255, 0, 0.75)";
-    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
+    renderModel(model, camera, ctx, sprites[frameIndex], count, options);
   }
 };
 

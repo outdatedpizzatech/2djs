@@ -15,7 +15,12 @@ export const renderModel = (
 ) => {
   const { worldX, worldY } = project(camera, model);
 
-  if (count > 0) {
+  if (count > 1) {
+    ctx.fillStyle = ctx.createPattern(sprite, "repeat") as CanvasPattern;
+    ctx.translate(worldX, worldY);
+    ctx.fillRect(0, 0, GRID_INTERVAL * count, GRID_INTERVAL);
+    ctx.translate(-worldX, -worldY);
+  } else if (count > 0) {
     ctx.drawImage(sprite, worldX, worldY);
   }
 

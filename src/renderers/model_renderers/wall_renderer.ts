@@ -5,6 +5,7 @@ import sprites from "../../sprite_collections/wall_sprite_collection";
 import { getAtPath, LayerMaps } from "../../coordinate_map";
 import { Layer } from "../../types";
 import { RenderOptions } from "./types";
+import { renderModel } from "../helpers/render_model";
 
 export const renderWall = (
   model: Wall,
@@ -40,5 +41,6 @@ export const renderWall = (
     isWall(getAtPath(layerMap, x, y + 1)) ||
     isWall(getAtPath(layerMap, x, y + 1));
   const spriteIndex = hasVerticalWallNeighbors ? 1 : 0;
-  ctx.drawImage(sprites[spriteIndex], worldX, worldY);
+
+  renderModel(model, camera, ctx, sprites[spriteIndex], count, options);
 };
