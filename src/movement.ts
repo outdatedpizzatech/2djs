@@ -1,5 +1,4 @@
 import {
-  gameState$,
   gameStateSubject$,
   whenMyPlayerHasMovementDirection$,
 } from "./signals";
