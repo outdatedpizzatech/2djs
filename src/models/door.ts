@@ -1,9 +1,8 @@
 import { Layer, Unsaved } from "../types";
-import { Debuggable } from "../debug/grid_lines";
 import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
 
-export interface Door extends Debuggable, GameObject {
+export interface Door extends GameObject {
   objectType: "Door";
 }
 
@@ -17,9 +16,6 @@ export const doorFactory = (attributes: Partial<Door>): Unsaved<Door> => {
   const particularProperties = {
     _id: attributes._id,
     objectType: "Door" as "Door",
-    debug: {
-      color: attributes.debug?.color,
-    },
     layer: Layer.PASSIVE,
     groupId: attributes.groupId,
   };

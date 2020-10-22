@@ -1,4 +1,3 @@
-import { Debuggable } from "../debug/grid_lines";
 import { Direction } from "../direction";
 import { v4 as uuidv4 } from "uuid";
 import { GameObject } from "../game_object";
@@ -7,7 +6,7 @@ import { Layer } from "../types";
 import axios from "axios";
 import { API_URI_BASE, SPAWN_COORDINATE } from "../common";
 
-export interface Player extends Debuggable, GameObject {
+export interface Player extends GameObject {
   objectType: "Player";
   moving: boolean;
   movementQueue: Direction[];
@@ -36,9 +35,6 @@ export const playerFactory = (
     objectType: "Player" as "Player",
     facingDirection: attributes.facingDirection || Direction.DOWN,
     movementSpeed: attributes.movementSpeed || 80,
-    debug: {
-      color: attributes.debug?.color,
-    },
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
     moving: false,

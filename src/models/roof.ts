@@ -1,9 +1,8 @@
-import { Debuggable } from "../debug/grid_lines";
 import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
 import { Layer, Unsaved } from "../types";
 
-export interface Roof extends Debuggable, GameObject {
+export interface Roof extends GameObject {
   objectType: "Roof";
 }
 
@@ -17,9 +16,6 @@ export const roofFactory = (attributes: Partial<Roof>): Unsaved<Roof> => {
   const particularProperties = {
     _id: attributes._id,
     objectType: "Roof" as "Roof",
-    debug: {
-      color: attributes.debug?.color,
-    },
     layer: Layer.OVERHEAD,
     groupId: attributes.groupId,
   };

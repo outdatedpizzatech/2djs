@@ -1,12 +1,6 @@
 import { GRID_INTERVAL } from "../common";
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
 
-export interface Debuggable {
-  debug: {
-    color?: string;
-  };
-}
-
 export const renderGridLines = (ctx: CanvasRenderingContext2D) => {
   const yOffset = (CAMERA_HEIGHT % GRID_INTERVAL) / 2;
 

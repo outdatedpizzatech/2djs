@@ -14,7 +14,7 @@ export const renderWall = (
   count: number,
   options: RenderOptions
 ) => {
-  const { debug, x, y, layer } = model;
+  const { x, y, layer } = model;
   const { worldX, worldY } = project(camera, model);
 
   if (

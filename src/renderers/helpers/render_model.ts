@@ -1,10 +1,9 @@
 import { GRID_INTERVAL } from "../../common";
-import { Debuggable } from "../../debug/grid_lines";
 import { Camera, project } from "../../camera";
 import { RenderOptions } from "../model_renderers/types";
 import { GameObject } from "../../game_object";
 
-interface Renderable extends Debuggable, GameObject {}
+interface Renderable extends GameObject {}
 
 export const renderModel = (
   model: Renderable,
@@ -14,13 +13,7 @@ export const renderModel = (
   count: number,
   options: RenderOptions
 ) => {
-  const { debug } = model;
   const { worldX, worldY } = project(camera, model);
-
-  if (debug.color) {
-    ctx.fillStyle = debug.color;
-    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
-  }
 
   if (count > 0) {
     ctx.drawImage(sprite, worldX, worldY);

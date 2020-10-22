@@ -1,9 +1,8 @@
-import { Debuggable } from "../debug/grid_lines";
 import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
 import { Layer, Unsaved } from "../types";
 
-export interface HouseFloor extends Debuggable, GameObject {
+export interface HouseFloor extends GameObject {
   objectType: "HouseFloor";
 }
 
@@ -21,9 +20,6 @@ export const houseFloorFactory = (
   const particularProperties = {
     _id: attributes._id,
     objectType: "HouseFloor" as "HouseFloor",
-    debug: {
-      color: attributes.debug?.color,
-    },
     layer: Layer.GROUND,
     groupId: attributes.groupId,
   };

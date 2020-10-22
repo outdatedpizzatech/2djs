@@ -1,9 +1,8 @@
-import { Debuggable } from "../debug/grid_lines";
 import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
 import { Layer, Unsaved } from "../types";
 
-export interface Water extends Debuggable, GameObject {
+export interface Water extends GameObject {
   objectType: "Water";
 }
 
@@ -17,9 +16,6 @@ export const waterFactory = (attributes: Partial<Water>): Unsaved<Water> => {
   const particularProperties = {
     _id: attributes._id,
     objectType: "Water" as "Water",
-    debug: {
-      color: attributes.debug?.color,
-    },
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
   };
