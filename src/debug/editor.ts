@@ -13,13 +13,13 @@ import {
 import { Layer, Unsaved } from "../types";
 import { GameState } from "../game_state";
 import { streetFactory } from "../models/street";
-import { GameObjectType } from "./debugger";
 import { doorFactory } from "../models/door";
 import { emptyFactory } from "../models/empty";
 import { houseFloorFactory } from "../models/house_floor";
 import { houseWallFactory, HouseWallRole } from "../models/house_wall";
 import { roofFactory } from "../models/roof";
 import { waterFactory } from "../models/water";
+import { GameObjectType } from "./types";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {

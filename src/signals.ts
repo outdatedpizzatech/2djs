@@ -29,6 +29,11 @@ import { cameraFactory } from "./camera";
 import { CoordinateMap } from "./coordinate_map";
 import { v4 as uuidv4 } from "uuid";
 
+export const selectedEditorObjectSubject$: Subject<string> = new Subject();
+export const selectedEditorObject$ = selectedEditorObjectSubject$
+  .asObservable()
+  .pipe(startWith(""));
+
 export const selectedGroupUuidSubject$: Subject<string> = new Subject();
 export const selectedGroupUuid$ = selectedGroupUuidSubject$
   .asObservable()
