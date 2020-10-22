@@ -1,25 +1,20 @@
-import { cameraFactory } from "./camera";
 import {
   coordinatesToLoadForMyPlayer$,
   frameWithGameState$,
-  gameState$,
+  gameStateSubject$,
   mapLoadWithState$,
   whenMyPlayerExceedsDrawDistanceThreshold$,
   whenTheMapIsLoaded$,
-  layerVisibility$,
-  gameStateSubject$,
 } from "./signals";
 import { GameState } from "./game_state";
 import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
 import { addView } from "./renderers/canvas_renderer";
-import { CoordinateMap } from "./coordinate_map";
 import { renderGround } from "./renderers/ground_renderer";
 import { loadDebugger } from "./debug/debugger";
 import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
 import { Coordinate, getLoadBoundsForCoordinate } from "./coordinate";
-import { GameObject } from "./game_object";
 import {
   clearMapOfObjects,
   updateMapWithObjects,
@@ -29,7 +24,6 @@ import { addSessionsSubscriptions } from "./sessions";
 import { cloneDeep } from "./clone_deep";
 import { distinctUntilChanged, map, withLatestFrom } from "rxjs/operators";
 import deepEqual from "fast-deep-equal";
-import { Layer } from "./types";
 
 const drawEntireScene = (params: {
   bufferCtx: CanvasRenderingContext2D;

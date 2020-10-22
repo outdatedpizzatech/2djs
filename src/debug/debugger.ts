@@ -16,15 +16,8 @@ import {
   withLatestFrom,
 } from "rxjs/operators";
 import { fromEvent, Subject } from "rxjs";
-import { Debuggable, renderGridLines } from "./grid_lines";
+import { renderGridLines } from "./grid_lines";
 import { Player } from "../models/player";
-import { isTree } from "../models/tree";
-import { isWall } from "../models/wall";
-import { isWater } from "../models/water";
-import { isStreet } from "../models/street";
-import { isHouseWall } from "../models/house_wall";
-import { isHouseFloor } from "../models/house_floor";
-import { isRoof } from "../models/roof";
 import { mouse0held$, mouse2held$, mousemove$ } from "../signals/input";
 import { GRID_INTERVAL } from "../common";
 import { getAtPath } from "../coordinate_map";
@@ -40,7 +33,6 @@ import houseFloorSprites from "../sprite_collections/street_sprite_collection";
 import doorSprites from "../sprite_collections/door_sprite_collection";
 import roofSprites from "../sprite_collections/roof_sprite_collection";
 import waterSprites from "../sprite_collections/water_sprite_collection";
-import { isEmpty } from "../models/empty";
 import { addObject, getGroup, removeObject, setGroup } from "./editor";
 import { v4 as uuidv4 } from "uuid";
 
@@ -126,9 +118,6 @@ const mountDebugArea = (body: HTMLBodyElement) => {
   groupDiv.style.padding = "10%";
   debugArea.appendChild(groupDiv);
 
-  const groupLabel = document.createElement("label");
-  groupDiv.appendChild(groupLabel);
-
   const shuffleButton = document.createElement("button");
   shuffleButton.innerText = "Shuffle ID";
   shuffleButton.style.display = "block";
@@ -153,6 +142,9 @@ const mountDebugArea = (body: HTMLBodyElement) => {
     selectedEditorObjectSubject$.next("setGroup");
   });
   groupDiv.appendChild(setGroupButton);
+
+  const groupLabel = document.createElement("label");
+  groupDiv.appendChild(groupLabel);
 
   const addLayerCheckbox = (layer: Layer, name: string) => {
     const layerLabel = document.createElement("label");
@@ -260,17 +252,6 @@ export const loadDebugger = (
 ) => {
   const debug = mountDebugArea(body);
 
-  const renderDebugObject = (debuggable: Debuggable | null) => {
-    if (isTree(debuggable)) debuggable.debug.color = "#FFFFFF";
-    if (isWall(debuggable)) debuggable.debug.color = "#0b63bb";
-    if (isWater(debuggable)) debuggable.debug.color = "#acc896";
-    if (isStreet(debuggable)) debuggable.debug.color = "#226e71";
-    if (isHouseWall(debuggable)) debuggable.debug.color = "#590e03";
-    if (isHouseFloor(debuggable)) debuggable.debug.color = "#7417ed";
-    if (isRoof(debuggable)) debuggable.debug.color = "#022efb";
-    if (isEmpty(debuggable)) debuggable.debug.color = "rgba(255, 0, 255, 0.5)";
-  };
-
   frame$.pipe(throttleTime(1000)).subscribe((deltaTime) => {
     debug.fps.innerText = `FPS: ${Math.round(1 / deltaTime)}`;
   });
@@ -289,7 +270,6 @@ export const loadDebugger = (
         for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
           const renderable = getAtPath(groundMap, x, y);
           if (renderable) {
-            renderDebugObject(renderable as any);
             if (withinLens(camera, renderable)) objectsInView++;
           }
         }
@@ -298,7 +278,6 @@ export const loadDebugger = (
         for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
           const renderable = getAtPath(passiveMap, x, y);
           if (renderable) {
-            renderDebugObject(renderable as any);
             if (withinLens(camera, renderable)) objectsInView++;
           }
         }
@@ -307,7 +286,6 @@ export const loadDebugger = (
         for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
           const renderable = getAtPath(interactiveMap, x, y);
           if (renderable) {
-            renderDebugObject(renderable as any);
             if (withinLens(camera, renderable)) objectsInView++;
           }
         }
@@ -316,7 +294,6 @@ export const loadDebugger = (
         for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
           const renderable = getAtPath(overheadMap, x, y);
           if (renderable) {
-            renderDebugObject(renderable as any);
             if (withinLens(camera, renderable)) objectsInView++;
           }
         }

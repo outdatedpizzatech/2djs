@@ -24,9 +24,6 @@ export const matchesObject = (a: any, b: any): boolean => {
   if (isTree(a)) {
     return isTree(b);
   }
-  if (isHouseWall(a)) {
-    return isHouseWall(b);
-  }
   if (isRoof(a)) {
     return isRoof(b);
   }

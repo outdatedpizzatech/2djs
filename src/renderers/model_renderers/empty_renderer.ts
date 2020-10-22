@@ -11,11 +11,6 @@ export const renderEmpty = (
 ) => {
   const { worldX, worldY } = project(camera, model);
 
-  if (model.debug.color) {
-    ctx.fillStyle = model.debug.color;
-    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
-  }
-
   if (
     options.debug.selectedGroupId &&
     options.debug.selectedGroupId == model.groupId

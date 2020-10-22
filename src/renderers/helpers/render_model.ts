@@ -1,7 +1,6 @@
 import { GRID_INTERVAL } from "../../common";
 import { Debuggable } from "../../debug/grid_lines";
 import { Camera, project } from "../../camera";
-import { Positionable } from "../../positionable";
 import { RenderOptions } from "../model_renderers/types";
 import { GameObject } from "../../game_object";
 

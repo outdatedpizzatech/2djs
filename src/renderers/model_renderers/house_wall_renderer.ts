@@ -11,21 +11,7 @@ export const renderHouseWall = (
   xCount: number,
   options: RenderOptions
 ) => {
-  const { debug } = model;
   const { worldX, worldY } = project(camera, model);
-
-  if (debug.color) {
-    ctx.fillStyle = debug.color;
-    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
-  }
-
-  if (
-    options.debug.selectedGroupId &&
-    options.debug.selectedGroupId == model.groupId
-  ) {
-    ctx.fillStyle = "rgba(255, 255, 0, 0.75)";
-    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
-  }
 
   const sprite = model.role == HouseWallRole.SIDE ? sprites[2] : sprites[3];
 
@@ -36,5 +22,13 @@ export const renderHouseWall = (
     ctx.translate(-worldX, -worldY);
   } else if (xCount > 0) {
     ctx.drawImage(sprite, worldX, worldY);
+  }
+
+  if (
+    options.debug.selectedGroupId &&
+    options.debug.selectedGroupId == model.groupId
+  ) {
+    ctx.fillStyle = "rgba(255, 255, 0, 0.75)";
+    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 };

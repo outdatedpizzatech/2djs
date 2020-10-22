@@ -17,11 +17,6 @@ export const renderWall = (
   const { debug, x, y, layer } = model;
   const { worldX, worldY } = project(camera, model);
 
-  if (debug.color) {
-    ctx.fillStyle = debug.color;
-    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
-  }
-
   if (
     options.debug.selectedGroupId &&
     options.debug.selectedGroupId == model.groupId

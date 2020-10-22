@@ -18,13 +18,8 @@ export const renderPlayer = (
   count: number,
   options: RenderOptions
 ) => {
-  const { debug, facingDirection } = model;
+  const { facingDirection } = model;
   const { worldX, worldY } = project(camera, model);
-
-  if (debug.color) {
-    ctx.fillStyle = debug.color;
-    ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
-  }
 
   if (count > 0) {
     const currentAnimation = getAnimationFrames(model);

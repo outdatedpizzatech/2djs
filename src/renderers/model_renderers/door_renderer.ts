@@ -3,7 +3,6 @@ import sprites from "../../sprite_collections/door_sprite_collection";
 import { renderModel } from "../helpers/render_model";
 import { Door } from "../../models/door";
 import { Player } from "../../models/player";
-import { LayerMaps } from "../../coordinate_map";
 import { RenderOptions } from "./types";
 
 export const renderDoor = (
