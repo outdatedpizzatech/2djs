@@ -12,6 +12,7 @@ import { playerFactory } from "./models/player";
 import { CoordinateBounds } from "./coordinate";
 import { GameObject } from "./game_object";
 import { API_URI_BASE } from "./common";
+import { flowerFactory } from "./models/flower";
 
 export const generateMap = async (
   coordinateBounds: CoordinateBounds
@@ -55,6 +56,8 @@ export const generateMap = async (
         return wallFactory({ ...data, objectType });
       } else if (objectType == "Player") {
         return playerFactory({ ...data, objectType });
+      } else if (objectType == "Flower") {
+        return flowerFactory({ ...data, objectType });
       }
     }
   );

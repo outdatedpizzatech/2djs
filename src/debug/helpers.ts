@@ -6,6 +6,7 @@ import houseFloorSprites from "../sprite_collections/street_sprite_collection";
 import doorSprites from "../sprite_collections/door_sprite_collection";
 import roofSprites from "../sprite_collections/roof_sprite_collection";
 import waterSprites from "../sprite_collections/water_sprite_collection";
+import flowerSprites from "../sprite_collections/flower_sprite_collection";
 import { GameObjectType } from "./types";
 
 export const objectToSpriteMap: { [K in GameObjectType]: HTMLImageElement } = {
@@ -19,4 +20,5 @@ export const objectToSpriteMap: { [K in GameObjectType]: HTMLImageElement } = {
   house_wall_front: houseWallSprites[3],
   roof: roofSprites[0],
   water: waterSprites[0],
+  flower: flowerSprites[0],
 };

@@ -8,7 +8,8 @@ export type GameObjectType =
   | "house_wall_front"
   | "house_wall_side"
   | "roof"
-  | "water";
+  | "water"
+  | "flower";
 
 export interface DebugArea {
   gridlines: HTMLInputElement;

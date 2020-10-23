@@ -19,6 +19,8 @@ import { renderDoor } from "../model_renderers/door_renderer";
 import { GameState } from "../../game_state";
 import { isEmpty } from "../../models/empty";
 import { renderEmpty } from "../model_renderers/empty_renderer";
+import { isFlower } from "../../models/flower";
+import { renderFlower } from "../model_renderers/flower_renderer";
 
 export const matchesObject = (a: any, b: any): boolean => {
   if (isTree(a)) {
@@ -42,6 +44,9 @@ export const pipelineRender = (
 
   if (isStreet(renderable)) {
     renderStreet(renderable, camera, bufferCtx, count, options);
+  }
+  if (isFlower(renderable)) {
+    renderFlower(renderable, camera, bufferCtx, count, options);
   }
   if (isHouseFloor(renderable)) {
     renderHouseFloor(renderable, camera, bufferCtx, count, options);

@@ -20,6 +20,7 @@ import { houseWallFactory, HouseWallRole } from "../models/house_wall";
 import { roofFactory } from "../models/roof";
 import { waterFactory } from "../models/water";
 import { GameObjectType } from "./types";
+import { flowerFactory } from "../models/flower";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {
@@ -54,6 +55,7 @@ export const addObject = async (params: {
     house_wall_side: houseWallFactory({ x, y, role: HouseWallRole.SIDE }),
     roof: roofFactory({ x, y }),
     water: waterFactory({ x, y }),
+    flower: flowerFactory({ x, y }),
   };
 
   const gameObject = objectToFactoryMap[selectedObject];
