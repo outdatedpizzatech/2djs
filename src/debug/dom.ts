@@ -64,8 +64,8 @@ export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   debugArea.appendChild(groupDiv);
 
   const shuffleButton = document.createElement("button");
-  shuffleButton.innerText = "Shuffle ID";
-  shuffleButton.style.display = "block";
+  shuffleButton.innerText = "Shuffle";
+  shuffleButton.style.display = "inline";
   shuffleButton.addEventListener("click", () => {
     const uuid = uuidv4();
     selectedGroupUuidSubject$.next(uuid);
@@ -74,7 +74,7 @@ export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
 
   const pickGroupButton = document.createElement("button");
   pickGroupButton.innerText = "Pick";
-  pickGroupButton.style.display = "block";
+  pickGroupButton.style.display = "inline";
   pickGroupButton.addEventListener("click", () => {
     selectedEditorObjectSubject$.next("pickGroup");
   });
@@ -82,13 +82,14 @@ export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
 
   const setGroupButton = document.createElement("button");
   setGroupButton.innerText = "Set";
-  setGroupButton.style.display = "block";
+  setGroupButton.style.display = "inline";
   setGroupButton.addEventListener("click", () => {
     selectedEditorObjectSubject$.next("setGroup");
   });
   groupDiv.appendChild(setGroupButton);
 
   const groupLabel = document.createElement("label");
+  groupLabel.style.display = "block";
   groupDiv.appendChild(groupLabel);
 
   const addLayerCheckbox = (layer: Layer, name: string) => {
