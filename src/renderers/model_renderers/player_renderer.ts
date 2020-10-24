@@ -16,22 +16,19 @@ export const renderPlayer = (
   model: Player,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
-  count: number,
   options: RenderOptions
 ) => {
   const { facingDirection } = model;
 
-  if (count > 0) {
-    const currentAnimation = getAnimationFrames(model);
-    const animationIndex = _getAnimationIndex(currentAnimation, model);
-    const frameIndex = _getSpriteFrame(
-      facingDirection,
-      currentAnimation,
-      animationIndex
-    );
+  const currentAnimation = getAnimationFrames(model);
+  const animationIndex = _getAnimationIndex(currentAnimation, model);
+  const frameIndex = _getSpriteFrame(
+    facingDirection,
+    currentAnimation,
+    animationIndex
+  );
 
-    renderModel(model, camera, ctx, sprites[frameIndex], count, options);
-  }
+  renderModel(model, camera, ctx, sprites[frameIndex], options);
 };
 
 function _getSpriteFrame(

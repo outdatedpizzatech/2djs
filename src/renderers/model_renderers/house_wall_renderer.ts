@@ -8,10 +8,9 @@ export const renderHouseWall = (
   model: HouseWall,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
-  xCount: number,
   options: RenderOptions
 ) => {
   const sprite = model.role == HouseWallRole.SIDE ? sprites[2] : sprites[3];
 
-  renderModel(model, camera, ctx, sprite, xCount, options);
+  renderModel(model, camera, ctx, sprite, options);
 };

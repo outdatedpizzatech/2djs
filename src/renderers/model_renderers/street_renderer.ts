@@ -8,8 +8,7 @@ export const renderStreet = (
   model: Street,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
-  count: number,
   options: RenderOptions
 ) => {
-  renderModel(model, camera, ctx, sprites[0], count, options);
+  renderModel(model, camera, ctx, sprites[0], options);
 };

@@ -35,7 +35,6 @@ export const matchesObject = (a: any, b: any): boolean => {
 export const pipelineRender = (
   renderable: any,
   bufferCtx: CanvasRenderingContext2D,
-  count: number,
   gameState: GameState
 ): void => {
   const { camera, layerMaps, players, debug } = gameState;
@@ -43,28 +42,28 @@ export const pipelineRender = (
   const options = { debug };
 
   if (isStreet(renderable)) {
-    renderStreet(renderable, camera, bufferCtx, count, options);
+    renderStreet(renderable, camera, bufferCtx, options);
   }
   if (isFlower(renderable)) {
-    renderFlower(renderable, camera, bufferCtx, count, options);
+    renderFlower(renderable, camera, bufferCtx, options);
   }
   if (isHouseFloor(renderable)) {
-    renderHouseFloor(renderable, camera, bufferCtx, count, options);
+    renderHouseFloor(renderable, camera, bufferCtx, options);
   }
   if (isTree(renderable)) {
-    renderTree(renderable, camera, bufferCtx, count, options);
+    renderTree(renderable, camera, bufferCtx, options);
   }
   if (isWall(renderable)) {
-    renderWall(renderable, camera, bufferCtx, layerMaps, count, options);
+    renderWall(renderable, camera, bufferCtx, layerMaps, options);
   }
   if (isHouseWall(renderable)) {
-    renderHouseWall(renderable, camera, bufferCtx, count, options);
+    renderHouseWall(renderable, camera, bufferCtx, options);
   }
   if (isWater(renderable)) {
-    renderWater(renderable, camera, bufferCtx, count, options);
+    renderWater(renderable, camera, bufferCtx, options);
   }
   if (isPlayer(renderable)) {
-    renderPlayer(renderable, camera, bufferCtx, count, options);
+    renderPlayer(renderable, camera, bufferCtx, options);
   }
   if (isDoor(renderable)) {
     renderDoor(
@@ -72,12 +71,11 @@ export const pipelineRender = (
       camera,
       bufferCtx,
       Object.values(players) as Player[],
-      count,
       options
     );
   }
   if (isRoof(renderable)) {
-    renderRoof(renderable, camera, bufferCtx, count, options);
+    renderRoof(renderable, camera, bufferCtx, options);
   }
   if (isEmpty(renderable)) {
     renderEmpty(renderable, camera, bufferCtx, options);

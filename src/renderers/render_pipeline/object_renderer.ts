@@ -45,30 +45,18 @@ export const renderAllObjects = (
   }
 
   const renderForLayer = (layer: CoordinateMap<GameObject>) => {
-    const renderedMap: any = {};
-
     for (let x = coordinateBounds.min.x; x <= coordinateBounds.max.x; x++) {
       if (!layer[x]) continue;
 
       for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
         const renderable = getAtPath(layer, x, y);
 
-        if (getAtPath(renderedMap, x, y)) {
-          pipelineRender(renderable, bufferCtx, 0, gameState);
-          continue;
-        }
-
         if (renderable) {
-          let renderCount = 1;
-
           for (let xa = x + 1; xa <= coordinateBounds.max.x; xa++) {
             const futureRenderable = getAtPath(layer, xa, y);
             if (!matchesObject(renderable, futureRenderable)) {
               break;
             }
-
-            setAtPath(renderedMap, xa, y, true);
-            renderCount++;
           }
 
           if (!isPlayer(renderable)) {
@@ -76,7 +64,7 @@ export const renderAllObjects = (
               !renderable.groupId ||
               !idsOverlappingPlayer[renderable.groupId]
             ) {
-              pipelineRender(renderable, bufferCtx, renderCount, gameState);
+              pipelineRender(renderable, bufferCtx, gameState);
             }
           }
         }
@@ -98,7 +86,7 @@ export const renderAllObjects = (
 
   if (layerVisibility[Layer.INTERACTIVE]) {
     playersArray.forEach((player) => {
-      pipelineRender(player, bufferCtx, 1, gameState);
+      pipelineRender(player, bufferCtx, gameState);
     });
   }
 

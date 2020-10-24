@@ -4,7 +4,12 @@ import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
 import { Layer } from "../types";
 import axios from "axios";
-import { API_URI_BASE, SPAWN_COORDINATE } from "../common";
+import {
+  API_URI_BASE,
+  GRID_INTERVAL,
+  SPAWN_COORDINATE,
+  UNIT_BASE,
+} from "../common";
 
 export interface Player extends GameObject {
   objectType: "Player";
@@ -34,7 +39,7 @@ export const playerFactory = (
     _id: attributes._id,
     objectType: "Player" as "Player",
     facingDirection: attributes.facingDirection || Direction.DOWN,
-    movementSpeed: attributes.movementSpeed || 80,
+    movementSpeed: attributes.movementSpeed || 80 * (GRID_INTERVAL / UNIT_BASE),
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
     moving: false,

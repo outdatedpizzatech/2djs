@@ -10,7 +10,6 @@ export const renderDoor = (
   camera: Camera,
   ctx: CanvasRenderingContext2D,
   players: Player[],
-  count: number,
   options: RenderOptions
 ) => {
   const overlappingPlayer = players.find(
@@ -23,5 +22,5 @@ export const renderDoor = (
     sprite = sprites[1];
   }
 
-  renderModel(model, camera, ctx, sprite, count, options);
+  renderModel(model, camera, ctx, sprite, options);
 };

@@ -9,5 +9,5 @@ export const renderEmpty = (
   ctx: CanvasRenderingContext2D,
   options: RenderOptions
 ) => {
-  renderModel(model, camera, ctx, document.createElement("img"), 0, options);
+  renderModel(model, camera, ctx, document.createElement("img"), options);
 };

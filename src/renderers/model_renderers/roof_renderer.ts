@@ -9,8 +9,7 @@ export const renderRoof = (
   model: Roof,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
-  xCount: number,
   options: RenderOptions
 ) => {
-  renderModel(model, camera, ctx, sprites[0], xCount, options);
+  renderModel(model, camera, ctx, sprites[0], options);
 };

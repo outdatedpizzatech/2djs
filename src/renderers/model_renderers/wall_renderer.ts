@@ -12,7 +12,6 @@ export const renderWall = (
   camera: Camera,
   ctx: CanvasRenderingContext2D,
   layerMaps: LayerMaps,
-  count: number,
   options: RenderOptions
 ) => {
   const { x, y, layer } = model;
@@ -24,10 +23,6 @@ export const renderWall = (
   ) {
     ctx.fillStyle = "rgba(255, 255, 0, 0.75)";
     ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
-  }
-
-  if (count == 0) {
-    return;
   }
 
   const layerMap =
@@ -42,5 +37,5 @@ export const renderWall = (
     isWall(getAtPath(layerMap, x, y + 1));
   const spriteIndex = hasVerticalWallNeighbors ? 1 : 0;
 
-  renderModel(model, camera, ctx, sprites[spriteIndex], count, options);
+  renderModel(model, camera, ctx, sprites[spriteIndex], options);
 };

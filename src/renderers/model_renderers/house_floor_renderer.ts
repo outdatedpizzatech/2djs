@@ -8,8 +8,7 @@ export const renderHouseFloor = (
   model: HouseFloor,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
-  count: number,
   options: RenderOptions
 ) => {
-  renderModel(model, camera, ctx, sprites[1], count, options);
+  renderModel(model, camera, ctx, sprites[1], options);
 };
