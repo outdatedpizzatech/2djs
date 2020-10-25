@@ -1,15 +1,4 @@
-export type GameObjectType =
-  | "tree"
-  | "wall"
-  | "street"
-  | "door"
-  | "empty"
-  | "house_floor"
-  | "house_wall_front"
-  | "house_wall_side"
-  | "roof"
-  | "water"
-  | "flower";
+import { GameObjectType } from "../types";
 
 export interface DebugArea {
   gridlines: HTMLInputElement;
@@ -18,3 +7,5 @@ export interface DebugArea {
   coordinates: HTMLDivElement;
   layerInspectorDiv: HTMLDivElement;
 }
+
+export type EditableGameObjectType = Exclude<GameObjectType, "Player">;

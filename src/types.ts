@@ -7,7 +7,7 @@ export enum Layer {
 
 export type Unsaved<T> = Omit<T, "_id">;
 
-export type GameObjectTypes =
+export type GameObjectType =
   | "Empty"
   | "Door"
   | "HouseFloor"

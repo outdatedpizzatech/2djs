@@ -2,14 +2,8 @@ import { GameObject } from "../game_object";
 import { positionableFactory } from "../positionable";
 import { Layer, Unsaved } from "../types";
 
-export enum HouseWallRole {
-  SIDE,
-  FRONT,
-}
-
 export interface HouseWall extends GameObject {
   objectType: "HouseWall";
-  role: HouseWallRole;
 }
 
 export const isHouseWall = (unknownObject: any): unknownObject is HouseWall => {
@@ -26,7 +20,6 @@ export const houseWallFactory = (
     objectType: "HouseWall" as "HouseWall",
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
-    role: attributes.role || HouseWallRole.SIDE,
   };
 
   return { ...positionableProperties, ...particularProperties };

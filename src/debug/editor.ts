@@ -16,11 +16,11 @@ import { streetFactory } from "../models/street";
 import { doorFactory } from "../models/door";
 import { emptyFactory } from "../models/empty";
 import { houseFloorFactory } from "../models/house_floor";
-import { houseWallFactory, HouseWallRole } from "../models/house_wall";
+import { houseWallFactory } from "../models/house_wall";
 import { roofFactory } from "../models/roof";
 import { waterFactory } from "../models/water";
-import { GameObjectType } from "./types";
 import { flowerFactory } from "../models/flower";
+import { EditableGameObjectType } from "./types";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {
@@ -40,22 +40,23 @@ export const addObject = async (params: {
   x: number;
   y: number;
   gameState: GameState;
-  selectedObject: GameObjectType;
+  selectedObject: EditableGameObjectType;
 }) => {
   const { gameState, x, y, selectedObject } = params;
 
-  const objectToFactoryMap: { [K in GameObjectType]: Unsaved<GameObject> } = {
-    tree: treeFactory({ x, y }),
-    wall: wallFactory({ x, y }),
-    street: streetFactory({ x, y }),
-    door: doorFactory({ x, y }),
-    empty: emptyFactory({ x, y }),
-    house_floor: houseFloorFactory({ x, y }),
-    house_wall_front: houseWallFactory({ x, y, role: HouseWallRole.FRONT }),
-    house_wall_side: houseWallFactory({ x, y, role: HouseWallRole.SIDE }),
-    roof: roofFactory({ x, y }),
-    water: waterFactory({ x, y }),
-    flower: flowerFactory({ x, y }),
+  const objectToFactoryMap: {
+    [K in EditableGameObjectType]: Unsaved<GameObject>;
+  } = {
+    Tree: treeFactory({ x, y }),
+    Wall: wallFactory({ x, y }),
+    Street: streetFactory({ x, y }),
+    Door: doorFactory({ x, y }),
+    Empty: emptyFactory({ x, y }),
+    HouseFloor: houseFloorFactory({ x, y }),
+    HouseWall: houseWallFactory({ x, y }),
+    Roof: roofFactory({ x, y }),
+    Water: waterFactory({ x, y }),
+    Flower: flowerFactory({ x, y }),
   };
 
   const gameObject = objectToFactoryMap[selectedObject];

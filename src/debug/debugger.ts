@@ -15,10 +15,11 @@ import { GRID_INTERVAL } from "../common";
 import { addObject, getGroup, removeObject, setGroup } from "./editor";
 import { objectToSpriteMap } from "./helpers";
 import { mountDebugArea } from "./dom";
-import { GameObjectType } from "./types";
 import { updateObjectsInView } from "./objects_in_view";
 import { showLayerTooltip } from "./layer_tooltip";
 import { withNormalizedCoordinate, withSnapping } from "./mouse";
+import { GameObjectType } from "../types";
+import { EditableGameObjectType } from "./types";
 
 export const loadDebugger = (
   body: HTMLBodyElement,
@@ -105,7 +106,7 @@ export const loadDebugger = (
       })),
       filter(
         ({ selectedObject }) =>
-          !!objectToSpriteMap[selectedObject as GameObjectType]
+          !!objectToSpriteMap[selectedObject as EditableGameObjectType]
       )
     )
     .subscribe(addObject);

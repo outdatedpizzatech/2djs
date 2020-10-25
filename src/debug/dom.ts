@@ -7,9 +7,9 @@ import {
   selectedGroupUuid$,
   selectedGroupUuidSubject$,
 } from "../signals";
-import { Layer } from "../types";
+import { GameObjectType, Layer } from "../types";
 import { objectToSpriteMap } from "./helpers";
-import { DebugArea, GameObjectType } from "./types";
+import { DebugArea, EditableGameObjectType } from "./types";
 
 export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   const debugArea = document.createElement("div");
@@ -136,7 +136,7 @@ export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   editorArea.style.gridTemplateColumns = "repeat(20, auto)";
   body.appendChild(editorArea);
 
-  Object.keys(objectToSpriteMap).forEach((key: GameObjectType) => {
+  Object.keys(objectToSpriteMap).forEach((key: EditableGameObjectType) => {
     const objectDiv = document.createElement("div");
     objectDiv.style.color = "white";
     objectDiv.style.padding = "10%";

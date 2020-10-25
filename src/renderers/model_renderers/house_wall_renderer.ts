@@ -1,6 +1,6 @@
 import { Camera } from "../../camera";
 import sprites from "../../sprite_collections/wall_sprite_collection";
-import { HouseWall, HouseWallRole } from "../../models/house_wall";
+import { HouseWall } from "../../models/house_wall";
 import { RenderOptions } from "./types";
 import { renderModel } from "../helpers/render_model";
 import { UNIT_BASE } from "../../common";
@@ -11,7 +11,7 @@ export const renderHouseWall = (
   ctx: CanvasRenderingContext2D,
   options: RenderOptions
 ) => {
-  const sprite = model.role == HouseWallRole.SIDE ? sprites[2] : sprites[3];
+  const sprite = sprites[3];
 
   options.dimensions = {
     width: UNIT_BASE,

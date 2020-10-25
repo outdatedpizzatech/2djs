@@ -7,18 +7,19 @@ import doorSprites from "../sprite_collections/door_sprite_collection";
 import roofSprites from "../sprite_collections/roof_sprite_collection";
 import waterSprites from "../sprite_collections/water_sprite_collection";
 import flowerSprites from "../sprite_collections/flower_sprite_collection";
-import { GameObjectType } from "./types";
+import { EditableGameObjectType } from "./types";
 
-export const objectToSpriteMap: { [K in GameObjectType]: HTMLImageElement } = {
-  tree: treeSprites[0],
-  wall: wallSprites[0],
-  street: streetSprites[0],
-  door: doorSprites[0],
-  empty: document.createElement("img"),
-  house_floor: houseFloorSprites[1],
-  house_wall_side: houseWallSprites[2],
-  house_wall_front: houseWallSprites[3],
-  roof: roofSprites[0],
-  water: waterSprites[0],
-  flower: flowerSprites[0],
+export const objectToSpriteMap: {
+  [K in EditableGameObjectType]: HTMLImageElement;
+} = {
+  Tree: treeSprites[0],
+  Wall: wallSprites[0],
+  Street: streetSprites[0],
+  Door: doorSprites[0],
+  Empty: document.createElement("img"),
+  HouseFloor: houseFloorSprites[1],
+  HouseWall: houseWallSprites[3],
+  Roof: roofSprites[0],
+  Water: waterSprites[0],
+  Flower: flowerSprites[0],
 };

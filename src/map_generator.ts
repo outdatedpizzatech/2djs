@@ -2,7 +2,7 @@ import { wallFactory } from "./models/wall";
 import { treeFactory } from "./models/tree";
 import { waterFactory } from "./models/water";
 import { streetFactory } from "./models/street";
-import { houseWallFactory, HouseWallRole } from "./models/house_wall";
+import { houseWallFactory } from "./models/house_wall";
 import { houseFloorFactory } from "./models/house_floor";
 import { roofFactory } from "./models/roof";
 import { emptyFactory } from "./models/empty";
@@ -13,10 +13,10 @@ import { CoordinateBounds } from "./coordinate";
 import { GameObject } from "./game_object";
 import { API_URI_BASE } from "./common";
 import { flowerFactory } from "./models/flower";
-import { GameObjectTypes, Unsaved } from "./types";
+import { GameObjectType, Unsaved } from "./types";
 
 const factoryFns: {
-  [K in GameObjectTypes]: (attrs: Partial<GameObject>) => Unsaved<GameObject>;
+  [K in GameObjectType]: (attrs: Partial<GameObject>) => Unsaved<GameObject>;
 } = {
   Empty: emptyFactory,
   Door: doorFactory,
@@ -44,12 +44,11 @@ export const generateMap = async (
   const gameObjects = result.data.map(
     (data: {
       _id: string;
-      objectType: GameObjectTypes;
+      objectType: GameObjectType;
       layer: number;
       x: number;
       y: number;
       groupId?: string;
-      role?: HouseWallRole;
     }) => {
       const { objectType } = data;
       const factoryFn = factoryFns[data.objectType];
