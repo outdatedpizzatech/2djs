@@ -44,53 +44,50 @@ export const renderAllObjects = (
     }
   }
 
-  const renderForLayer = (layer: CoordinateMap<GameObject>) => {
+  const renderColumnForLayer = (
+    layer: CoordinateMap<GameObject>,
+    y: number
+  ) => {
     for (let x = coordinateBounds.min.x; x <= coordinateBounds.max.x; x++) {
-      if (!layer[x]) continue;
+      const renderable = getAtPath(layer, x, y);
 
-      for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
-        const renderable = getAtPath(layer, x, y);
-
-        if (renderable) {
-          for (let xa = x + 1; xa <= coordinateBounds.max.x; xa++) {
-            const futureRenderable = getAtPath(layer, xa, y);
-            if (!matchesObject(renderable, futureRenderable)) {
-              break;
-            }
-          }
-
-          if (!isPlayer(renderable)) {
-            if (
-              !renderable.groupId ||
-              !idsOverlappingPlayer[renderable.groupId]
-            ) {
-              pipelineRender(renderable, bufferCtx, gameState);
-            }
+      if (renderable) {
+        if (!isPlayer(renderable)) {
+          if (
+            !renderable.groupId ||
+            !idsOverlappingPlayer[renderable.groupId]
+          ) {
+            pipelineRender(renderable, bufferCtx, gameState, y);
           }
         }
       }
     }
   };
 
-  if (layerVisibility[Layer.GROUND]) {
-    renderForLayer(groundMap);
-  }
+  for (let y = coordinateBounds.min.y; y <= coordinateBounds.max.y; y++) {
+    if (layerVisibility[Layer.GROUND]) {
+      renderColumnForLayer(groundMap, y);
+    }
+    if (layerVisibility[Layer.PASSIVE]) {
+      renderColumnForLayer(passiveMap, y);
+    }
+    if (layerVisibility[Layer.INTERACTIVE]) {
+      renderColumnForLayer(interactiveMap, y);
+    }
 
-  if (layerVisibility[Layer.PASSIVE]) {
-    renderForLayer(passiveMap);
-  }
-
-  if (layerVisibility[Layer.INTERACTIVE]) {
-    renderForLayer(interactiveMap);
-  }
-
-  if (layerVisibility[Layer.INTERACTIVE]) {
     playersArray.forEach((player) => {
-      pipelineRender(player, bufferCtx, gameState);
+      pipelineRender(player, bufferCtx, gameState, y);
     });
-  }
 
-  if (layerVisibility[Layer.OVERHEAD]) {
-    renderForLayer(overheadMap);
+    if (layerVisibility[Layer.OVERHEAD]) {
+      renderColumnForLayer(overheadMap, y);
+    }
   }
+  //
+  if (layerVisibility[Layer.INTERACTIVE]) {
+  }
+  //
+  // if (layerVisibility[Layer.OVERHEAD]) {
+  //   renderForLayer(overheadMap);
+  // }
 };

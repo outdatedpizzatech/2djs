@@ -35,7 +35,8 @@ export const matchesObject = (a: any, b: any): boolean => {
 export const pipelineRender = (
   renderable: any,
   bufferCtx: CanvasRenderingContext2D,
-  gameState: GameState
+  gameState: GameState,
+  y: number
 ): void => {
   const { camera, layerMaps, players, debug } = gameState;
 
@@ -63,7 +64,7 @@ export const pipelineRender = (
     renderWater(renderable, camera, bufferCtx, options);
   }
   if (isPlayer(renderable)) {
-    renderPlayer(renderable, camera, bufferCtx, options);
+    renderPlayer(renderable, camera, bufferCtx, options, y);
   }
   if (isDoor(renderable)) {
     renderDoor(

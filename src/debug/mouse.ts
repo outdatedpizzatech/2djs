@@ -1,5 +1,5 @@
 import { map } from "rxjs/operators";
-import { GRID_INTERVAL } from "../common";
+import { GRID_INTERVAL, UNIT_BASE } from "../common";
 import { GameState } from "../game_state";
 import { offset } from "../camera";
 
@@ -9,7 +9,7 @@ export const withSnapping = (gridCanvas: HTMLCanvasElement) =>
     const x = event.x - boundingRect.x;
     const y = event.y - boundingRect.y;
     const snapX = Math.floor(x / GRID_INTERVAL) * GRID_INTERVAL;
-    const magicYOffset = 4;
+    const magicYOffset = GRID_INTERVAL - UNIT_BASE + UNIT_BASE / 4;
     const snapY = Math.floor(y / GRID_INTERVAL) * GRID_INTERVAL + magicYOffset;
     return { x: snapX, y: snapY };
   });

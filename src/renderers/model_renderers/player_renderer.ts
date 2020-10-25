@@ -1,5 +1,5 @@
 import { Camera, project } from "../../camera";
-import { GRID_INTERVAL } from "../../common";
+import { GRID_INTERVAL, GRID_MAGNITUDE, UNIT_BASE } from "../../common";
 import {
   getAnimationFrames,
   Player,
@@ -16,8 +16,23 @@ export const renderPlayer = (
   model: Player,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
-  options: RenderOptions
+  options: RenderOptions,
+  y: number
 ) => {
+  const worldY = y * GRID_INTERVAL;
+
+  const diffY = (worldY - model.worldY) / GRID_MAGNITUDE;
+
+  if (Math.abs(worldY - model.worldY) >= GRID_INTERVAL) {
+    return;
+  }
+
+  if (diffY < 0) {
+    options.cropYLength = UNIT_BASE - Math.abs(diffY);
+  } else if (diffY > 0) {
+    options.cropYStart = Math.abs(diffY);
+  }
+
   const { facingDirection } = model;
 
   const currentAnimation = getAnimationFrames(model);

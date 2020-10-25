@@ -1,4 +1,4 @@
-import { GRID_INTERVAL } from "../../common";
+import { GRID_INTERVAL, UNIT_BASE } from "../../common";
 import { Camera, project } from "../../camera";
 import { isWall, Wall } from "../../models/wall";
 import sprites from "../../sprite_collections/wall_sprite_collection";

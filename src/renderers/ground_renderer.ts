@@ -1,17 +1,27 @@
 import { Camera, CAMERA_HEIGHT, CAMERA_WIDTH, offset } from "../camera";
 import sprites from "../sprite_collections/grass_sprite_collection";
+import { GRID_INTERVAL } from "../common";
+
+const groundTempCanvas = document.createElement("canvas");
+groundTempCanvas.width = GRID_INTERVAL;
+groundTempCanvas.height = GRID_INTERVAL;
+const tempContext = groundTempCanvas.getContext(
+  "2d"
+) as CanvasRenderingContext2D;
 
 export const renderGround = (
   bufferCtx: CanvasRenderingContext2D,
   camera: Camera
 ) => {
+  tempContext.drawImage(sprites[0], 0, 0, GRID_INTERVAL, GRID_INTERVAL);
+
   let { worldX: cameraX, worldY: cameraY } = offset(camera);
 
   const groundOffsetX = cameraX - CAMERA_WIDTH / 2;
   const groundOffsetY = cameraY - CAMERA_HEIGHT / 2;
 
   bufferCtx.fillStyle = bufferCtx.createPattern(
-    sprites[0],
+    groundTempCanvas,
     "repeat"
   ) as CanvasPattern;
 

@@ -13,6 +13,23 @@ import { CoordinateBounds } from "./coordinate";
 import { GameObject } from "./game_object";
 import { API_URI_BASE } from "./common";
 import { flowerFactory } from "./models/flower";
+import { GameObjectTypes, Unsaved } from "./types";
+
+const factoryFns: {
+  [K in GameObjectTypes]: (attrs: Partial<GameObject>) => Unsaved<GameObject>;
+} = {
+  Empty: emptyFactory,
+  Door: doorFactory,
+  HouseFloor: houseFloorFactory,
+  HouseWall: houseWallFactory,
+  Roof: roofFactory,
+  Street: streetFactory,
+  Water: waterFactory,
+  Tree: treeFactory,
+  Wall: wallFactory,
+  Player: playerFactory,
+  Flower: flowerFactory,
+};
 
 export const generateMap = async (
   coordinateBounds: CoordinateBounds
@@ -27,7 +44,7 @@ export const generateMap = async (
   const gameObjects = result.data.map(
     (data: {
       _id: string;
-      objectType: string;
+      objectType: GameObjectTypes;
       layer: number;
       x: number;
       y: number;
@@ -35,30 +52,9 @@ export const generateMap = async (
       role?: HouseWallRole;
     }) => {
       const { objectType } = data;
+      const factoryFn = factoryFns[data.objectType];
 
-      if (objectType == "Empty") {
-        return emptyFactory({ ...data, objectType });
-      } else if (objectType == "Door") {
-        return doorFactory({ ...data, objectType });
-      } else if (objectType == "HouseFloor") {
-        return houseFloorFactory({ ...data, objectType });
-      } else if (objectType == "HouseWall") {
-        return houseWallFactory({ ...data, objectType });
-      } else if (objectType == "Roof") {
-        return roofFactory({ ...data, objectType });
-      } else if (objectType == "Street") {
-        return streetFactory({ ...data, objectType });
-      } else if (objectType == "Water") {
-        return waterFactory({ ...data, objectType });
-      } else if (objectType == "Tree") {
-        return treeFactory({ ...data, objectType });
-      } else if (objectType == "Wall") {
-        return wallFactory({ ...data, objectType });
-      } else if (objectType == "Player") {
-        return playerFactory({ ...data, objectType });
-      } else if (objectType == "Flower") {
-        return flowerFactory({ ...data, objectType });
-      }
+      return factoryFn({ ...data, objectType });
     }
   );
 

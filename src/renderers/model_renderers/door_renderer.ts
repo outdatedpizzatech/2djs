@@ -4,6 +4,7 @@ import { renderModel } from "../helpers/render_model";
 import { Door } from "../../models/door";
 import { Player } from "../../models/player";
 import { RenderOptions } from "./types";
+import { UNIT_BASE } from "../../common";
 
 export const renderDoor = (
   model: Door,
@@ -21,6 +22,11 @@ export const renderDoor = (
   if (overlappingPlayer) {
     sprite = sprites[1];
   }
+
+  options.dimensions = {
+    width: UNIT_BASE,
+    height: UNIT_BASE * 2,
+  };
 
   renderModel(model, camera, ctx, sprite, options);
 };
