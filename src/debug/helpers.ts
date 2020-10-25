@@ -7,6 +7,7 @@ import doorSprites from "../sprite_collections/door_sprite_collection";
 import roofSprites from "../sprite_collections/roof_sprite_collection";
 import waterSprites from "../sprite_collections/water_sprite_collection";
 import flowerSprites from "../sprite_collections/flower_sprite_collection";
+import houseWallFrameSprites from "../sprite_collections/house_wall_frame_sprite_collection";
 import { EditableGameObjectType } from "./types";
 
 export const objectToSpriteMap: {
@@ -19,6 +20,7 @@ export const objectToSpriteMap: {
   Empty: document.createElement("img"),
   HouseFloor: houseFloorSprites[1],
   HouseWall: houseWallSprites[3],
+  HouseWallFrame: houseWallFrameSprites[0],
   Roof: roofSprites[0],
   Water: waterSprites[0],
   Flower: flowerSprites[0],

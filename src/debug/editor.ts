@@ -21,6 +21,7 @@ import { roofFactory } from "../models/roof";
 import { waterFactory } from "../models/water";
 import { flowerFactory } from "../models/flower";
 import { EditableGameObjectType } from "./types";
+import { houseWallFrameFactory } from "../models/house_wall_frame";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {
@@ -54,6 +55,7 @@ export const addObject = async (params: {
     Empty: emptyFactory({ x, y }),
     HouseFloor: houseFloorFactory({ x, y }),
     HouseWall: houseWallFactory({ x, y }),
+    HouseWallFrame: houseWallFrameFactory({ x, y }),
     Roof: roofFactory({ x, y }),
     Water: waterFactory({ x, y }),
     Flower: flowerFactory({ x, y }),

@@ -1,9 +1,8 @@
-import { GRID_INTERVAL, UNIT_BASE } from "../../common";
+import { GRID_INTERVAL } from "../../common";
 import { Camera, project } from "../../camera";
-import { isWall, Wall } from "../../models/wall";
+import { Wall } from "../../models/wall";
 import sprites from "../../sprite_collections/wall_sprite_collection";
-import { getAtPath, LayerMaps } from "../../coordinate_map";
-import { Layer } from "../../types";
+import { LayerMaps } from "../../coordinate_map";
 import { RenderOptions } from "./types";
 import { renderModel } from "../helpers/render_model";
 
@@ -14,7 +13,6 @@ export const renderWall = (
   layerMaps: LayerMaps,
   options: RenderOptions
 ) => {
-  const { x, y, layer } = model;
   const { worldX, worldY } = project(camera, model);
 
   if (
@@ -25,17 +23,5 @@ export const renderWall = (
     ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);
   }
 
-  const layerMap =
-    layer === Layer.INTERACTIVE
-      ? layerMaps.interactiveMap
-      : layer === Layer.OVERHEAD
-      ? layerMaps.overheadMap
-      : layerMaps.groundMap;
-
-  const hasVerticalWallNeighbors =
-    isWall(getAtPath(layerMap, x, y + 1)) ||
-    isWall(getAtPath(layerMap, x, y + 1));
-  const spriteIndex = hasVerticalWallNeighbors ? 1 : 0;
-
-  renderModel(model, camera, ctx, sprites[spriteIndex], options);
+  renderModel(model, camera, ctx, sprites[0], options);
 };

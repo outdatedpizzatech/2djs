@@ -21,6 +21,8 @@ import { isEmpty } from "../../models/empty";
 import { renderEmpty } from "../model_renderers/empty_renderer";
 import { isFlower } from "../../models/flower";
 import { renderFlower } from "../model_renderers/flower_renderer";
+import { isHouseWallFrame } from "../../models/house_wall_frame";
+import { renderHouseWallFrame } from "../model_renderers/house_wall_frame_renderer";
 
 export const matchesObject = (a: any, b: any): boolean => {
   if (isTree(a)) {
@@ -44,27 +46,39 @@ export const pipelineRender = (
 
   if (isStreet(renderable)) {
     renderStreet(renderable, camera, bufferCtx, options);
+    return;
   }
   if (isFlower(renderable)) {
     renderFlower(renderable, camera, bufferCtx, options);
+    return;
   }
   if (isHouseFloor(renderable)) {
     renderHouseFloor(renderable, camera, bufferCtx, options);
+    return;
   }
   if (isTree(renderable)) {
     renderTree(renderable, camera, bufferCtx, options);
+    return;
   }
   if (isWall(renderable)) {
     renderWall(renderable, camera, bufferCtx, layerMaps, options);
+    return;
   }
   if (isHouseWall(renderable)) {
     renderHouseWall(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isHouseWallFrame(renderable)) {
+    renderHouseWallFrame(renderable, camera, bufferCtx, options);
+    return;
   }
   if (isWater(renderable)) {
     renderWater(renderable, camera, bufferCtx, options);
+    return;
   }
   if (isPlayer(renderable)) {
     renderPlayer(renderable, camera, bufferCtx, options, y);
+    return;
   }
   if (isDoor(renderable)) {
     renderDoor(
@@ -74,11 +88,18 @@ export const pipelineRender = (
       Object.values(players) as Player[],
       options
     );
+    return;
   }
   if (isRoof(renderable)) {
     renderRoof(renderable, camera, bufferCtx, options);
+    return;
   }
   if (isEmpty(renderable)) {
     renderEmpty(renderable, camera, bufferCtx, options);
+    return;
   }
+
+  throw new Error(
+    `Could not find a rendering method for ${renderable.objectType}`
+  );
 };
