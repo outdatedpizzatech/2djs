@@ -23,6 +23,10 @@ import { isFlower } from "../../models/flower";
 import { renderFlower } from "../model_renderers/flower_renderer";
 import { isHouseWallFrame } from "../../models/house_wall_frame";
 import { renderHouseWallFrame } from "../model_renderers/house_wall_frame_renderer";
+import { isHouseWallWindow } from "../../models/house_wall_window";
+import { renderHouseWallWindow } from "../model_renderers/house_wall_window_renderer";
+import { isHouseWallShort } from "../../models/house_wall_short";
+import { renderHouseWallShort } from "../model_renderers/house_wall_short_renderer";
 
 export const matchesObject = (a: any, b: any): boolean => {
   if (isTree(a)) {
@@ -96,6 +100,14 @@ export const pipelineRender = (
   }
   if (isEmpty(renderable)) {
     renderEmpty(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isHouseWallWindow(renderable)) {
+    renderHouseWallWindow(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isHouseWallShort(renderable)) {
+    renderHouseWallShort(renderable, camera, bufferCtx, options);
     return;
   }
 

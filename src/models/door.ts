@@ -1,6 +1,5 @@
 import { Layer, Unsaved } from "../types";
-import { GameObject } from "../game_object";
-import { positionableFactory } from "../positionable";
+import { GameObject, gameObjectFactory } from "../game_object";
 
 export interface Door extends GameObject {
   objectType: "Door";
@@ -12,7 +11,7 @@ export const isDoor = (unknownObject: any): unknownObject is Door => {
 };
 
 export const doorFactory = (attributes: Partial<Door>): Unsaved<Door> => {
-  const positionableProperties = positionableFactory(attributes);
+  const gameObjectProperties = gameObjectFactory(attributes);
   const particularProperties = {
     _id: attributes._id,
     objectType: "Door" as "Door",
@@ -20,5 +19,5 @@ export const doorFactory = (attributes: Partial<Door>): Unsaved<Door> => {
     groupId: attributes.groupId,
   };
 
-  return { ...positionableProperties, ...particularProperties };
+  return { ...gameObjectProperties, ...particularProperties };
 };

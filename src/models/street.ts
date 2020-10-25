@@ -1,4 +1,4 @@
-import { GameObject } from "../game_object";
+import { GameObject, gameObjectFactory } from "../game_object";
 import { positionableFactory } from "../positionable";
 import { Layer, Unsaved } from "../types";
 
@@ -12,7 +12,7 @@ export const isStreet = (unknownObject: any): unknownObject is Street => {
 };
 
 export const streetFactory = (attributes: Partial<Street>): Unsaved<Street> => {
-  const positionableProperties = positionableFactory(attributes);
+  const gameObjectProperties = gameObjectFactory(attributes);
   const particularProperties = {
     _id: attributes._id,
     objectType: "Street" as "Street",
@@ -20,5 +20,5 @@ export const streetFactory = (attributes: Partial<Street>): Unsaved<Street> => {
     groupId: attributes.groupId,
   };
 
-  return { ...positionableProperties, ...particularProperties };
+  return { ...gameObjectProperties, ...particularProperties };
 };

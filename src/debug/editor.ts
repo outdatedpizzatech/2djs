@@ -10,7 +10,7 @@ import {
   removeObjectFromMap,
   updateObjectInMap,
 } from "../reducers/map_reducer";
-import { Layer, Unsaved } from "../types";
+import { GameObjectType, Layer, Unsaved } from "../types";
 import { GameState } from "../game_state";
 import { streetFactory } from "../models/street";
 import { doorFactory } from "../models/door";
@@ -22,6 +22,8 @@ import { waterFactory } from "../models/water";
 import { flowerFactory } from "../models/flower";
 import { EditableGameObjectType } from "./types";
 import { houseWallFrameFactory } from "../models/house_wall_frame";
+import { houseWallWindowFactory } from "../models/house_wall_window";
+import { houseWallShortFactory } from "../models/house_wall_short";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {
@@ -42,26 +44,36 @@ export const addObject = async (params: {
   y: number;
   gameState: GameState;
   selectedObject: EditableGameObjectType;
+  scaleX: boolean;
 }) => {
-  const { gameState, x, y, selectedObject } = params;
+  const { gameState, x, y, selectedObject, scaleX } = params;
 
-  const objectToFactoryMap: {
-    [K in EditableGameObjectType]: Unsaved<GameObject>;
-  } = {
-    Tree: treeFactory({ x, y }),
-    Wall: wallFactory({ x, y }),
-    Street: streetFactory({ x, y }),
-    Door: doorFactory({ x, y }),
-    Empty: emptyFactory({ x, y }),
-    HouseFloor: houseFloorFactory({ x, y }),
-    HouseWall: houseWallFactory({ x, y }),
-    HouseWallFrame: houseWallFrameFactory({ x, y }),
-    Roof: roofFactory({ x, y }),
-    Water: waterFactory({ x, y }),
-    Flower: flowerFactory({ x, y }),
+  const scale = {
+    x: scaleX ? -1 : 0,
+    y: 1,
   };
 
-  const gameObject = objectToFactoryMap[selectedObject];
+  const objectToFactoryMap: {
+    [K in EditableGameObjectType]: (
+      attrs: Partial<GameObject>
+    ) => Unsaved<GameObject>;
+  } = {
+    Tree: treeFactory,
+    Wall: wallFactory,
+    Street: streetFactory,
+    Door: doorFactory,
+    Empty: emptyFactory,
+    HouseFloor: houseFloorFactory,
+    HouseWall: houseWallFactory,
+    HouseWallFrame: houseWallFrameFactory,
+    HouseWallShort: houseWallShortFactory,
+    HouseWallWindow: houseWallWindowFactory,
+    Roof: roofFactory,
+    Water: waterFactory,
+    Flower: flowerFactory,
+  };
+
+  const gameObject = objectToFactoryMap[selectedObject]({ x, y, scale });
 
   if (!gameObject) {
     return;

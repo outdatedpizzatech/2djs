@@ -1,5 +1,4 @@
-import { GameObject } from "../game_object";
-import { positionableFactory } from "../positionable";
+import { GameObject, gameObjectFactory } from "../game_object";
 import { Layer, Unsaved } from "../types";
 
 export interface Flower extends GameObject {
@@ -12,7 +11,7 @@ export const isFlower = (unknownObject: any): unknownObject is Flower => {
 };
 
 export const flowerFactory = (attributes: Partial<Flower>): Unsaved<Flower> => {
-  const positionableProperties = positionableFactory(attributes);
+  const gameObjectProperties = gameObjectFactory(attributes);
   const particularProperties = {
     _id: attributes._id,
     objectType: "Flower" as "Flower",
@@ -20,5 +19,5 @@ export const flowerFactory = (attributes: Partial<Flower>): Unsaved<Flower> => {
     groupId: attributes.groupId,
   };
 
-  return { ...positionableProperties, ...particularProperties };
+  return { ...gameObjectProperties, ...particularProperties };
 };

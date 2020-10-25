@@ -21,19 +21,30 @@ export const renderModel = (
     ? options.cropYLength
     : height - cropYStart;
 
+  if (model.scale.x != 1) {
+    ctx.save();
+    ctx.scale(-1, 1);
+  }
+
+  const xOffset = model.scale.x == -1 ? GRID_INTERVAL : 0;
+
   ctx.drawImage(
     sprite,
     0,
     cropYStart,
     width,
     cropYLength,
-    worldX,
+    worldX * model.scale.x - xOffset,
     worldY +
       cropYStart * GRID_MAGNITUDE -
       (height - UNIT_BASE) * GRID_MAGNITUDE,
     width * GRID_MAGNITUDE,
     cropYLength * GRID_MAGNITUDE
   );
+
+  if (model.scale.x != 1) {
+    ctx.restore();
+  }
 
   if (
     options.debug.selectedGroupId &&

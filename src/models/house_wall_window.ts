@@ -2,24 +2,24 @@ import { GameObject, gameObjectFactory, scalableFactory } from "../game_object";
 import { positionableFactory } from "../positionable";
 import { Layer, Unsaved } from "../types";
 
-export interface HouseWallFrame extends GameObject {
-  objectType: "HouseWallFrame";
+export interface HouseWallWindow extends GameObject {
+  objectType: "HouseWallWindow";
 }
 
-export const isHouseWallFrame = (
+export const isHouseWallWindow = (
   unknownObject: any
-): unknownObject is HouseWallFrame => {
+): unknownObject is HouseWallWindow => {
   if (!unknownObject) return false;
-  return (unknownObject as HouseWallFrame).objectType === "HouseWallFrame";
+  return (unknownObject as HouseWallWindow).objectType === "HouseWallWindow";
 };
 
-export const houseWallFrameFactory = (
-  attributes: Partial<HouseWallFrame>
-): Unsaved<HouseWallFrame> => {
+export const houseWallWindowFactory = (
+  attributes: Partial<HouseWallWindow>
+): Unsaved<HouseWallWindow> => {
   const gameObjectProperties = gameObjectFactory(attributes);
   const particularProperties = {
     _id: attributes._id,
-    objectType: "HouseWallFrame" as "HouseWallFrame",
+    objectType: "HouseWallWindow" as "HouseWallWindow",
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
   };

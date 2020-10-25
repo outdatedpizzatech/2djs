@@ -15,6 +15,8 @@ import { API_URI_BASE } from "./common";
 import { flowerFactory } from "./models/flower";
 import { GameObjectType, Unsaved } from "./types";
 import { houseWallFrameFactory } from "./models/house_wall_frame";
+import { houseWallWindowFactory } from "./models/house_wall_window";
+import { houseWallShortFactory } from "./models/house_wall_short";
 
 const factoryFns: {
   [K in GameObjectType]: (attrs: Partial<GameObject>) => Unsaved<GameObject>;
@@ -24,6 +26,8 @@ const factoryFns: {
   HouseFloor: houseFloorFactory,
   HouseWall: houseWallFactory,
   HouseWallFrame: houseWallFrameFactory,
+  HouseWallWindow: houseWallWindowFactory,
+  HouseWallShort: houseWallShortFactory,
   Roof: roofFactory,
   Street: streetFactory,
   Water: waterFactory,

@@ -18,8 +18,8 @@ import { mountDebugArea } from "./dom";
 import { updateObjectsInView } from "./objects_in_view";
 import { showLayerTooltip } from "./layer_tooltip";
 import { withNormalizedCoordinate, withSnapping } from "./mouse";
-import { GameObjectType } from "../types";
 import { EditableGameObjectType } from "./types";
+import { scaleX$ } from "./signals";
 
 export const loadDebugger = (
   body: HTMLBodyElement,
@@ -98,11 +98,13 @@ export const loadDebugger = (
       withLatestFrom(mouseMoveWithNormalizedCoordinate$),
       withLatestFrom(gameState$),
       withLatestFrom(selectedEditorObject$),
-      map(([[[[_], { x, y }], gameState], selectedObject]) => ({
+      withLatestFrom(scaleX$),
+      map(([[[[[_], { x, y }], gameState], selectedObject], scaleX]) => ({
         x,
         y,
         gameState,
         selectedObject,
+        scaleX,
       })),
       filter(
         ({ selectedObject }) =>

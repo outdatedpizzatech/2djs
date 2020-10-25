@@ -1,4 +1,4 @@
-import { GameObject } from "../game_object";
+import { GameObject, gameObjectFactory } from "../game_object";
 import { positionableFactory } from "../positionable";
 import { Layer, Unsaved } from "../types";
 
@@ -16,7 +16,7 @@ export const isHouseFloor = (
 export const houseFloorFactory = (
   attributes: Partial<HouseFloor>
 ): Unsaved<HouseFloor> => {
-  const positionableProperties = positionableFactory(attributes);
+  const gameObjectProperties = gameObjectFactory(attributes);
   const particularProperties = {
     _id: attributes._id,
     objectType: "HouseFloor" as "HouseFloor",
@@ -24,5 +24,5 @@ export const houseFloorFactory = (
     groupId: attributes.groupId,
   };
 
-  return { ...positionableProperties, ...particularProperties };
+  return { ...gameObjectProperties, ...particularProperties };
 };

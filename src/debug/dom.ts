@@ -10,6 +10,7 @@ import {
 import { GameObjectType, Layer } from "../types";
 import { objectToSpriteMap } from "./helpers";
 import { DebugArea, EditableGameObjectType } from "./types";
+import { scaleXSubject$ } from "./signals";
 
 export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   const debugArea = document.createElement("div");
@@ -21,7 +22,7 @@ export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   debugArea.style.marginRight = "auto";
   debugArea.style.background = "gray";
   debugArea.style.display = "grid";
-  debugArea.style.gridTemplateColumns = "10% 10% 10% 10% 10% 20%";
+  debugArea.style.gridTemplateColumns = "10% 10% 10% 10% 10% 20% 10%";
   body.appendChild(debugArea);
 
   const gridLinesLabel = document.createElement("label");
@@ -91,6 +92,24 @@ export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   const groupLabel = document.createElement("label");
   groupLabel.style.display = "block";
   groupDiv.appendChild(groupLabel);
+
+  const editorScalingDiv = document.createElement("div");
+  editorScalingDiv.style.background = "navy";
+  editorScalingDiv.style.color = "white";
+  editorScalingDiv.style.padding = "10%";
+  debugArea.appendChild(editorScalingDiv);
+
+  const scaleXLabel = document.createElement("label");
+  scaleXLabel.style.display = "block";
+  const scaleXCheckbox = document.createElement("input");
+  scaleXCheckbox.type = "checkbox";
+  scaleXCheckbox.checked = false;
+  scaleXCheckbox.addEventListener("click", function () {
+    scaleXSubject$.next(this.checked);
+  });
+  scaleXLabel.innerText = "Invert X";
+  scaleXLabel.prepend(scaleXCheckbox);
+  editorScalingDiv.appendChild(scaleXLabel);
 
   const addLayerCheckbox = (layer: Layer, name: string) => {
     const layerLabel = document.createElement("label");

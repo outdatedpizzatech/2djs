@@ -1,5 +1,4 @@
-import { GameObject } from "../game_object";
-import { positionableFactory } from "../positionable";
+import { GameObject, gameObjectFactory } from "../game_object";
 import { Layer, Unsaved } from "../types";
 
 export interface Roof extends GameObject {
@@ -12,7 +11,7 @@ export const isRoof = (unknownObject: any): unknownObject is Roof => {
 };
 
 export const roofFactory = (attributes: Partial<Roof>): Unsaved<Roof> => {
-  const positionableProperties = positionableFactory(attributes);
+  const gameObjectProperties = gameObjectFactory(attributes);
   const particularProperties = {
     _id: attributes._id,
     objectType: "Roof" as "Roof",
@@ -20,5 +19,5 @@ export const roofFactory = (attributes: Partial<Roof>): Unsaved<Roof> => {
     groupId: attributes.groupId,
   };
 
-  return { ...positionableProperties, ...particularProperties };
+  return { ...gameObjectProperties, ...particularProperties };
 };

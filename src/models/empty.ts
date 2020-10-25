@@ -1,6 +1,5 @@
 import { Layer, Unsaved } from "../types";
-import { GameObject } from "../game_object";
-import { positionableFactory } from "../positionable";
+import { GameObject, gameObjectFactory } from "../game_object";
 
 export interface Empty extends GameObject {
   objectType: "Empty";
@@ -12,7 +11,7 @@ export const isEmpty = (unknownObject: any): unknownObject is Empty => {
 };
 
 export const emptyFactory = (attributes: Partial<Empty>): Unsaved<Empty> => {
-  const positionableProperties = positionableFactory(attributes);
+  const gameObjectProperties = gameObjectFactory(attributes);
   const particularProperties = {
     _id: attributes._id,
     objectType: "Empty" as "Empty",
@@ -20,5 +19,5 @@ export const emptyFactory = (attributes: Partial<Empty>): Unsaved<Empty> => {
     groupId: attributes.groupId,
   };
 
-  return { ...positionableProperties, ...particularProperties };
+  return { ...gameObjectProperties, ...particularProperties };
 };
