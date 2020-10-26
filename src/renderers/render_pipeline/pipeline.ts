@@ -31,6 +31,10 @@ import { isHouseWallFrameShort } from "../../models/house_wall_frame_short";
 import { renderHouseWallFrameShort } from "../model_renderers/house_wall_frame_short_renderer";
 import { isHouseRoofSteeple } from "../../models/house_roof_steeple";
 import { renderHouseRoofSteeple } from "../model_renderers/house_roof_steeple_renderer";
+import { isHouseRoofEdge } from "../../models/house_roof_edge";
+import { renderHouseRoofEdge } from "../model_renderers/house_roof_edge_renderer";
+import { isHouseRoof } from "../../models/house_roof";
+import { renderHouseRoof } from "../model_renderers/house_roof_renderer";
 
 export const matchesObject = (a: any, b: any): boolean => {
   if (isTree(a)) {
@@ -120,6 +124,14 @@ export const pipelineRender = (
   }
   if (isHouseRoofSteeple(renderable)) {
     renderHouseRoofSteeple(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isHouseRoofEdge(renderable)) {
+    renderHouseRoofEdge(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isHouseRoof(renderable)) {
+    renderHouseRoof(renderable, camera, bufferCtx, options);
     return;
   }
 

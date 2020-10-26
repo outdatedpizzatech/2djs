@@ -11,7 +11,9 @@ import houseWallFrameSprites from "../sprite_collections/house_wall_frame_sprite
 import houseWallWindowSprites from "../sprite_collections/house_wall_window_sprite_collection";
 import houseWallShortSprites from "../sprite_collections/house_wall_short_sprite_collection";
 import houseRoofSteepleSprites from "../sprite_collections/house_roof_steeple_sprite_collection";
+import houseRoofEdgeSprites from "../sprite_collections/house_roof_edge_sprite_collection";
 import houseWallFrameShortSprites from "../sprite_collections/house_wall_frame_short_sprite_collection";
+import houseRoofSprites from "../sprite_collections/house_roof_sprite_collection";
 import { EditableGameObjectType } from "./types";
 
 export const objectToSpriteMap: {
@@ -27,6 +29,8 @@ export const objectToSpriteMap: {
   HouseWallFrame: houseWallFrameSprites[0],
   HouseWallFrameShort: houseWallFrameShortSprites[0],
   HouseRoofSteeple: houseRoofSteepleSprites[0],
+  HouseRoofEdge: houseRoofEdgeSprites[0],
+  HouseRoof: houseRoofSprites[0],
   HouseWallShort: houseWallShortSprites[0],
   HouseWallWindow: houseWallWindowSprites[0],
   Roof: roofSprites[0],

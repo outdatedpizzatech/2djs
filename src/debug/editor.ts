@@ -26,6 +26,8 @@ import { houseWallWindowFactory } from "../models/house_wall_window";
 import { houseWallShortFactory } from "../models/house_wall_short";
 import { houseWallFrameShortFactory } from "../models/house_wall_frame_short";
 import { houseRoofSteepleFactory } from "../models/house_roof_steeple";
+import { houseRoofEdgeFactory } from "../models/house_roof_edge";
+import { houseRoofFactory } from "../models/house_roof";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {
@@ -70,6 +72,8 @@ export const addObject = async (params: {
     HouseWallFrame: houseWallFrameFactory,
     HouseWallFrameShort: houseWallFrameShortFactory,
     HouseRoofSteeple: houseRoofSteepleFactory,
+    HouseRoofEdge: houseRoofEdgeFactory,
+    HouseRoof: houseRoofFactory,
     HouseWallShort: houseWallShortFactory,
     HouseWallWindow: houseWallWindowFactory,
     Roof: roofFactory,
