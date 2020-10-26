@@ -15,6 +15,8 @@ export type GameObjectType =
   | "HouseWallFrame"
   | "HouseWallWindow"
   | "HouseWallShort"
+  | "HouseWallFrameShort"
+  | "HouseRoofSteeple"
   | "Roof"
   | "Street"
   | "Water"

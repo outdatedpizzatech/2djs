@@ -17,6 +17,8 @@ import { GameObjectType, Unsaved } from "./types";
 import { houseWallFrameFactory } from "./models/house_wall_frame";
 import { houseWallWindowFactory } from "./models/house_wall_window";
 import { houseWallShortFactory } from "./models/house_wall_short";
+import { houseWallFrameShortFactory } from "./models/house_wall_frame_short";
+import { houseRoofSteepleFactory } from "./models/house_roof_steeple";
 
 const factoryFns: {
   [K in GameObjectType]: (attrs: Partial<GameObject>) => Unsaved<GameObject>;
@@ -26,6 +28,8 @@ const factoryFns: {
   HouseFloor: houseFloorFactory,
   HouseWall: houseWallFactory,
   HouseWallFrame: houseWallFrameFactory,
+  HouseWallFrameShort: houseWallFrameShortFactory,
+  HouseRoofSteeple: houseRoofSteepleFactory,
   HouseWallWindow: houseWallWindowFactory,
   HouseWallShort: houseWallShortFactory,
   Roof: roofFactory,

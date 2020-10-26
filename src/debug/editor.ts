@@ -24,6 +24,8 @@ import { EditableGameObjectType } from "./types";
 import { houseWallFrameFactory } from "../models/house_wall_frame";
 import { houseWallWindowFactory } from "../models/house_wall_window";
 import { houseWallShortFactory } from "../models/house_wall_short";
+import { houseWallFrameShortFactory } from "../models/house_wall_frame_short";
+import { houseRoofSteepleFactory } from "../models/house_roof_steeple";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {
@@ -66,6 +68,8 @@ export const addObject = async (params: {
     HouseFloor: houseFloorFactory,
     HouseWall: houseWallFactory,
     HouseWallFrame: houseWallFrameFactory,
+    HouseWallFrameShort: houseWallFrameShortFactory,
+    HouseRoofSteeple: houseRoofSteepleFactory,
     HouseWallShort: houseWallShortFactory,
     HouseWallWindow: houseWallWindowFactory,
     Roof: roofFactory,
