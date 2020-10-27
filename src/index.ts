@@ -20,11 +20,13 @@ import {
   clearMapOfObjects,
   updateMapWithObjects,
 } from "./reducers/map_reducer";
-import { addMovementSubscriptions } from "./movement";
-import { addSessionsSubscriptions } from "./sessions";
+import { addMovementSubscriptions } from "./subscriptions/movement";
+import { addSessionsSubscriptions } from "./subscriptions/sessions";
 import { cloneDeep } from "./clone_deep";
 import { distinctUntilChanged, map, withLatestFrom } from "rxjs/operators";
 import deepEqual from "fast-deep-equal";
+import { addMapSubscriptions } from "./subscriptions/map";
+import { addCameraSubscriptions } from "./subscriptions/camera";
 
 const drawEntireScene = (params: {
   bufferCtx: CanvasRenderingContext2D;
@@ -58,23 +60,10 @@ async function index() {
 
   const visibleCtx = visibleCanvas.getContext("2d") as CanvasRenderingContext2D;
 
+  addMapSubscriptions();
   addMovementSubscriptions();
   addSessionsSubscriptions();
-
-  mapLoadWithState$.subscribe((params) => {
-    gameStateSubject$.next(
-      updateMapWithObjects({
-        ...params,
-        gameState: clearMapOfObjects(params.gameState),
-      })
-    );
-  });
-
-  frameWithGameState$.subscribe(({ gameState }) => {
-    let newGameState = cloneDeep(gameState);
-    newGameState = updateCameraPosition(newGameState);
-    gameStateSubject$.next(newGameState);
-  });
+  addCameraSubscriptions();
 
   frameWithGameState$
     .pipe(
@@ -91,28 +80,6 @@ async function index() {
         visibleCanvas,
         visibleCtx,
       });
-    });
-
-  whenMyPlayerExceedsDrawDistanceThreshold$.subscribe(
-    ({ player, currentMapId }) => {
-      coordinatesToLoadForMyPlayerSubject$.next({
-        x: player.x,
-        y: player.y,
-      });
-    }
-  );
-
-  coordinatesToLoadForMyPlayerSubject$
-    .pipe(withLatestFrom(currentMapId$))
-    .subscribe(async ([coordinateWithMap, mapId]) => {
-      console.log("YUMP");
-      const coordinateBounds = getLoadBoundsForCoordinate(coordinateWithMap);
-      const mapPlaceables = await generateMap({
-        ...coordinateBounds,
-        ...coordinateWithMap,
-        ...{ mapId },
-      });
-      whenTheMapIsLoaded$.next(mapPlaceables);
     });
 
   if (process.env.DEBUG) {
