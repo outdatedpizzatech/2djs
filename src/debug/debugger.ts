@@ -1,6 +1,7 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
 import {
   coordinatesToLoadForMyPlayerSubject$,
+  currentMapId$,
   frame$,
   frameWithGameState$,
   gameState$,
@@ -99,13 +100,20 @@ export const loadDebugger = (
       withLatestFrom(gameState$),
       withLatestFrom(selectedEditorObject$),
       withLatestFrom(scaleX$),
-      map(([[[[[_], { x, y }], gameState], selectedObject], scaleX]) => ({
-        x,
-        y,
-        gameState,
-        selectedObject,
-        scaleX,
-      })),
+      withLatestFrom(currentMapId$),
+      map(
+        ([
+          [[[[[_], { x, y }], gameState], selectedObject], scaleX],
+          mapId,
+        ]) => ({
+          x,
+          y,
+          gameState,
+          selectedObject,
+          scaleX,
+          mapId,
+        })
+      ),
       filter(
         ({ selectedObject }) =>
           !!objectToSpriteMap[selectedObject as EditableGameObjectType]

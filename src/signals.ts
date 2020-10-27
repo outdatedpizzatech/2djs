@@ -29,7 +29,12 @@ import { cameraFactory } from "./camera";
 import { CoordinateMap } from "./coordinate_map";
 import { v4 as uuidv4 } from "uuid";
 
-export const currentMapId$: Observable<null> = of(null);
+export const currentMapIdSubject$: Subject<string | null> = new Subject<
+  string | null
+>();
+export const currentMapId$ = currentMapIdSubject$
+  .asObservable()
+  .pipe(startWith(null));
 
 export const selectedEditorObjectSubject$: Subject<string> = new Subject();
 export const selectedEditorObject$ = selectedEditorObjectSubject$
@@ -50,7 +55,6 @@ export const whenTheMapIsLoaded$ = new Subject<GameObject[]>();
 export const coordinatesToLoadForMyPlayerSubject$ = new Subject<{
   x: number;
   y: number;
-  mapId: string | null;
 }>();
 export const coordinatesToLoadForMyPlayer$ = coordinatesToLoadForMyPlayerSubject$.asObservable();
 export const gameStateSubject$: Subject<GameState> = new Subject();

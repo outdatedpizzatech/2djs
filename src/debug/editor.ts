@@ -49,8 +49,9 @@ export const addObject = async (params: {
   gameState: GameState;
   selectedObject: EditableGameObjectType;
   scaleX: boolean;
+  mapId: string | null;
 }) => {
-  const { gameState, x, y, selectedObject, scaleX } = params;
+  const { gameState, x, y, selectedObject, scaleX, mapId } = params;
 
   const scale = {
     x: scaleX ? -1 : 0,
@@ -81,7 +82,7 @@ export const addObject = async (params: {
     Flower: flowerFactory,
   };
 
-  const gameObject = objectToFactoryMap[selectedObject]({ x, y, scale });
+  const gameObject = objectToFactoryMap[selectedObject]({ x, y, scale, mapId });
 
   if (!gameObject) {
     return;

@@ -33,8 +33,9 @@ export const scalableFactory = (attributes: Partial<Scalable>): Scalable => {
 };
 
 export const gameObjectFactory = (
-  attributes: Partial<Scalable> & Partial<Positionable>
+  attributes: Partial<Scalable> & Partial<Positionable> & Partial<Identifiable>
 ): Scalable & Positionable => ({
   ...scalableFactory(attributes),
   ...positionableFactory(attributes),
+  ...{ mapId: attributes.mapId },
 });

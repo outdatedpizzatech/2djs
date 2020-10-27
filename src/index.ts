@@ -1,5 +1,6 @@
 import {
   coordinatesToLoadForMyPlayerSubject$,
+  currentMapId$,
   frameWithGameState$,
   gameStateSubject$,
   mapLoadWithState$,
@@ -97,19 +98,22 @@ async function index() {
       coordinatesToLoadForMyPlayerSubject$.next({
         x: player.x,
         y: player.y,
-        mapId: currentMapId,
       });
     }
   );
 
-  coordinatesToLoadForMyPlayerSubject$.subscribe(async (coordinateWithMap) => {
-    const coordinateBounds = getLoadBoundsForCoordinate(coordinateWithMap);
-    const mapPlaceables = await generateMap({
-      ...coordinateBounds,
-      ...coordinateWithMap,
+  coordinatesToLoadForMyPlayerSubject$
+    .pipe(withLatestFrom(currentMapId$))
+    .subscribe(async ([coordinateWithMap, mapId]) => {
+      console.log("YUMP");
+      const coordinateBounds = getLoadBoundsForCoordinate(coordinateWithMap);
+      const mapPlaceables = await generateMap({
+        ...coordinateBounds,
+        ...coordinateWithMap,
+        ...{ mapId },
+      });
+      whenTheMapIsLoaded$.next(mapPlaceables);
     });
-    whenTheMapIsLoaded$.next(mapPlaceables);
-  });
 
   if (process.env.DEBUG) {
     loadDebugger(body, gameArea);

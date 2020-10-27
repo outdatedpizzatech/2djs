@@ -46,7 +46,6 @@ export const addSessionsSubscriptions = () => {
     coordinatesToLoadForMyPlayerSubject$.next({
       x: player.x,
       y: player.y,
-      mapId: null,
     });
   });
 };

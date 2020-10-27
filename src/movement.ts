@@ -1,4 +1,10 @@
 import {
+  coordinatesToLoadForMyPlayer$,
+  coordinatesToLoadForMyPlayerSubject$,
+  currentMapId$,
+  currentMapIdSubject$,
+  frameWithGameState$,
+  gameState$,
   gameStateSubject$,
   whenMyPlayerHasMovementDirection$,
 } from "./signals";
@@ -20,6 +26,19 @@ import {
   whenInputtingDirectionWhileMyPlayerIsNotMoving$,
 } from "./signals/input";
 import { cloneDeep } from "./clone_deep";
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  withLatestFrom,
+} from "rxjs/operators";
+import { Player } from "./models/player";
+import { getAtPath } from "./coordinate_map";
+import { isDoor } from "./models/door";
+import {
+  clearMapOfObjects,
+  updateMapWithObjects,
+} from "./reducers/map_reducer";
 
 export const addMovementSubscriptions = () => {
   whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$.subscribe(
@@ -103,4 +122,29 @@ export const addMovementSubscriptions = () => {
       gameStateSubject$.next(newGameState);
     }
   });
+
+  frameWithGameState$
+    .pipe(
+      map(({ deltaTime, gameState }) => ({
+        deltaTime,
+        gameState,
+        player: gameState.players[gameState.myClientId] as Player,
+      })),
+      filter(({ player }) => !!player),
+      filter(({ player }) => !player.moving),
+      map(({ player, gameState }) => ({ x: player.x, y: player.y, gameState })),
+      distinctUntilChanged((prev, curr) => prev.x == curr.x && prev.y == curr.y)
+    )
+    .subscribe(({ x, y, gameState }) => {
+      console.log("nump");
+      const layer = gameState.layerMaps.passiveMap;
+
+      if (isDoor(getAtPath(layer, x, y))) {
+        currentMapIdSubject$.next("100");
+        coordinatesToLoadForMyPlayerSubject$.next({
+          x: 0,
+          y: 0,
+        });
+      }
+    });
 };
