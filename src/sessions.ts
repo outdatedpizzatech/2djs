@@ -4,7 +4,7 @@ import {
 } from "./signals/socket";
 import { addPlayer, removePlayer } from "./reducers/player_reducer";
 import {
-  coordinatesToLoadForMyPlayer$,
+  coordinatesToLoadForMyPlayerSubject$,
   gameState$,
   gameStateSubject$,
   whenMyPlayerHasNotSpawned$,
@@ -43,6 +43,10 @@ export const addSessionsSubscriptions = () => {
     socket.emit(PLAYER_JOIN, player);
 
     gameStateSubject$.next(newGameState);
-    coordinatesToLoadForMyPlayer$.next({ x: player.x, y: player.y });
+    coordinatesToLoadForMyPlayerSubject$.next({
+      x: player.x,
+      y: player.y,
+      mapId: null,
+    });
   });
 };

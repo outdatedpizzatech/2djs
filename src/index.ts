@@ -1,5 +1,5 @@
 import {
-  coordinatesToLoadForMyPlayer$,
+  coordinatesToLoadForMyPlayerSubject$,
   frameWithGameState$,
   gameStateSubject$,
   mapLoadWithState$,
@@ -79,7 +79,7 @@ async function index() {
     .pipe(
       map(({ gameState }) => gameState),
       distinctUntilChanged((p, q) => deepEqual(p, q)),
-      withLatestFrom(coordinatesToLoadForMyPlayer$)
+      withLatestFrom(coordinatesToLoadForMyPlayerSubject$)
     )
     .subscribe(([gameState, coordinate]) => {
       drawEntireScene({
@@ -92,16 +92,22 @@ async function index() {
       });
     });
 
-  whenMyPlayerExceedsDrawDistanceThreshold$.subscribe(({ player }) => {
-    coordinatesToLoadForMyPlayer$.next({
-      x: player.x,
-      y: player.y,
-    });
-  });
+  whenMyPlayerExceedsDrawDistanceThreshold$.subscribe(
+    ({ player, currentMapId }) => {
+      coordinatesToLoadForMyPlayerSubject$.next({
+        x: player.x,
+        y: player.y,
+        mapId: currentMapId,
+      });
+    }
+  );
 
-  coordinatesToLoadForMyPlayer$.subscribe(async (coordinate) => {
-    const coordinateBounds = getLoadBoundsForCoordinate(coordinate);
-    const mapPlaceables = await generateMap(coordinateBounds);
+  coordinatesToLoadForMyPlayerSubject$.subscribe(async (coordinateWithMap) => {
+    const coordinateBounds = getLoadBoundsForCoordinate(coordinateWithMap);
+    const mapPlaceables = await generateMap({
+      ...coordinateBounds,
+      ...coordinateWithMap,
+    });
     whenTheMapIsLoaded$.next(mapPlaceables);
   });
 

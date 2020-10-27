@@ -46,14 +46,19 @@ const factoryFns: {
 };
 
 export const generateMap = async (
-  coordinateBounds: CoordinateBounds
+  coordinateBounds: CoordinateBounds & { mapId: string | null }
 ): Promise<GameObject[]> => {
   const { x: xMin, y: yMin } = coordinateBounds.min;
   const { x: xMax, y: yMax } = coordinateBounds.max;
+  const { mapId } = coordinateBounds;
 
-  const result = await axios.get(
-    `${API_URI_BASE}/map?xMin=${xMin}&xMax=${xMax}&yMin=${yMin}&yMax=${yMax}`
-  );
+  let uri = `${API_URI_BASE}/map?xMin=${xMin}&xMax=${xMax}&yMin=${yMin}&yMax=${yMax}`;
+
+  if (mapId) {
+    uri += `&mapId=${mapId}`;
+  }
+
+  const result = await axios.get(uri);
 
   const gameObjects = result.data.map(
     (data: {

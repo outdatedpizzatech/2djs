@@ -1,6 +1,6 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
 import {
-  coordinatesToLoadForMyPlayer$,
+  coordinatesToLoadForMyPlayerSubject$,
   frame$,
   frameWithGameState$,
   gameState$,
@@ -32,7 +32,7 @@ export const loadDebugger = (
   });
 
   frameWithGameState$
-    .pipe(withLatestFrom(coordinatesToLoadForMyPlayer$))
+    .pipe(withLatestFrom(coordinatesToLoadForMyPlayerSubject$))
     .subscribe(([{ gameState }, coordinate]) => {
       updateObjectsInView({
         gameState,

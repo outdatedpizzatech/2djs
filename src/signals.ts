@@ -2,6 +2,8 @@ import {
   animationFrameScheduler,
   combineLatest,
   interval,
+  Observable,
+  of,
   Subject,
 } from "rxjs";
 import { DRAW_DISTANCE, FRAMERATE } from "./common";
@@ -27,6 +29,8 @@ import { cameraFactory } from "./camera";
 import { CoordinateMap } from "./coordinate_map";
 import { v4 as uuidv4 } from "uuid";
 
+export const currentMapId$: Observable<null> = of(null);
+
 export const selectedEditorObjectSubject$: Subject<string> = new Subject();
 export const selectedEditorObject$ = selectedEditorObjectSubject$
   .asObservable()
@@ -43,7 +47,12 @@ export const frame$ = interval(1000 / FRAMERATE, animationFrameScheduler).pipe(
   map(([previous, current]) => (current - previous) / 1000)
 );
 export const whenTheMapIsLoaded$ = new Subject<GameObject[]>();
-export const coordinatesToLoadForMyPlayer$ = new Subject<Coordinate>();
+export const coordinatesToLoadForMyPlayerSubject$ = new Subject<{
+  x: number;
+  y: number;
+  mapId: string | null;
+}>();
+export const coordinatesToLoadForMyPlayer$ = coordinatesToLoadForMyPlayerSubject$.asObservable();
 export const gameStateSubject$: Subject<GameState> = new Subject();
 const camera = cameraFactory({
   x: 0,
@@ -100,7 +109,7 @@ export const frameWithGameState$ = frame$.pipe(
   }))
 );
 export const mapLoadWithState$ = whenTheMapIsLoaded$.pipe(
-  withLatestFrom(coordinatesToLoadForMyPlayer$),
+  withLatestFrom(coordinatesToLoadForMyPlayerSubject$),
   withLatestFrom(gameState$),
   map(([[gameObjects, coordinate], gameState]) => ({
     gameObjects,
@@ -121,11 +130,13 @@ export const whenMyPlayerHasMovementDirection$ = frameWithGameState$.pipe(
 
 export const whenMyPlayerExceedsDrawDistanceThreshold$ = frameWithGameState$.pipe(
   withLatestFrom(coordinatesToLoadForMyPlayer$),
-  map(([{ deltaTime, gameState }, coordinate]) => ({
+  withLatestFrom(currentMapId$),
+  map(([[{ deltaTime, gameState }, coordinate], currentMapId]) => ({
     deltaTime,
     gameState,
     coordinate,
     player: gameState.players[gameState.myClientId] as Player,
+    currentMapId,
   })),
   filter(({ player }) => !!player),
   filter(({ player, coordinate }) => {
