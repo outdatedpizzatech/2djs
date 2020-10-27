@@ -1,5 +1,4 @@
 import { GameObject, gameObjectFactory } from "../game_object";
-import { positionableFactory } from "../positionable";
 import { Layer, Unsaved } from "../types";
 
 export interface Street extends GameObject {

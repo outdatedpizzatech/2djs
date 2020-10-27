@@ -1,7 +1,6 @@
 import { Direction } from "../direction";
 import { v4 as uuidv4 } from "uuid";
 import { GameObject, gameObjectFactory } from "../game_object";
-import { positionableFactory } from "../positionable";
 import { Layer } from "../types";
 import axios from "axios";
 import {

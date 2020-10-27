@@ -1,5 +1,4 @@
-import { GameObject, gameObjectFactory, scalableFactory } from "../game_object";
-import { positionableFactory } from "../positionable";
+import { GameObject, gameObjectFactory } from "../game_object";
 import { Layer, Unsaved } from "../types";
 
 export interface HouseRoofEdge extends GameObject {

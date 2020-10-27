@@ -2,8 +2,6 @@ import {
   animationFrameScheduler,
   combineLatest,
   interval,
-  merge,
-  Observable,
   Subject,
 } from "rxjs";
 import { DRAW_DISTANCE, FRAMERATE } from "./common";

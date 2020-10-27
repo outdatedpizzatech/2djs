@@ -10,7 +10,7 @@ import {
   removeObjectFromMap,
   updateObjectInMap,
 } from "../reducers/map_reducer";
-import { GameObjectType, Layer, Unsaved } from "../types";
+import { Layer, Unsaved } from "../types";
 import { GameState } from "../game_state";
 import { streetFactory } from "../models/street";
 import { doorFactory } from "../models/door";

@@ -1,6 +1,6 @@
 import { GameState } from "../../game_state";
-import { CoordinateMap, getAtPath, setAtPath } from "../../coordinate_map";
-import { matchesObject, pipelineRender } from "./pipeline";
+import { CoordinateMap, getAtPath } from "../../coordinate_map";
+import { pipelineRender } from "./pipeline";
 import { isPlayer, Player } from "../../models/player";
 import { Coordinate, getLoadBoundsForCoordinate } from "../../coordinate";
 import { GameObject } from "../../game_object";

@@ -1,7 +1,6 @@
-import { Camera, project } from "../../camera";
+import { Camera } from "../../camera";
 import sprites from "../../sprite_collections/roof_sprite_collection";
 import { Roof } from "../../models/roof";
-import { GRID_INTERVAL } from "../../common";
 import { RenderOptions } from "./types";
 import { renderModel } from "../helpers/render_model";
 

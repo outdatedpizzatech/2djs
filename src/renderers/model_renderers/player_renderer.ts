@@ -1,4 +1,4 @@
-import { Camera, project } from "../../camera";
+import { Camera } from "../../camera";
 import { GRID_INTERVAL, GRID_MAGNITUDE, UNIT_BASE } from "../../common";
 import {
   getAnimationFrames,
@@ -8,7 +8,6 @@ import {
 } from "../../models/player";
 import { Direction } from "../../direction";
 import sprites from "../../sprite_collections/player_sprite_collection";
-import { LayerMaps } from "../../coordinate_map";
 import { RenderOptions } from "./types";
 import { renderModel } from "../helpers/render_model";
 

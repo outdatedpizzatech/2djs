@@ -3,7 +3,7 @@ import { Tree } from "../../models/tree";
 import sprites from "../../sprite_collections/tree_sprite_collection";
 import { RenderOptions } from "./types";
 import { renderModel } from "../helpers/render_model";
-import { GRID_INTERVAL, UNIT_BASE } from "../../common";
+import { UNIT_BASE } from "../../common";
 
 export const renderTree = (
   model: Tree,

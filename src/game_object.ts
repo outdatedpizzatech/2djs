@@ -17,6 +17,7 @@ export interface Placeable extends Positionable, Layerable {}
 export interface Identifiable {
   objectType: string;
   groupId?: string;
+  mapId?: string | null;
   _id: string;
 }
 
