@@ -1,14 +1,14 @@
 import { combineLatest } from "rxjs";
 import { map, scan, startWith } from "rxjs/operators";
 import { GameState } from "../game_state";
-import { updateDebugger } from "../reducers/debugger_reducer";
+import { updateDebugger } from "../debug/debugger_reducer";
 import { updateCameraPosition } from "../reducers/camera_reducer";
 import { CoordinateMap } from "../coordinate_map";
 import { GameObject } from "../game_object";
 import { Layer } from "../types";
 import { cameraFactory } from "../camera";
-import { gameStateSubject$, layerVisibility$ } from "./subjects";
-import { selectedGroupUuid$ } from "./debugger";
+import { gameStateSubject$ } from "./subjects";
+import { layerVisibilitySubject$, selectedGroupUuid$ } from "../debug/signals";
 
 const camera = cameraFactory({
   x: 0,
@@ -38,7 +38,7 @@ const initialGameState: GameState = {
 
 export const gameState$ = combineLatest([
   gameStateSubject$,
-  layerVisibility$.pipe(
+  layerVisibilitySubject$.pipe(
     map(({ layer, visible }) => ({ [layer]: visible })),
     startWith(initialGameState.debug.layerVisibility)
   ),

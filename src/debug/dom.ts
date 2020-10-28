@@ -3,13 +3,16 @@ import { v4 as uuidv4 } from "uuid";
 import { GameObjectType, Layer } from "../types";
 import { objectToSpriteMap } from "./helpers";
 import { DebugArea, EditableGameObjectType } from "./types";
-import { scaleXSubject$ } from "./signals";
 import {
-  layerVisibility$,
+  layerVisibilitySubject$,
+  scaleXSubject$,
+  selectedEditorObject$,
+  selectedGroupUuid$,
+} from "./signals";
+import {
   selectedEditorObjectSubject$,
   selectedGroupUuidSubject$,
 } from "../signals/subjects";
-import { selectedEditorObject$, selectedGroupUuid$ } from "../signals/debugger";
 
 export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   const debugArea = document.createElement("div");
@@ -117,7 +120,7 @@ export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
     layerCheckbox.type = "checkbox";
     layerCheckbox.checked = true;
     layerCheckbox.addEventListener("click", function () {
-      layerVisibility$.next({ layer, visible: this.checked });
+      layerVisibilitySubject$.next({ layer, visible: this.checked });
     });
     layerLabel.innerText = name;
     layerLabel.prepend(layerCheckbox);

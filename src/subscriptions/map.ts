@@ -17,7 +17,7 @@ import {
   coordinatesToLoadForMyPlayerSubject$,
   currentMapIdSubject$,
   gameStateSubject$,
-  whenTheMapIsLoaded$,
+  mapPlaceablesSubject$,
 } from "../signals/subjects";
 import { currentMapId$, mapLoadWithState$ } from "../signals/map";
 import { whenMyPlayerExceedsDrawDistanceThreshold$ } from "../signals/movement";
@@ -69,7 +69,7 @@ export const addMapSubscriptions = () => {
         ...coordinateWithMap,
         ...{ mapId },
       });
-      whenTheMapIsLoaded$.next(mapPlaceables);
+      mapPlaceablesSubject$.next(mapPlaceables);
     });
 
   whenMyPlayerExceedsDrawDistanceThreshold$.subscribe(

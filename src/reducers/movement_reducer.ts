@@ -1,13 +1,14 @@
 import { flow } from "lodash";
-import { GameState, updateCoordinateMap } from "../game_state";
 import {
   updatePlayerCoordinates,
   updatePlayerFacingDirection,
   updatePlayerMovementDirection,
 } from "./player_reducer";
 import { Player } from "../models/player";
-import { Direction } from "../direction";
+import { Direction, getModsFromDirection } from "../direction";
 import { cloneDeep } from "../clone_deep";
+import { removeAtPath, setAtPath } from "../coordinate_map";
+import { GameState } from "../game_state";
 
 export const updateMovementForPlayer = (params: {
   direction: Direction;
@@ -55,4 +56,24 @@ export const updateFacingDirectionForPlayer = (params: {
         player,
       })
   )();
+};
+
+export const updateCoordinateMap = (params: {
+  direction: Direction;
+  gameState: GameState;
+  player: Player;
+}) => {
+  const { gameState, player, direction } = params;
+  const {
+    layerMaps: { interactiveMap },
+  } = gameState;
+
+  const { x, y } = player;
+
+  const [xMod, yMod] = getModsFromDirection(direction);
+
+  setAtPath(gameState.layerMaps.interactiveMap, x + xMod, y + yMod, player);
+  removeAtPath(interactiveMap, x, y);
+
+  return gameState;
 };

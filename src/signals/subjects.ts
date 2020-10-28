@@ -13,9 +13,4 @@ export const coordinatesToLoadForMyPlayerSubject$ = new Subject<{
   y: number;
 }>();
 export const gameStateSubject$: Subject<GameState> = new Subject();
-export const whenTheMapIsLoaded$ = new Subject<GameObject[]>();
-
-export const layerVisibility$: Subject<{
-  layer: Layer;
-  visible: boolean;
-}> = new Subject();
+export const mapPlaceablesSubject$ = new Subject<GameObject[]>();

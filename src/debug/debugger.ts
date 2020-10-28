@@ -11,10 +11,9 @@ import { updateObjectsInView } from "./objects_in_view";
 import { showLayerTooltip } from "./layer_tooltip";
 import { withNormalizedCoordinate, withSnapping } from "./mouse";
 import { EditableGameObjectType } from "./types";
-import { scaleX$ } from "./signals";
+import { scaleX$, selectedEditorObject$, selectedGroupUuid$ } from "./signals";
 import { coordinatesToLoadForMyPlayerSubject$ } from "../signals/subjects";
 import { gameState$ } from "../signals/game_state";
-import { selectedEditorObject$, selectedGroupUuid$ } from "../signals/debugger";
 import { currentMapId$ } from "../signals/map";
 import { frame$, frameWithGameState$ } from "../signals/frame";
 
