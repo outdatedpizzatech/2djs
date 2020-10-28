@@ -1,4 +1,3 @@
-import { frameWithGameState$ } from "./signals";
 import { GameState } from "./game_state";
 import { renderGameSpace } from "./renderers/game_renderer";
 import { addView } from "./renderers/canvas_renderer";
@@ -12,6 +11,7 @@ import { distinctUntilChanged, map, withLatestFrom } from "rxjs/operators";
 import deepEqual from "fast-deep-equal";
 import { addMapSubscriptions } from "./subscriptions/map";
 import { coordinatesToLoadForMyPlayerSubject$ } from "./signals/subjects";
+import { frameWithGameState$ } from "./signals/frame";
 
 const drawEntireScene = (params: {
   bufferCtx: CanvasRenderingContext2D;

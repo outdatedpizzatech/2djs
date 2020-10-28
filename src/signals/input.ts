@@ -1,11 +1,11 @@
 import { fromEvent, merge } from "rxjs";
 import { filter, map, scan, withLatestFrom } from "rxjs/operators";
 import { getDirectionFromKeyMap, KeyMap } from "../input";
-import { frame$ } from "../signals";
 import { Direction, getModsFromDirection } from "../direction";
 import { isPlayer, Player } from "../models/player";
 import { getAtPath } from "../coordinate_map";
 import { gameState$ } from "./game_state";
+import { frame$ } from "./frame";
 
 const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
 const keyup$ = fromEvent<KeyboardEvent>(document, "keyup");

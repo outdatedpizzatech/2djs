@@ -1,5 +1,4 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
-import { currentMapId$, frame$, frameWithGameState$ } from "../signals";
 import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { fromEvent } from "rxjs";
 import { renderGridLines } from "./grid_lines";
@@ -16,6 +15,8 @@ import { scaleX$ } from "./signals";
 import { coordinatesToLoadForMyPlayerSubject$ } from "../signals/subjects";
 import { gameState$ } from "../signals/game_state";
 import { selectedEditorObject$, selectedGroupUuid$ } from "../signals/debugger";
+import { currentMapId$ } from "../signals/map";
+import { frame$, frameWithGameState$ } from "../signals/frame";
 
 export const loadDebugger = (
   body: HTMLBodyElement,

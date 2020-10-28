@@ -1,10 +1,4 @@
 import {
-  currentMapId$,
-  frameWithGameState$,
-  mapLoadWithState$,
-  whenMyPlayerExceedsDrawDistanceThreshold$,
-} from "../signals";
-import {
   distinctUntilChanged,
   filter,
   map,
@@ -25,6 +19,9 @@ import {
   gameStateSubject$,
   whenTheMapIsLoaded$,
 } from "../signals/subjects";
+import { currentMapId$, mapLoadWithState$ } from "../signals/map";
+import { whenMyPlayerExceedsDrawDistanceThreshold$ } from "../signals/movement";
+import { frameWithGameState$ } from "../signals/frame";
 
 export const addMapSubscriptions = () => {
   frameWithGameState$
