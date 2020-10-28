@@ -1,4 +1,3 @@
-import { gameStateSubject$, selectedGroupUuidSubject$ } from "../signals";
 import { CoordinateMap, getAtPath, LayerMaps } from "../coordinate_map";
 import { GameObject } from "../game_object";
 import { treeFactory } from "../models/tree";
@@ -28,6 +27,10 @@ import { houseWallFrameShortFactory } from "../models/house_wall_frame_short";
 import { houseRoofSteepleFactory } from "../models/house_roof_steeple";
 import { houseRoofEdgeFactory } from "../models/house_roof_edge";
 import { houseRoofFactory } from "../models/house_roof";
+import {
+  gameStateSubject$,
+  selectedGroupUuidSubject$,
+} from "../signals/subjects";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {

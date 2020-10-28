@@ -1,32 +1,17 @@
-import {
-  coordinatesToLoadForMyPlayerSubject$,
-  currentMapId$,
-  frameWithGameState$,
-  gameStateSubject$,
-  mapLoadWithState$,
-  whenMyPlayerExceedsDrawDistanceThreshold$,
-  whenTheMapIsLoaded$,
-} from "./signals";
+import { frameWithGameState$ } from "./signals";
 import { GameState } from "./game_state";
-import { updateCameraPosition } from "./reducers/camera_reducer";
 import { renderGameSpace } from "./renderers/game_renderer";
 import { addView } from "./renderers/canvas_renderer";
 import { renderGround } from "./renderers/ground_renderer";
 import { loadDebugger } from "./debug/debugger";
-import { generateMap } from "./map_generator";
 import { renderAllObjects } from "./renderers/render_pipeline/object_renderer";
-import { Coordinate, getLoadBoundsForCoordinate } from "./coordinate";
-import {
-  clearMapOfObjects,
-  updateMapWithObjects,
-} from "./reducers/map_reducer";
+import { Coordinate } from "./coordinate";
 import { addMovementSubscriptions } from "./subscriptions/movement";
 import { addSessionsSubscriptions } from "./subscriptions/sessions";
-import { cloneDeep } from "./clone_deep";
 import { distinctUntilChanged, map, withLatestFrom } from "rxjs/operators";
 import deepEqual from "fast-deep-equal";
 import { addMapSubscriptions } from "./subscriptions/map";
-import { addCameraSubscriptions } from "./subscriptions/camera";
+import { coordinatesToLoadForMyPlayerSubject$ } from "./signals/subjects";
 
 const drawEntireScene = (params: {
   bufferCtx: CanvasRenderingContext2D;
@@ -63,7 +48,6 @@ async function index() {
   addMapSubscriptions();
   addMovementSubscriptions();
   addSessionsSubscriptions();
-  addCameraSubscriptions();
 
   frameWithGameState$
     .pipe(

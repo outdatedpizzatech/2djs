@@ -1,13 +1,5 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
-import {
-  coordinatesToLoadForMyPlayerSubject$,
-  currentMapId$,
-  frame$,
-  frameWithGameState$,
-  gameState$,
-  selectedEditorObject$,
-  selectedGroupUuid$,
-} from "../signals";
+import { currentMapId$, frame$, frameWithGameState$ } from "../signals";
 import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
 import { fromEvent } from "rxjs";
 import { renderGridLines } from "./grid_lines";
@@ -21,6 +13,9 @@ import { showLayerTooltip } from "./layer_tooltip";
 import { withNormalizedCoordinate, withSnapping } from "./mouse";
 import { EditableGameObjectType } from "./types";
 import { scaleX$ } from "./signals";
+import { coordinatesToLoadForMyPlayerSubject$ } from "../signals/subjects";
+import { gameState$ } from "../signals/game_state";
+import { selectedEditorObject$, selectedGroupUuid$ } from "../signals/debugger";
 
 export const loadDebugger = (
   body: HTMLBodyElement,

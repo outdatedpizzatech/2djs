@@ -3,16 +3,15 @@ import {
   whenOtherPlayersHaveLeft$,
 } from "../signals/socket";
 import { addPlayer, removePlayer } from "../reducers/player_reducer";
-import {
-  coordinatesToLoadForMyPlayerSubject$,
-  gameState$,
-  gameStateSubject$,
-  whenMyPlayerHasNotSpawned$,
-} from "../signals";
+import { whenMyPlayerHasNotSpawned$ } from "../signals";
 import { Player, playerOnSpawnPoint } from "../models/player";
 import { PLAYER_JOIN, SPAWN_COORDINATE } from "../common";
 import { socket } from "../sockets";
 import { cloneDeep } from "../clone_deep";
+import {
+  coordinatesToLoadForMyPlayerSubject$,
+  gameStateSubject$,
+} from "../signals/subjects";
 
 export const addSessionsSubscriptions = () => {
   whenOtherPlayersHaveJoined$.subscribe(({ player, gameState }) => {

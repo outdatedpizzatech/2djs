@@ -2,7 +2,8 @@ import { Subject } from "rxjs";
 import { Player } from "../models/player";
 import { Direction } from "../direction";
 import { filter, map, withLatestFrom } from "rxjs/operators";
-import { frameWithGameState$, gameState$ } from "../signals";
+import { frameWithGameState$ } from "../signals";
+import { gameState$ } from "./game_state";
 
 export const whenAPlayerJoins$ = new Subject<Player>();
 export const whenAPlayerLeaves$ = new Subject<string>();

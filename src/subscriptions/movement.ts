@@ -1,7 +1,4 @@
-import {
-  gameStateSubject$,
-  whenMyPlayerHasMovementDirection$,
-} from "../signals";
+import { whenMyPlayerHasMovementDirection$ } from "../signals";
 import {
   updateFacingDirectionForPlayer,
   updateMovementForPlayer,
@@ -20,6 +17,7 @@ import {
   whenInputtingDirectionWhileMyPlayerIsNotMoving$,
 } from "../signals/input";
 import { cloneDeep } from "../clone_deep";
+import { gameStateSubject$ } from "../signals/subjects";
 
 export const addMovementSubscriptions = () => {
   whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$.subscribe(

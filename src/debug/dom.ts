@@ -1,16 +1,15 @@
 import { CAMERA_WIDTH } from "../camera";
 import { v4 as uuidv4 } from "uuid";
-import {
-  layerVisibility$,
-  selectedEditorObject$,
-  selectedEditorObjectSubject$,
-  selectedGroupUuid$,
-  selectedGroupUuidSubject$,
-} from "../signals";
 import { GameObjectType, Layer } from "../types";
 import { objectToSpriteMap } from "./helpers";
 import { DebugArea, EditableGameObjectType } from "./types";
 import { scaleXSubject$ } from "./signals";
+import {
+  layerVisibility$,
+  selectedEditorObjectSubject$,
+  selectedGroupUuidSubject$,
+} from "../signals/subjects";
+import { selectedEditorObject$, selectedGroupUuid$ } from "../signals/debugger";
 
 export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   const debugArea = document.createElement("div");

@@ -1,6 +1,6 @@
 import { GameState } from "../game_state";
 
-export const updateCameraPosition = (gameState: GameState): GameState => {
+export const updateCameraPosition = (gameState: GameState) => {
   const player = gameState.players[gameState.myClientId];
 
   if (player) {
@@ -9,6 +9,4 @@ export const updateCameraPosition = (gameState: GameState): GameState => {
     gameState.camera.worldX = worldX;
     gameState.camera.worldY = worldY;
   }
-
-  return gameState;
 };

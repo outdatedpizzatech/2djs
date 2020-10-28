@@ -1,109 +1,32 @@
-import {
-  animationFrameScheduler,
-  combineLatest,
-  interval,
-  Observable,
-  of,
-  Subject,
-} from "rxjs";
+import { animationFrameScheduler, interval } from "rxjs";
 import { DRAW_DISTANCE, FRAMERATE } from "./common";
 import {
   filter,
   map,
   pairwise,
-  scan,
   startWith,
   throttleTime,
   withLatestFrom,
 } from "rxjs/operators";
-import { GameState } from "./game_state";
 import { Player } from "./models/player";
+import { getDistance, getLoadBoundsForCoordinate } from "./coordinate";
+import { gameState$ } from "./signals/game_state";
 import {
-  Coordinate,
-  getDistance,
-  getLoadBoundsForCoordinate,
-} from "./coordinate";
-import { GameObject } from "./game_object";
-import { Layer } from "./types";
-import { cameraFactory } from "./camera";
-import { CoordinateMap } from "./coordinate_map";
-import { v4 as uuidv4 } from "uuid";
+  coordinatesToLoadForMyPlayerSubject$,
+  currentMapIdSubject$,
+  whenTheMapIsLoaded$,
+} from "./signals/subjects";
 
-export const currentMapIdSubject$: Subject<string | null> = new Subject<
-  string | null
->();
 export const currentMapId$ = currentMapIdSubject$
   .asObservable()
   .pipe(startWith(null));
-
-export const selectedEditorObjectSubject$: Subject<string> = new Subject();
-export const selectedEditorObject$ = selectedEditorObjectSubject$
-  .asObservable()
-  .pipe(startWith(""));
-
-export const selectedGroupUuidSubject$: Subject<string> = new Subject();
-export const selectedGroupUuid$ = selectedGroupUuidSubject$
-  .asObservable()
-  .pipe(startWith(uuidv4()));
 
 export const frame$ = interval(1000 / FRAMERATE, animationFrameScheduler).pipe(
   map(() => performance.now()),
   pairwise(),
   map(([previous, current]) => (current - previous) / 1000)
 );
-export const whenTheMapIsLoaded$ = new Subject<GameObject[]>();
-export const coordinatesToLoadForMyPlayerSubject$ = new Subject<{
-  x: number;
-  y: number;
-}>();
 export const coordinatesToLoadForMyPlayer$ = coordinatesToLoadForMyPlayerSubject$.asObservable();
-export const gameStateSubject$: Subject<GameState> = new Subject();
-const camera = cameraFactory({
-  x: 0,
-  y: 0,
-});
-
-const initialGameState: GameState = {
-  myClientId: "",
-  camera,
-  layerMaps: {
-    interactiveMap: {} as CoordinateMap<GameObject>,
-    groundMap: {} as CoordinateMap<GameObject>,
-    overheadMap: {} as CoordinateMap<GameObject>,
-    passiveMap: {} as CoordinateMap<GameObject>,
-  },
-  players: {},
-  debug: {
-    layerVisibility: {
-      [Layer.INTERACTIVE]: true,
-      [Layer.PASSIVE]: true,
-      [Layer.GROUND]: true,
-      [Layer.OVERHEAD]: true,
-    },
-    selectedGroupId: null,
-  },
-};
-
-export const layerVisibility$: Subject<{
-  layer: Layer;
-  visible: boolean;
-}> = new Subject();
-
-export const gameState$ = combineLatest([
-  gameStateSubject$,
-  layerVisibility$.pipe(
-    map(({ layer, visible }) => ({ [layer]: visible })),
-    startWith(initialGameState.debug.layerVisibility)
-  ),
-  selectedGroupUuid$,
-]).pipe(
-  scan((acc: GameState, [gameState, debugLayer, selectedGroupUuid]) => {
-    Object.assign(gameState.debug.layerVisibility, debugLayer);
-    gameState.debug.selectedGroupId = selectedGroupUuid;
-    return gameState;
-  }, initialGameState),
-  startWith(initialGameState)
-);
 
 export const frameWithGameState$ = frame$.pipe(
   withLatestFrom(gameState$),

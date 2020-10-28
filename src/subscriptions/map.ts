@@ -1,12 +1,8 @@
 import {
-  coordinatesToLoadForMyPlayerSubject$,
   currentMapId$,
-  currentMapIdSubject$,
   frameWithGameState$,
-  gameStateSubject$,
   mapLoadWithState$,
   whenMyPlayerExceedsDrawDistanceThreshold$,
-  whenTheMapIsLoaded$,
 } from "../signals";
 import {
   distinctUntilChanged,
@@ -23,6 +19,12 @@ import {
 } from "../reducers/map_reducer";
 import { getLoadBoundsForCoordinate } from "../coordinate";
 import { generateMap } from "../map_generator";
+import {
+  coordinatesToLoadForMyPlayerSubject$,
+  currentMapIdSubject$,
+  gameStateSubject$,
+  whenTheMapIsLoaded$,
+} from "../signals/subjects";
 
 export const addMapSubscriptions = () => {
   frameWithGameState$
