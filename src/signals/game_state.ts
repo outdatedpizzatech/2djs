@@ -1,5 +1,5 @@
 import { combineLatest } from "rxjs";
-import { map, scan, startWith } from "rxjs/operators";
+import { distinctUntilChanged, map, scan, startWith } from "rxjs/operators";
 import { GameState } from "../game_state";
 import { updateDebugger } from "../debug/debugger_reducer";
 import { updateCameraPosition } from "../reducers/camera_reducer";

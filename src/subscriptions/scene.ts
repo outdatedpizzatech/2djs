@@ -6,6 +6,7 @@ import { GameState } from "../game_state";
 import { Coordinate } from "../coordinate";
 import { renderGround } from "../renderers/ground_renderer";
 import { renderAllObjects } from "../renderers/render_pipeline/object_renderer";
+import { coordinatesToLoadForMyPlayer$ } from "../signals/my_player";
 
 const drawEntireScene = (params: {
   bufferCtx: CanvasRenderingContext2D;
@@ -42,7 +43,7 @@ export const addSceneSubscriptions = (
     .pipe(
       map(({ gameState }) => gameState),
       distinctUntilChanged((p, q) => deepEqual(p, q)),
-      withLatestFrom(coordinatesToLoadForMyPlayerSubject$)
+      withLatestFrom(coordinatesToLoadForMyPlayer$)
     )
     .subscribe(([gameState, coordinate]) => {
       drawEntireScene({

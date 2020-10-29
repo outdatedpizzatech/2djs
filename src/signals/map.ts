@@ -1,4 +1,5 @@
 import {
+  aPlayerGoesToMapSubject$,
   coordinatesToLoadForMyPlayerSubject$,
   currentMapIdSubject$,
   mapPlaceablesSubject$,
@@ -6,13 +7,14 @@ import {
 import { map, startWith, withLatestFrom } from "rxjs/operators";
 import { gameState$ } from "./game_state";
 import { getLoadBoundsForCoordinate } from "../coordinate";
+import { coordinatesToLoadForMyPlayer$ } from "./my_player";
 
 export const currentMapId$ = currentMapIdSubject$
   .asObservable()
   .pipe(startWith(null));
 
 export const mapLoadWithState$ = mapPlaceablesSubject$.pipe(
-  withLatestFrom(coordinatesToLoadForMyPlayerSubject$),
+  withLatestFrom(coordinatesToLoadForMyPlayer$),
   withLatestFrom(gameState$),
   map(([[gameObjects, coordinate], gameState]) => ({
     gameObjects,
@@ -20,3 +22,5 @@ export const mapLoadWithState$ = mapPlaceablesSubject$.pipe(
     coordinateBounds: getLoadBoundsForCoordinate(coordinate),
   }))
 );
+
+export const whenAPlayerGoesToMap$ = aPlayerGoesToMapSubject$.asObservable();

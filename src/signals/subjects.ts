@@ -1,7 +1,6 @@
 import { Subject } from "rxjs";
 import { GameState } from "../game_state";
 import { GameObject } from "../game_object";
-import { Layer } from "../types";
 
 export const currentMapIdSubject$: Subject<string | null> = new Subject<
   string | null
@@ -14,3 +13,9 @@ export const coordinatesToLoadForMyPlayerSubject$ = new Subject<{
 }>();
 export const gameStateSubject$: Subject<GameState> = new Subject();
 export const mapPlaceablesSubject$ = new Subject<GameObject[]>();
+export const aPlayerGoesToMapSubject$ = new Subject<{
+  clientId: string;
+  mapId: string;
+  x: number;
+  y: number;
+}>();

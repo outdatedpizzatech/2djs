@@ -83,11 +83,4 @@ export const renderAllObjects = (
       renderColumnForLayer(overheadMap, y);
     }
   }
-  //
-  if (layerVisibility[Layer.INTERACTIVE]) {
-  }
-  //
-  // if (layerVisibility[Layer.OVERHEAD]) {
-  //   renderForLayer(overheadMap);
-  // }
 };

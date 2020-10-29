@@ -16,6 +16,7 @@ import { coordinatesToLoadForMyPlayerSubject$ } from "../signals/subjects";
 import { gameState$ } from "../signals/game_state";
 import { currentMapId$ } from "../signals/map";
 import { frame$, frameWithGameState$ } from "../signals/frame";
+import { coordinatesToLoadForMyPlayer$ } from "../signals/my_player";
 
 export const loadDebugger = (
   body: HTMLBodyElement,
@@ -28,7 +29,7 @@ export const loadDebugger = (
   });
 
   frameWithGameState$
-    .pipe(withLatestFrom(coordinatesToLoadForMyPlayerSubject$))
+    .pipe(withLatestFrom(coordinatesToLoadForMyPlayer$))
     .subscribe(([{ gameState }, coordinate]) => {
       updateObjectsInView({
         gameState,

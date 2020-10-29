@@ -1,6 +1,7 @@
 import {
   API_URI_BASE,
   PLAYER_FACING_DIRECTION,
+  PLAYER_GO_TO_MAP,
   PLAYER_JOIN,
   PLAYER_LEAVE,
   PLAYER_MOVE,
@@ -14,6 +15,7 @@ import {
 } from "./signals/socket";
 import { Direction } from "./direction";
 import io from "socket.io-client";
+import { aPlayerGoesToMapSubject$ } from "./signals/subjects";
 
 export const socket = io(API_URI_BASE);
 
@@ -43,3 +45,10 @@ socket.on(
 socket.on(PLAYER_LEAVE, (clientId: string) => {
   whenAPlayerLeaves$.next(clientId);
 });
+
+socket.on(
+  PLAYER_GO_TO_MAP,
+  (params: { mapId: string; x: number; y: number; clientId: string }) => {
+    aPlayerGoesToMapSubject$.next(params);
+  }
+);
