@@ -60,17 +60,10 @@ export const generateMap = async (
 
   const result = await axios.get(uri);
 
-  const gameObjects = result.data.map(
-    (data: {
-      _id: string;
-      objectType: GameObjectType;
-      layer: number;
-      x: number;
-      y: number;
-      groupId?: string;
-    }) => {
+  const gameObjects = result.data.map((data: any
+    ) => {
       const { objectType } = data;
-      const factoryFn = factoryFns[data.objectType];
+      const factoryFn = factoryFns[data.objectType as GameObjectType];
 
       return factoryFn({ ...data, objectType });
     }

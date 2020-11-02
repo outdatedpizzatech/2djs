@@ -135,7 +135,6 @@ export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   const layerInspectorDiv = document.createElement("div");
   layerInspectorDiv.style.fontFamily = `Monospace`;
   layerInspectorDiv.style.fontSize = `12px`;
-  layerInspectorDiv.style.background = "#333333";
   layerInspectorDiv.style.color = "white";
   layerInspectorDiv.style.position = "absolute";
   layerInspectorDiv.style.top = "0";

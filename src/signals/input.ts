@@ -1,4 +1,4 @@
-import { fromEvent, merge } from "rxjs";
+import {fromEvent, merge, pipe} from "rxjs";
 import { filter, map, scan, withLatestFrom } from "rxjs/operators";
 import { getDirectionFromKeyMap, KeyMap } from "../input";
 import { Direction, getModsFromDirection } from "../direction";
@@ -12,6 +12,9 @@ const keyup$ = fromEvent<KeyboardEvent>(document, "keyup");
 export const mousemove$ = fromEvent<MouseEvent>(document, "mousemove");
 export const mouseup$ = fromEvent<MouseEvent>(document, "mouseup");
 export const mousedown$ = fromEvent<MouseEvent>(document, "mousedown");
+export const mouse0up$ = mouseup$.pipe(
+  filter((event) => event.button == 0),
+);
 export const mouse0held$ = merge(
   mousedown$.pipe(
     filter((event) => event.button == 0),

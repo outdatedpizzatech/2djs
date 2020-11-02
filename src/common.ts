@@ -1,4 +1,4 @@
-export const FRAMERATE = 30;
+export const FRAMERATE = 60;
 export const UNIT_BASE = 16;
 export const GRID_MAGNITUDE = 1.5;
 export const GRID_INTERVAL = UNIT_BASE * GRID_MAGNITUDE;

@@ -102,19 +102,39 @@ export const addMapSubscriptions = () => {
       distinctUntilChanged(
         (prev, curr) => prev.x == curr.x && prev.y == curr.y
       ),
-      filter(({ x, y, gameState }) => {
+      map(({ x, y, gameState }) => {
         const layer = gameState.layerMaps.passiveMap;
 
-        return isDoor(getAtPath(layer, x, y));
-      })
+        const objectAtPath = getAtPath(layer, x, y);
+
+        return {
+          clientId: gameState.myClientId,
+          objectAtPath,
+        }
+      }),
+      filter(({ objectAtPath }) => {
+        return(isDoor(objectAtPath) && !!objectAtPath.warpTo);
+      }),
     )
-    .subscribe(({ gameState }) => {
-      socket.emit(PLAYER_GO_TO_MAP, {
-        clientId: gameState.myClientId,
-        mapId: "100",
-        x: 0,
-        y: 0,
-      });
+    .subscribe(({ clientId, objectAtPath }) => {
+      console.log("warping???")
+
+      if(!isDoor(objectAtPath)){
+        return false;
+      }
+
+      if(objectAtPath.warpTo){
+        const {
+          mapId, x, y
+        } = objectAtPath.warpTo;
+
+        socket.emit(PLAYER_GO_TO_MAP, {
+          clientId: clientId,
+          mapId,
+          x,
+          y,
+        });
+      }
     });
 
   mapLoadWithState$.subscribe((params) => {

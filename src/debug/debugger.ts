@@ -1,8 +1,8 @@
 import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
-import { filter, map, throttleTime, withLatestFrom } from "rxjs/operators";
+import {filter, map, scan, startWith, throttleTime, withLatestFrom} from "rxjs/operators";
 import { fromEvent } from "rxjs";
 import { renderGridLines } from "./grid_lines";
-import { mouse0held$, mouse2held$, mousemove$ } from "../signals/input";
+import {mouse0held$, mouse0up$, mouse2held$, mousemove$} from "../signals/input";
 import { GRID_INTERVAL } from "../common";
 import { addObject, getGroup, removeObject, setGroup } from "./editor";
 import { objectToSpriteMap } from "./helpers";
@@ -82,10 +82,54 @@ export const loadDebugger = (
     mouseCtx.fillRect(x, y, GRID_INTERVAL, GRID_INTERVAL);
   });
 
-  mouseMoveWithNormalizedCoordinate$
+  const selectedTile$ = mouse0up$
+    .pipe(
+      withLatestFrom(mouseMoveWithNormalizedCoordinate$),
+      map(([_, coordinate]) => ({ coordinate })),
+      withLatestFrom(selectedEditorObject$),
+      map(([{ coordinate}, selectedObject]) => ({ coordinate, selectedObject })),
+      withLatestFrom(currentMapId$),
+      map(
+        ([{ coordinate: { x, y }, selectedObject}, mapId]) => ({
+          x,
+          y,
+          selectedObject,
+          mapId,
+        })
+      ),
+      filter(
+        ({ selectedObject }) =>
+          selectedObject == ""
+      ),
+      scan((acc: { x: number, y: number, mapId: string } | null, curr) => {
+        const { x, y, mapId } = curr;
+
+        if(acc != null && acc.x == x && acc.y == y && acc.mapId == mapId){
+          return null;
+        } else {
+          return { x, y, mapId };
+        }
+      }, null)
+    , startWith(null))
+
+  selectedTile$
+    .pipe(filter((selectedTile) => selectedTile != null))
     .pipe(withLatestFrom(gameState$))
-    .subscribe(([{ x, y }, gameState]) => {
-      showLayerTooltip({ gameState, x, y, debug });
+    .subscribe(([selectedTile, gameState]) => {
+      if(selectedTile){
+        showLayerTooltip({ gameState, x: selectedTile.x, y: selectedTile.y, debug, color: "blue" });
+      }
+    });
+
+  mouseMoveWithNormalizedCoordinate$
+    .pipe(
+      withLatestFrom(selectedTile$),
+      filter(([_, selectedTile]) => selectedTile == null),
+      map(([coordinate, _]) => ({coordinate})),
+      withLatestFrom(gameState$)
+)
+    .subscribe(([{ coordinate: { x, y} }, gameState]) => {
+      showLayerTooltip({ gameState, x, y, debug, color: "#333" });
     });
 
   frame$

@@ -7,6 +7,7 @@ import { Coordinate } from "../coordinate";
 import { renderGround } from "../renderers/ground_renderer";
 import { renderAllObjects } from "../renderers/render_pipeline/object_renderer";
 import { coordinatesToLoadForMyPlayer$ } from "../signals/my_player";
+import {currentMapId$} from "../signals/map";
 
 const drawEntireScene = (params: {
   bufferCtx: CanvasRenderingContext2D;
@@ -15,6 +16,7 @@ const drawEntireScene = (params: {
   visibleCanvas: HTMLCanvasElement;
   visibleCtx: CanvasRenderingContext2D;
   coordinate: Coordinate;
+  currentMapId: string | null;
 }) => {
   const {
     bufferCanvas,
@@ -22,11 +24,14 @@ const drawEntireScene = (params: {
     coordinate,
     visibleCtx,
     visibleCanvas,
+    currentMapId,
   } = params;
 
   visibleCtx.clearRect(0, 0, visibleCanvas.width, visibleCanvas.height);
 
-  renderGround(visibleCtx, gameState.camera);
+  if(!currentMapId){
+    renderGround(visibleCtx, gameState.camera);
+  }
   renderAllObjects(visibleCtx, gameState, coordinate);
 
   visibleCtx.drawImage(bufferCanvas, 0, 0);
@@ -43,9 +48,10 @@ export const addSceneSubscriptions = (
     .pipe(
       map(({ gameState }) => gameState),
       distinctUntilChanged((p, q) => deepEqual(p, q)),
-      withLatestFrom(coordinatesToLoadForMyPlayer$)
+      withLatestFrom(coordinatesToLoadForMyPlayer$),
+      withLatestFrom(currentMapId$),
     )
-    .subscribe(([gameState, coordinate]) => {
+    .subscribe(([[gameState, coordinate], currentMapId]) => {
       drawEntireScene({
         gameState,
         coordinate,
@@ -53,6 +59,7 @@ export const addSceneSubscriptions = (
         bufferCanvas,
         visibleCanvas,
         visibleCtx,
+        currentMapId,
       });
     });
 };

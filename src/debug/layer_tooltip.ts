@@ -12,8 +12,9 @@ export const showLayerTooltip = (params: {
   x: number;
   y: number;
   debug: DebugArea;
+  color: string;
 }) => {
-  const { debug, gameState, x, y } = params;
+  const { debug, gameState, x, y, color } = params;
 
   debug.coordinates.innerText = `Mouse:\r${x},${y}`;
 
@@ -36,4 +37,5 @@ export const showLayerTooltip = (params: {
     inspectorText += `\r Ground Layer: ${objectDisplay(groundObject)} \r`;
 
   debug.layerInspectorDiv.innerText = inspectorText;
+  debug.layerInspectorDiv.style.background = color;
 };
