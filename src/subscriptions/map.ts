@@ -14,7 +14,6 @@ import {
 import { getLoadBoundsForCoordinate } from "../coordinate";
 import { generateMap } from "../map_generator";
 import {
-  aPlayerGoesToMapSubject$,
   coordinatesToLoadForMyPlayerSubject$,
   currentMapIdSubject$,
   gameStateSubject$,
@@ -32,6 +31,10 @@ import { GRID_INTERVAL, PLAYER_GO_TO_MAP } from "../common";
 import { gameState$ } from "../signals/game_state";
 import { cloneDeep } from "../clone_deep";
 import { coordinatesToLoadForMyPlayer$ } from "../signals/my_player";
+import {
+  TransitioningBehavior,
+  transitioningBehaviorSubject$,
+} from "../signals/transition";
 
 export const addMapSubscriptions = () => {
   whenAPlayerGoesToMap$
@@ -110,23 +113,21 @@ export const addMapSubscriptions = () => {
         return {
           clientId: gameState.myClientId,
           objectAtPath,
-        }
+        };
       }),
       filter(({ objectAtPath }) => {
-        return(isDoor(objectAtPath) && !!objectAtPath.warpTo);
-      }),
+        return isDoor(objectAtPath) && !!objectAtPath.warpTo;
+      })
     )
     .subscribe(({ clientId, objectAtPath }) => {
-      console.log("warping???")
-
-      if(!isDoor(objectAtPath)){
+      if (!isDoor(objectAtPath)) {
         return false;
       }
 
-      if(objectAtPath.warpTo){
-        const {
-          mapId, x, y
-        } = objectAtPath.warpTo;
+      if (objectAtPath.warpTo) {
+        const { mapId, x, y } = objectAtPath.warpTo;
+
+        transitioningBehaviorSubject$.next(TransitioningBehavior.OUT);
 
         socket.emit(PLAYER_GO_TO_MAP, {
           clientId: clientId,

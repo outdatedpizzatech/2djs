@@ -6,6 +6,7 @@ import { isPlayer, Player } from "../models/player";
 import { getAtPath } from "../coordinate_map";
 import { gameState$ } from "./game_state";
 import { frame$ } from "./frame";
+import {transitioning$} from "./transition";
 
 const keydown$ = fromEvent<KeyboardEvent>(document, "keydown");
 const keyup$ = fromEvent<KeyboardEvent>(document, "keyup");
@@ -44,7 +45,10 @@ const keyMap$ = keyActions$.pipe(
 );
 const keysMapPerFrame$ = frame$.pipe(withLatestFrom(keyMap$));
 export const inputDirectionForFrame$ = keysMapPerFrame$.pipe(
-  map(([_, keymap]) => getDirectionFromKeyMap(keymap)),
+  withLatestFrom(transitioning$),
+  map(([[_, keymap], transitioning]) => ({ keymap, transitioning })),
+  filter(({ transitioning }) => !transitioning),
+  map(({ keymap }) => getDirectionFromKeyMap(keymap)),
   filter((direction) => direction != Direction.NONE)
 );
 export const whenInputtingDirectionToAnUnoccupiedNeighborOfMyPlayer$ = inputDirectionForFrame$.pipe(

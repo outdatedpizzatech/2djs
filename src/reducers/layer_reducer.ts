@@ -9,6 +9,33 @@ import {
   setAtPath,
 } from "../coordinate_map";
 
+const addGameObjectToLayerMap = (
+  layerMap: CoordinateMap<GameObject>,
+  gameObject: GameObject
+) => {
+  const xRow = layerMap[gameObject.x] || {};
+  xRow[gameObject.y] = gameObject;
+  layerMap[gameObject.x] = xRow;
+};
+
+const addGameObjectToGameState = (
+  gameState: GameState,
+  gameObject: GameObject
+) => {
+  if (gameObject.layer == Layer.GROUND) {
+    addGameObjectToLayerMap(gameState.layerMaps.groundMap, gameObject);
+  }
+  if (gameObject.layer == Layer.OVERHEAD) {
+    addGameObjectToLayerMap(gameState.layerMaps.overheadMap, gameObject);
+  }
+  if (gameObject.layer == Layer.PASSIVE) {
+    addGameObjectToLayerMap(gameState.layerMaps.passiveMap, gameObject);
+  }
+  if (gameObject.layer == Layer.INTERACTIVE) {
+    addGameObjectToLayerMap(gameState.layerMaps.interactiveMap, gameObject);
+  }
+};
+
 export const updateLayerMaps = (
   gameObjects: GameObject[],
   gameState: GameState,
@@ -24,26 +51,7 @@ export const updateLayerMaps = (
   }
 
   gameObjects.forEach((placeable) => {
-    if (placeable.layer == Layer.GROUND) {
-      const xRow = gameState.layerMaps.groundMap[placeable.x] || {};
-      xRow[placeable.y] = placeable;
-      gameState.layerMaps.groundMap[placeable.x] = xRow;
-    }
-    if (placeable.layer == Layer.OVERHEAD) {
-      const xRow = gameState.layerMaps.overheadMap[placeable.x] || {};
-      xRow[placeable.y] = placeable;
-      gameState.layerMaps.overheadMap[placeable.x] = xRow;
-    }
-    if (placeable.layer == Layer.PASSIVE) {
-      const xRow = gameState.layerMaps.passiveMap[placeable.x] || {};
-      xRow[placeable.y] = placeable;
-      gameState.layerMaps.passiveMap[placeable.x] = xRow;
-    }
-    if (placeable.layer == Layer.INTERACTIVE) {
-      const xRow = gameState.layerMaps.interactiveMap[placeable.x] || {};
-      xRow[placeable.y] = placeable;
-      gameState.layerMaps.interactiveMap[placeable.x] = xRow;
-    }
+    addGameObjectToGameState(gameState, placeable);
   });
 
   return gameState;
@@ -62,26 +70,7 @@ export const addToLayerMaps = (
   gameObject: GameObject,
   gameState: GameState
 ) => {
-  if (gameObject.layer == Layer.GROUND) {
-    const xRow = gameState.layerMaps.groundMap[gameObject.x] || {};
-    xRow[gameObject.y] = gameObject;
-    gameState.layerMaps.groundMap[gameObject.x] = xRow;
-  }
-  if (gameObject.layer == Layer.OVERHEAD) {
-    const xRow = gameState.layerMaps.overheadMap[gameObject.x] || {};
-    xRow[gameObject.y] = gameObject;
-    gameState.layerMaps.overheadMap[gameObject.x] = xRow;
-  }
-  if (gameObject.layer == Layer.PASSIVE) {
-    const xRow = gameState.layerMaps.passiveMap[gameObject.x] || {};
-    xRow[gameObject.y] = gameObject;
-    gameState.layerMaps.passiveMap[gameObject.x] = xRow;
-  }
-  if (gameObject.layer == Layer.INTERACTIVE) {
-    const xRow = gameState.layerMaps.interactiveMap[gameObject.x] || {};
-    xRow[gameObject.y] = gameObject;
-    gameState.layerMaps.interactiveMap[gameObject.x] = xRow;
-  }
+  addGameObjectToGameState(gameState, gameObject);
 
   return gameState;
 };

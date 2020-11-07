@@ -36,16 +36,6 @@ import { renderHouseRoofEdge } from "../model_renderers/house_roof_edge_renderer
 import { isHouseRoof } from "../../models/house_roof";
 import { renderHouseRoof } from "../model_renderers/house_roof_renderer";
 
-export const matchesObject = (a: any, b: any): boolean => {
-  if (isTree(a)) {
-    return isTree(b);
-  }
-  if (isRoof(a)) {
-    return isRoof(b);
-  }
-  return false;
-};
-
 export const pipelineRender = (
   renderable: any,
   bufferCtx: CanvasRenderingContext2D,

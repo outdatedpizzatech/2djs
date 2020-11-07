@@ -1,13 +1,8 @@
-import {
-  aPlayerGoesToMapSubject$,
-  coordinatesToLoadForMyPlayerSubject$,
-  currentMapIdSubject$,
-  mapPlaceablesSubject$,
-} from "./subjects";
-import { map, startWith, withLatestFrom } from "rxjs/operators";
-import { gameState$ } from "./game_state";
-import { getLoadBoundsForCoordinate } from "../coordinate";
-import { coordinatesToLoadForMyPlayer$ } from "./my_player";
+import {aPlayerGoesToMapSubject$, currentMapIdSubject$, mapPlaceablesSubject$,} from "./subjects";
+import {map, startWith, withLatestFrom} from "rxjs/operators";
+import {gameState$} from "./game_state";
+import {getLoadBoundsForCoordinate} from "../coordinate";
+import {coordinatesToLoadForMyPlayer$} from "./my_player";
 
 export const currentMapId$ = currentMapIdSubject$
   .asObservable()
