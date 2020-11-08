@@ -21,6 +21,11 @@ import { houseWallFrameShortFactory } from "./models/house_wall_frame_short";
 import { houseRoofSteepleFactory } from "./models/house_roof_steeple";
 import { houseRoofEdgeFactory } from "./models/house_roof_edge";
 import { houseRoofFactory } from "./models/house_roof";
+import { stairwayFactory } from "./models/stairway";
+import { stairwayBottomFactory } from "./models/stairway_bottom";
+import { stairwayTopFactory } from "./models/stairway_top";
+import { stairwayRailingBottomLeftFactory } from "./models/stairway_railing_bottom_left";
+import { stairwayRailingBottomRightFactory } from "./models/stairway_railing_bottom_right";
 
 const factoryFns: {
   [K in GameObjectType]: (attrs: Partial<GameObject>) => Unsaved<GameObject>;
@@ -43,6 +48,11 @@ const factoryFns: {
   Wall: wallFactory,
   Player: playerFactory,
   Flower: flowerFactory,
+  Stairway: stairwayFactory,
+  StairwayBottom: stairwayBottomFactory,
+  StairwayTop: stairwayTopFactory,
+  StairwayRailingBottomLeft: stairwayRailingBottomLeftFactory,
+  StairwayRailingBottomRight: stairwayRailingBottomRightFactory,
 };
 
 export const generateMap = async (
@@ -60,14 +70,12 @@ export const generateMap = async (
 
   const result = await axios.get(uri);
 
-  const gameObjects = result.data.map((data: any
-    ) => {
-      const { objectType } = data;
-      const factoryFn = factoryFns[data.objectType as GameObjectType];
+  const gameObjects = result.data.map((data: any) => {
+    const { objectType } = data;
+    const factoryFn = factoryFns[data.objectType as GameObjectType];
 
-      return factoryFn({ ...data, objectType });
-    }
-  );
+    return factoryFn({ ...data, objectType });
+  });
 
   return gameObjects;
 };

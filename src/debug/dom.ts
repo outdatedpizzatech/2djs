@@ -153,7 +153,7 @@ export const mountDebugArea = (body: HTMLBodyElement): DebugArea => {
   editorArea.style.marginRight = "auto";
   editorArea.style.background = "gray";
   editorArea.style.display = "grid";
-  editorArea.style.gridTemplateColumns = "repeat(20, auto)";
+  editorArea.style.gridTemplateColumns = "repeat(12, auto)";
   body.appendChild(editorArea);
 
   Object.keys(objectToSpriteMap).forEach((key: EditableGameObjectType) => {

@@ -35,6 +35,16 @@ import { isHouseRoofEdge } from "../../models/house_roof_edge";
 import { renderHouseRoofEdge } from "../model_renderers/house_roof_edge_renderer";
 import { isHouseRoof } from "../../models/house_roof";
 import { renderHouseRoof } from "../model_renderers/house_roof_renderer";
+import { isStairway } from "../../models/stairway";
+import { renderStairway } from "../model_renderers/stairway_renderer";
+import { isStairwayTop } from "../../models/stairway_top";
+import { renderStairwayTop } from "../model_renderers/stairway_top_renderer";
+import { isStairwayBottom } from "../../models/stairway_bottom";
+import { renderStairwayBottom } from "../model_renderers/stairway_bottom_renderer";
+import { isStairwayRailingBottomLeft } from "../../models/stairway_railing_bottom_left";
+import { renderStairwayRailingBottomLeft } from "../model_renderers/stairway_railing_bottom_left_renderer";
+import { isStairwayRailingBottomRight } from "../../models/stairway_railing_bottom_right";
+import { renderStairwayRailingBottomRight } from "../model_renderers/stairway_railing_bottom_right_renderer";
 
 export const pipelineRender = (
   renderable: any,
@@ -122,6 +132,26 @@ export const pipelineRender = (
   }
   if (isHouseRoof(renderable)) {
     renderHouseRoof(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isStairway(renderable)) {
+    renderStairway(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isStairwayTop(renderable)) {
+    renderStairwayTop(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isStairwayBottom(renderable)) {
+    renderStairwayBottom(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isStairwayRailingBottomLeft(renderable)) {
+    renderStairwayRailingBottomLeft(renderable, camera, bufferCtx, options);
+    return;
+  }
+  if (isStairwayRailingBottomRight(renderable)) {
+    renderStairwayRailingBottomRight(renderable, camera, bufferCtx, options);
     return;
   }
 

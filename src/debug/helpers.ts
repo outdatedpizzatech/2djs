@@ -14,6 +14,11 @@ import houseRoofSteepleSprites from "../sprite_collections/house_roof_steeple_sp
 import houseRoofEdgeSprites from "../sprite_collections/house_roof_edge_sprite_collection";
 import houseWallFrameShortSprites from "../sprite_collections/house_wall_frame_short_sprite_collection";
 import houseRoofSprites from "../sprite_collections/house_roof_sprite_collection";
+import stairwaySprites from "../sprite_collections/stairway_sprite_collection";
+import stairwayBottomSprites from "../sprite_collections/stairway_bottom_sprite_collection";
+import stairwayTopSprites from "../sprite_collections/stairway_top_sprite_collection";
+import stairwayRailingBottomLeftSprites from "../sprite_collections/stairway_railing_bottom_left_sprite_collection";
+import stairwayRailingBottomRightSprites from "../sprite_collections/stairway_railing_bottom_right_sprite_collection";
 import { EditableGameObjectType } from "./types";
 
 export const objectToSpriteMap: {
@@ -36,4 +41,9 @@ export const objectToSpriteMap: {
   Roof: roofSprites[0],
   Water: waterSprites[0],
   Flower: flowerSprites[0],
+  Stairway: stairwaySprites[0],
+  StairwayTop: stairwayTopSprites[0],
+  StairwayBottom: stairwayBottomSprites[0],
+  StairwayRailingBottomLeft: stairwayRailingBottomLeftSprites[0],
+  StairwayRailingBottomRight: stairwayRailingBottomRightSprites[0],
 };

@@ -25,4 +25,9 @@ export type GameObjectType =
   | "Tree"
   | "Wall"
   | "Player"
-  | "Flower";
+  | "Flower"
+  | "Stairway"
+  | "StairwayTop"
+  | "StairwayBottom"
+  | "StairwayRailingBottomLeft"
+  | "StairwayRailingBottomRight";

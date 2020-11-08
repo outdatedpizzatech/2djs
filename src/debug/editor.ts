@@ -31,6 +31,11 @@ import {
   gameStateSubject$,
   selectedGroupUuidSubject$,
 } from "../signals/subjects";
+import { stairwayFactory } from "../models/stairway";
+import { stairwayBottomFactory } from "../models/stairway_bottom";
+import { stairwayTopFactory } from "../models/stairway_top";
+import { stairwayRailingBottomLeftFactory } from "../models/stairway_railing_bottom_left";
+import { stairwayRailingBottomRightFactory } from "../models/stairway_railing_bottom_right";
 
 const getLayerMapFromLayer = (layer: Layer, layerMaps: LayerMaps) => {
   if (layer == Layer.INTERACTIVE) {
@@ -83,6 +88,11 @@ export const addObject = async (params: {
     Roof: roofFactory,
     Water: waterFactory,
     Flower: flowerFactory,
+    Stairway: stairwayFactory,
+    StairwayBottom: stairwayBottomFactory,
+    StairwayTop: stairwayTopFactory,
+    StairwayRailingBottomLeft: stairwayRailingBottomLeftFactory,
+    StairwayRailingBottomRight: stairwayRailingBottomRightFactory,
   };
 
   const gameObject = objectToFactoryMap[selectedObject]({ x, y, scale, mapId });
