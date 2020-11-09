@@ -21,6 +21,7 @@ export const houseRoofEdgeFactory = (
     objectType: "HouseRoofEdge" as "HouseRoofEdge",
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
+    isStructure: true,
   };
 
   return {

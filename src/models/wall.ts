@@ -1,5 +1,6 @@
 import { GameObject, gameObjectFactory } from "../game_object";
 import { Layer, Unsaved } from "../types";
+import sprites from "../sprite_collections/wall_sprite_collection";
 
 export interface Wall extends GameObject {
   objectType: "Wall";
@@ -17,6 +18,7 @@ export const wallFactory = (attributes: Partial<Wall>): Unsaved<Wall> => {
     objectType: "Wall" as "Wall",
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
+    isStructure: true,
   };
 
   return { ...gameObjectProperties, ...particularProperties };

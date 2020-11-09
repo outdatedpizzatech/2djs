@@ -10,14 +10,13 @@ export const renderWall = (
   model: Wall,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
-  layerMaps: LayerMaps,
   options: RenderOptions
 ) => {
   const { worldX, worldY } = project(camera, model);
 
   if (
-    options.debug.selectedGroupId &&
-    options.debug.selectedGroupId == model.groupId
+    options.debug?.selectedGroupId &&
+    options.debug?.selectedGroupId == model.groupId
   ) {
     ctx.fillStyle = "rgba(255, 255, 0, 0.75)";
     ctx.fillRect(worldX, worldY, GRID_INTERVAL, GRID_INTERVAL);

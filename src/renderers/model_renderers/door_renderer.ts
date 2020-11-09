@@ -2,7 +2,6 @@ import { Camera } from "../../camera";
 import sprites from "../../sprite_collections/door_sprite_collection";
 import { renderModel } from "../helpers/render_model";
 import { Door } from "../../models/door";
-import { Player } from "../../models/player";
 import { RenderOptions } from "./types";
 import { UNIT_BASE } from "../../common";
 
@@ -10,9 +9,10 @@ export const renderDoor = (
   model: Door,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
-  players: Player[],
   options: RenderOptions
 ) => {
+  const { players } = options;
+
   const overlappingPlayer = players.find(
     (player) => model.x == player.x && model.y == player.y
   );

@@ -12,14 +12,13 @@ export const renderModel = (
   sprite: HTMLImageElement,
   options: RenderOptions
 ) => {
-  const { worldX, worldY } = project(camera, model);
+  const { worldX: cameraX, worldY: cameraY } = project(camera, model);
+
+  const worldX = options.worldX || cameraX;
+  const worldY = options.worldY || cameraY;
 
   const width = options.dimensions?.width || UNIT_BASE;
   const height = options.dimensions?.height || UNIT_BASE;
-  const cropYStart = options.cropYStart || 0;
-  const cropYLength = options.cropYLength
-    ? options.cropYLength
-    : height - cropYStart;
 
   if (model.scale.x != 1) {
     ctx.save();
@@ -30,16 +29,10 @@ export const renderModel = (
 
   ctx.drawImage(
     sprite,
-    0,
-    cropYStart,
-    width,
-    cropYLength,
     worldX * model.scale.x - xOffset,
-    worldY +
-      cropYStart * GRID_MAGNITUDE -
-      (height - UNIT_BASE) * GRID_MAGNITUDE,
+    worldY - (height - UNIT_BASE) * GRID_MAGNITUDE,
     width * GRID_MAGNITUDE,
-    cropYLength * GRID_MAGNITUDE
+    height * GRID_MAGNITUDE
   );
 
   if (model.scale.x != 1) {
@@ -47,7 +40,7 @@ export const renderModel = (
   }
 
   if (
-    options.debug.selectedGroupId &&
+    options.debug?.selectedGroupId &&
     options.debug.selectedGroupId == model.groupId
   ) {
     ctx.fillStyle = "rgba(255, 255, 0, 0.75)";

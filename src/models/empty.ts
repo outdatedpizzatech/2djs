@@ -15,7 +15,7 @@ export const emptyFactory = (attributes: Partial<Empty>): Unsaved<Empty> => {
   const particularProperties = {
     _id: attributes._id,
     objectType: "Empty" as "Empty",
-    layer: Layer.OVERHEAD,
+    layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
   };
 

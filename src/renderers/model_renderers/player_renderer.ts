@@ -15,21 +15,14 @@ export const renderPlayer = (
   model: Player,
   camera: Camera,
   ctx: CanvasRenderingContext2D,
-  options: RenderOptions,
-  y: number
+  options: RenderOptions
 ) => {
-  const worldY = y * GRID_INTERVAL;
+  const { y } = options;
 
-  const diffY = (worldY - model.worldY) / GRID_MAGNITUDE;
+  const worldY = y * GRID_INTERVAL;
 
   if (Math.abs(worldY - model.worldY) >= GRID_INTERVAL) {
     return;
-  }
-
-  if (diffY < 0) {
-    options.cropYLength = UNIT_BASE - Math.abs(diffY);
-  } else if (diffY > 0) {
-    options.cropYStart = Math.abs(diffY);
   }
 
   const { facingDirection } = model;

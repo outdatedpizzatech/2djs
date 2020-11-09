@@ -11,9 +11,5 @@ export const renderTree = (
   ctx: CanvasRenderingContext2D,
   options: RenderOptions
 ) => {
-  options.dimensions = {
-    width: UNIT_BASE,
-    height: UNIT_BASE * 4,
-  };
   renderModel(model, camera, ctx, sprites[0], options);
 };

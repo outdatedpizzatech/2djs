@@ -3,6 +3,7 @@ import { CAMERA_HEIGHT, CAMERA_WIDTH } from "../camera";
 interface RenderFixture {
   visibleCanvas: HTMLCanvasElement;
   bufferCanvas: HTMLCanvasElement;
+  tempCanvas: HTMLCanvasElement;
   gameArea: HTMLDivElement;
   body: HTMLBodyElement;
 }
@@ -31,9 +32,12 @@ export function renderGameSpace(): RenderFixture {
   bufferCanvas.width = CAMERA_WIDTH;
   bufferCanvas.height = CAMERA_HEIGHT;
 
+  const tempCanvas = document.createElement("canvas");
+
   const exportable: RenderFixture = {
     bufferCanvas,
     visibleCanvas,
+    tempCanvas,
     gameArea,
     body,
   };

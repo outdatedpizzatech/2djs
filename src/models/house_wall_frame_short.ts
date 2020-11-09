@@ -1,5 +1,6 @@
 import { GameObject, gameObjectFactory } from "../game_object";
 import { Layer, Unsaved } from "../types";
+import sprites from "../sprite_collections/house_wall_frame_short_sprite_collection";
 
 export interface HouseWallFrameShort extends GameObject {
   objectType: "HouseWallFrameShort";
@@ -23,6 +24,7 @@ export const houseWallFrameShortFactory = (
     objectType: "HouseWallFrameShort" as "HouseWallFrameShort",
     layer: Layer.INTERACTIVE,
     groupId: attributes.groupId,
+    isStructure: true,
   };
 
   return {

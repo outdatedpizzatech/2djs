@@ -1,4 +1,4 @@
-import { Layer } from "./types";
+import { GameObjectType, Layer } from "./types";
 import { Positionable, positionableFactory } from "./positionable";
 
 export interface Layerable {
@@ -15,13 +15,15 @@ interface Scalable {
 export interface Placeable extends Positionable, Layerable {}
 
 export interface Identifiable {
-  objectType: string;
+  objectType: GameObjectType;
   groupId?: string;
   mapId?: string | null;
   _id: string;
 }
 
-export interface GameObject extends Placeable, Identifiable, Scalable {}
+export interface GameObject extends Placeable, Identifiable, Scalable {
+  isStructure?: boolean;
+}
 
 export const scalableFactory = (attributes: Partial<Scalable>): Scalable => {
   return {

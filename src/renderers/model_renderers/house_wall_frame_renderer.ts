@@ -13,10 +13,5 @@ export const renderHouseWallFrame = (
 ) => {
   const sprite = sprites[0];
 
-  options.dimensions = {
-    width: UNIT_BASE,
-    height: UNIT_BASE * 2,
-  };
-
   renderModel(model, camera, ctx, sprite, options);
 };

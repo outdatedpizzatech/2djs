@@ -9,22 +9,27 @@ import { renderAllObjects } from "../renderers/render_pipeline/object_renderer";
 import { coordinatesToLoadForMyPlayer$ } from "../signals/my_player";
 import { currentMapId$ } from "../signals/map";
 import { transitionPercent$ } from "../signals/transition";
+import { RenderDictionary } from "../renderers/render_dictionary";
 
 const drawEntireSceneToBuffer = (params: {
   bufferCanvas: HTMLCanvasElement;
   bufferCtx: CanvasRenderingContext2D;
+  tempCtx: CanvasRenderingContext2D;
   gameState: GameState;
   coordinate: Coordinate;
   currentMapId: string | null;
   transitionPercent: number;
+  renderDictionary: RenderDictionary;
 }) => {
   const {
     gameState,
     coordinate,
     bufferCtx,
+    tempCtx,
     currentMapId,
     bufferCanvas,
     transitionPercent,
+    renderDictionary,
   } = params;
 
   if (transitionPercent == 0 || transitionPercent == 1) {
@@ -33,7 +38,13 @@ const drawEntireSceneToBuffer = (params: {
     if (!currentMapId) {
       renderGround(bufferCtx, gameState.camera);
     }
-    renderAllObjects(bufferCtx, gameState, coordinate);
+    renderAllObjects(
+      bufferCtx,
+      gameState,
+      coordinate,
+      tempCtx,
+      renderDictionary
+    );
   }
 };
 
@@ -54,10 +65,13 @@ const drawEntireSceneToVisible = (params: {
 
 export const addSceneSubscriptions = (
   bufferCanvas: HTMLCanvasElement,
-  visibleCanvas: HTMLCanvasElement
+  visibleCanvas: HTMLCanvasElement,
+  tempCanvas: HTMLCanvasElement,
+  renderDictionary: RenderDictionary
 ) => {
   const bufferCtx = bufferCanvas.getContext("2d") as CanvasRenderingContext2D;
   const visibleCtx = visibleCanvas.getContext("2d") as CanvasRenderingContext2D;
+  const tempCtx = tempCanvas.getContext("2d") as CanvasRenderingContext2D;
 
   frameWithGameState$
     .pipe(
@@ -91,8 +105,10 @@ export const addSceneSubscriptions = (
         coordinate,
         bufferCanvas,
         bufferCtx,
+        tempCtx,
         currentMapId,
         transitionPercent,
+        renderDictionary,
       });
     });
 
