@@ -26,12 +26,14 @@ import { renderStairwayRailingBottomLeft } from "./model_renderers/stairway_rail
 import { renderStairwayRailingBottomRight } from "./model_renderers/stairway_railing_bottom_right_renderer";
 import { loadShadow } from "./load_shadows";
 import tree from "../sprite_collections/tree_sprite_collection";
+import person from "../sprite_collections/person_sprite_collection";
 import house_wall_frame from "../sprite_collections/house_wall_frame_sprite_collection";
 import wall from "../sprite_collections/wall_sprite_collection";
 import house_wall_frame_short from "../sprite_collections/house_wall_frame_short_sprite_collection";
 import house_roof_edge from "../sprite_collections/house_roof_edge_sprite_collection";
 import player from "../sprite_collections/player_sprite_collection";
 import { UNIT_BASE } from "../common";
+import { renderPerson } from "./model_renderers/person_renderer";
 
 export type RenderDictionary = {
   [K in GameObjectType]: {
@@ -84,6 +86,10 @@ export const getRenderDictionary: () => RenderDictionary = () => ({
   Player: {
     renderFn: renderPlayer,
     shadow: loadShadow(player[0]),
+  },
+  Person: {
+    renderFn: renderPerson,
+    shadow: loadShadow(person[0]),
   },
   Door: {
     renderFn: renderDoor,

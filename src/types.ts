@@ -30,4 +30,5 @@ export type GameObjectType =
   | "StairwayTop"
   | "StairwayBottom"
   | "StairwayRailingBottomLeft"
-  | "StairwayRailingBottomRight";
+  | "StairwayRailingBottomRight"
+  | "Person";

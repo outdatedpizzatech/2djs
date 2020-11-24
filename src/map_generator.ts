@@ -9,6 +9,7 @@ import { emptyFactory } from "./models/empty";
 import { doorFactory } from "./models/door";
 import axios from "axios";
 import { playerFactory } from "./models/player";
+import { personFactory } from "./models/person";
 import { CoordinateBounds } from "./coordinate";
 import { GameObject } from "./game_object";
 import { API_URI_BASE } from "./common";
@@ -47,6 +48,7 @@ const factoryFns: {
   Tree: treeFactory,
   Wall: wallFactory,
   Player: playerFactory,
+  Person: personFactory,
   Flower: flowerFactory,
   Stairway: stairwayFactory,
   StairwayBottom: stairwayBottomFactory,

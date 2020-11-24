@@ -8,4 +8,7 @@ export interface DebugArea {
   layerInspectorDiv: HTMLDivElement;
 }
 
-export type EditableGameObjectType = Exclude<GameObjectType, "Player">;
+export type EditableGameObjectType = Exclude<
+  GameObjectType,
+  "Player" | "Person"
+>;
